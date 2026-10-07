@@ -2,7 +2,7 @@
 <html lang="zh-HK">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
   <title>MWC 復康治療公家排班日曆</title>
 
   <!-- Tailwind CSS CDN -->
@@ -35,14 +35,33 @@
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
 
   <style>
+    :root {
+      --sat: env(safe-area-inset-top, 0px);
+      --sab: env(safe-area-inset-bottom, 0px);
+      --sal: env(safe-area-inset-left, 0px);
+      --sar: env(safe-area-inset-right, 0px);
+    }
     body {
       font-family: 'Inter', 'Noto Sans TC', sans-serif;
       -webkit-font-smoothing: antialiased;
+      padding-top: var(--sat);
+      padding-bottom: var(--sab);
+      padding-left: var(--sal);
+      padding-right: var(--sar);
     }
     ::-webkit-scrollbar { width: 5px; height: 5px; }
     ::-webkit-scrollbar-track { background: transparent; }
     ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 9999px; }
     ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+    /* Hide scrollbars for touch-friendly horizontal swipe */
+    .no-scrollbar::-webkit-scrollbar { display: none; }
+    .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+    /* Prevent iOS Safari auto-zoom on inputs */
+    @media screen and (max-width: 768px) {
+      input, select, textarea {
+        font-size: 16px !important;
+      }
+    }
     @media print {
       .no-print { display: none !important; }
       body { background: white !important; color: black !important; }
@@ -51,81 +70,106 @@
 </head>
 
 <body class="bg-slate-50 text-slate-800 min-h-screen flex flex-col">
-  <!-- Minimalist Sticky Header -->
+  <!-- Minimalist Sticky Header with Mobile-First Adaptive Controls -->
   <header class="bg-white/95 backdrop-blur-md border-b border-slate-200 sticky top-0 z-30 no-print transition-all">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 h-14 flex items-center justify-between gap-2">
+    <div class="max-w-7xl mx-auto px-3 sm:px-6 h-14 flex items-center justify-between gap-2">
       <!-- Brand & Link Access Status -->
-      <div class="flex items-center space-x-3">
-        <div class="w-8 h-8 rounded-lg bg-slate-900 text-white flex items-center justify-center font-bold text-sm shadow-sm">
+      <div class="flex items-center space-x-2 sm:space-x-3 min-w-0">
+        <div class="w-8 h-8 rounded-lg bg-slate-900 text-white flex items-center justify-center font-bold text-sm shadow-sm flex-shrink-0">
           <i class="fa-solid fa-notes-medical text-xs"></i>
         </div>
-        <div>
-          <div class="flex items-center space-x-2">
-            <h1 class="font-bold text-slate-900 text-sm sm:text-base tracking-tight">MWC 復康治療排班</h1>
-            <span id="accessModeBadge" class="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200">
-              <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 mr-1 animate-pulse"></span>連結已授權修改
+        <div class="min-w-0">
+          <div class="flex items-center space-x-1.5 sm:space-x-2">
+            <h1 class="font-bold text-slate-900 text-xs sm:text-base tracking-tight truncate">MWC 復康排班</h1>
+            <span id="accessModeBadge" class="inline-flex items-center px-1.5 sm:px-2 py-0.5 rounded-full text-[9px] sm:text-[10px] font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200 flex-shrink-0">
+              <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 mr-1 animate-pulse"></span>
+              <span class="hidden xs:inline sm:inline">可修改</span>
             </span>
           </div>
         </div>
       </div>
 
-      <!-- Action Cluster: Link Sharing, Operator ID, Audit Report, & Appointment Creation -->
-      <div class="flex items-center space-x-2 flex-wrap sm:flex-nowrap justify-end">
+      <!-- Action Cluster: Responsive across iPhone, iPad, and iPad Pro -->
+      <div class="flex items-center space-x-1 sm:space-x-2 flex-shrink-0">
         <!-- Current Operator Identification Pill -->
-        <button id="btnSwitchOperator" title="點擊切換修改者身份" class="inline-flex items-center space-x-1.5 px-2.5 py-1.5 rounded-lg border border-slate-200 bg-slate-50 hover:bg-slate-100 text-slate-700 text-xs font-medium transition">
-          <i class="fa-solid fa-id-badge text-slate-500"></i>
+        <button id="btnSwitchOperator" title="點擊切換修改者身份" class="inline-flex items-center space-x-1 px-2 py-1.5 rounded-lg border border-slate-200 bg-slate-50 hover:bg-slate-100 text-slate-700 text-xs font-medium transition max-w-[110px] sm:max-w-none">
+          <i class="fa-solid fa-id-badge text-slate-500 text-xs"></i>
           <span class="hidden md:inline text-slate-500">修改人:</span>
-          <span id="currentOperatorLabel" class="font-bold text-slate-900">未登記</span>
-          <i class="fa-solid fa-angle-down text-[10px] text-slate-400"></i>
+          <span id="currentOperatorLabel" class="font-bold text-slate-900 truncate">未登記</span>
+          <i class="fa-solid fa-angle-down text-[9px] text-slate-400"></i>
         </button>
 
-        <!-- Share Link Button -->
-        <button id="btnOpenShareModal" title="產生與複製授權修改連結" class="inline-flex items-center space-x-1.5 px-2.5 py-1.5 rounded-lg border border-slate-200 bg-white hover:bg-slate-50 text-slate-700 text-xs font-medium transition shadow-2xs">
-          <i class="fa-solid fa-link text-indigo-600"></i>
-          <span class="hidden sm:inline">分享連結</span>
-        </button>
+        <!-- Desktop / iPad Pro Quick Actions (Hidden on narrow screens) -->
+        <div class="hidden lg:flex items-center space-x-1.5">
+          <button id="btnOpenShareModal" title="產生與複製授權修改連結" class="inline-flex items-center space-x-1 px-2.5 py-1.5 rounded-lg border border-slate-200 bg-white hover:bg-slate-50 text-slate-700 text-xs font-medium transition shadow-2xs">
+            <i class="fa-solid fa-link text-indigo-600"></i>
+            <span>分享連結</span>
+          </button>
+          <button id="btnOpenAuditModal" title="查閱完整修改歷史報告" class="inline-flex items-center space-x-1 px-2.5 py-1.5 rounded-lg border border-slate-200 bg-white hover:bg-slate-50 text-slate-700 text-xs font-medium transition shadow-2xs relative">
+            <i class="fa-solid fa-clock-rotate-left text-slate-600"></i>
+            <span>修改報告</span>
+            <span id="auditCountBadge" class="ml-1 px-1.5 py-0.2 bg-slate-800 text-white text-[10px] rounded-full font-mono font-bold">0</span>
+          </button>
+          <button id="btnOpenTeamsConfig" title="Teams 異動通知與紀錄" class="inline-flex items-center space-x-1 px-2.5 py-1.5 rounded-lg border border-slate-200 bg-white hover:bg-slate-50 text-slate-700 text-xs font-medium transition shadow-2xs">
+            <i class="fa-brands fa-microsoft text-indigo-600"></i>
+            <span>Teams</span>
+          </button>
+          <button id="btnOpenDataSafety" title="資料安全防護與備份" class="inline-flex items-center space-x-1 px-2.5 py-1.5 rounded-lg border border-emerald-200 bg-emerald-50 hover:bg-emerald-100 text-emerald-800 text-xs font-medium transition shadow-2xs">
+            <i class="fa-solid fa-shield-halved text-emerald-600"></i>
+            <span>資料安全</span>
+          </button>
+          <button id="btnOpenRecurModal" title="跨年/跨月週期排班" class="inline-flex items-center space-x-1 px-2.5 py-1.5 rounded-lg border border-slate-200 bg-white hover:bg-slate-50 text-slate-700 text-xs font-medium transition shadow-2xs">
+            <i class="fa-solid fa-repeat text-slate-500"></i>
+            <span>週期排班</span>
+          </button>
+        </div>
 
-        <!-- Audit Report Button -->
-        <button id="btnOpenAuditModal" title="查閱完整修改歷史報告" class="inline-flex items-center space-x-1.5 px-2.5 py-1.5 rounded-lg border border-slate-200 bg-white hover:bg-slate-50 text-slate-700 text-xs font-medium transition shadow-2xs relative">
-          <i class="fa-solid fa-clock-rotate-left text-slate-600"></i>
-          <span class="hidden sm:inline">修改報告</span>
-          <span id="auditCountBadge" class="ml-1 px-1.5 py-0.2 bg-slate-800 text-white text-[10px] rounded-full font-mono font-bold">0</span>
-        </button>
+        <!-- Mobile More Menu Trigger Button (Visible on iPhone / iPad Portrait) -->
+        <div class="relative lg:hidden">
+          <button id="btnMobileMoreActions" class="p-2 rounded-lg border border-slate-200 bg-white hover:bg-slate-50 text-slate-700 text-xs transition" title="更多公家功能">
+            <i class="fa-solid fa-ellipsis-vertical text-slate-600"></i>
+          </button>
+          <!-- Mobile Dropdown Panel -->
+          <div id="mobileMoreDropdown" class="hidden absolute right-0 mt-1.5 w-48 bg-white border border-slate-200 rounded-xl shadow-xl py-1.5 z-50 text-xs divide-y divide-slate-100">
+            <div class="py-1">
+              <button id="btnMobileShare" class="w-full text-left px-3 py-2 text-slate-700 hover:bg-slate-50 flex items-center space-x-2">
+                <i class="fa-solid fa-link text-indigo-600 w-4"></i><span>分享授權連結</span>
+              </button>
+              <button id="btnMobileAudit" class="w-full text-left px-3 py-2 text-slate-700 hover:bg-slate-50 flex items-center justify-between">
+                <div class="flex items-center space-x-2"><i class="fa-solid fa-clock-rotate-left text-slate-600 w-4"></i><span>修改歷史報告</span></div>
+                <span id="auditCountBadgeMobile" class="px-1.5 py-0.2 bg-slate-800 text-white text-[9px] rounded-full font-mono">0</span>
+              </button>
+            </div>
+            <div class="py-1">
+              <button id="btnMobileTeams" class="w-full text-left px-3 py-2 text-slate-700 hover:bg-slate-50 flex items-center space-x-2">
+                <i class="fa-brands fa-microsoft text-indigo-600 w-4"></i><span>Teams 通知名冊</span>
+              </button>
+              <button id="btnMobileSafety" class="w-full text-left px-3 py-2 text-emerald-800 hover:bg-emerald-50 flex items-center space-x-2">
+                <i class="fa-solid fa-shield-halved text-emerald-600 w-4"></i><span>資料安全與備份</span>
+              </button>
+              <button id="btnMobileRecur" class="w-full text-left px-3 py-2 text-slate-700 hover:bg-slate-50 flex items-center space-x-2">
+                <i class="fa-solid fa-repeat text-slate-500 w-4"></i><span>跨年週期排班</span>
+              </button>
+            </div>
+          </div>
+        </div>
 
-        <!-- Teams Notification Center Button -->
-        <button id="btnOpenTeamsConfig" title="Teams 異動通知與紀錄" class="inline-flex items-center space-x-1.5 px-2.5 py-1.5 rounded-lg border border-slate-200 bg-white hover:bg-slate-50 text-slate-700 text-xs font-medium transition shadow-2xs">
-          <i class="fa-brands fa-microsoft text-indigo-600 text-sm"></i>
-          <span class="hidden md:inline">Teams</span>
-        </button>
-
-        <!-- Data Safety & Backup Center Button -->
-        <button id="btnOpenDataSafety" title="資料安全防護、年尾排班補齊與備份" class="inline-flex items-center space-x-1.5 px-2.5 py-1.5 rounded-lg border border-emerald-200 bg-emerald-50 hover:bg-emerald-100 text-emerald-800 text-xs font-medium transition shadow-2xs">
-          <i class="fa-solid fa-shield-halved text-emerald-600"></i>
-          <span class="hidden md:inline">資料安全</span>
-        </button>
-
-        <!-- Recurring Batch Scheduler Button -->
-        <button id="btnOpenRecurModal" title="跨年/跨月週期排班" class="inline-flex items-center space-x-1.5 px-2.5 py-1.5 rounded-lg border border-slate-200 bg-white hover:bg-slate-50 text-slate-700 text-xs font-medium transition shadow-2xs">
-          <i class="fa-solid fa-repeat text-slate-500"></i>
-          <span class="hidden lg:inline">週期排班</span>
-        </button>
-
-        <!-- New Appointment Button -->
-        <button id="btnOpenNewModal" class="inline-flex items-center space-x-1.5 px-3 py-1.5 rounded-lg bg-slate-900 hover:bg-slate-800 text-white text-xs font-medium transition shadow-sm">
+        <!-- New Appointment Button (Universal prominent CTA) -->
+        <button id="btnOpenNewModal" class="inline-flex items-center space-x-1 px-2.5 sm:px-3 py-1.5 rounded-lg bg-slate-900 hover:bg-slate-800 text-white text-xs font-medium transition shadow-sm">
           <i class="fa-solid fa-plus text-xs"></i>
-          <span>新增預約</span>
+          <span class="inline">預約</span>
         </button>
       </div>
     </div>
   </header>
 
-  <main class="flex-1 max-w-7xl w-full mx-auto p-4 sm:p-6 space-y-4">
-    <!-- Single Consolidated Minimalist Control Bar -->
-    <div class="bg-white rounded-xl border border-slate-200/80 p-3 shadow-2xs space-y-3">
-      <!-- Upper Controls: Cross-Year Navigation & View Mode Switcher -->
-      <div class="flex flex-col md:flex-row items-start md:items-center justify-between gap-3">
+  <main class="flex-1 max-w-7xl w-full mx-auto p-2 sm:p-4 md:p-6 space-y-3 sm:space-y-4">
+    <!-- Single Consolidated Responsive Control Bar -->
+    <div class="bg-white rounded-xl border border-slate-200/80 p-2.5 sm:p-3 shadow-2xs space-y-2.5 sm:space-y-3">
+      <!-- Upper Controls: Cross-Year Navigation & Fluid View Mode Switcher -->
+      <div class="flex flex-col md:flex-row items-stretch md:items-center justify-between gap-2.5 sm:gap-3">
         <!-- Date Navigation Controls -->
-        <div class="flex flex-wrap items-center gap-1.5 sm:gap-2">
+        <div class="flex flex-wrap items-center justify-between sm:justify-start gap-1.5 sm:gap-2">
           <!-- Steppers -->
           <div class="inline-flex rounded-lg border border-slate-200 bg-slate-50/80 p-0.5">
             <button id="btnPrevYear" title="上一年" class="px-2 py-1 text-slate-600 hover:text-slate-900 hover:bg-white rounded text-xs transition">
@@ -144,10 +188,10 @@
 
           <!-- Quick Jump Selectors -->
           <div class="flex items-center space-x-1">
-            <select id="jumpYearSelect" class="bg-slate-50 border border-slate-200 rounded-lg px-2 py-1 text-xs font-semibold text-slate-800 focus:outline-none focus:ring-1 focus:ring-slate-400">
+            <select id="jumpYearSelect" class="bg-slate-50 border border-slate-200 rounded-lg px-1.5 sm:px-2 py-1 text-xs font-semibold text-slate-800 focus:outline-none">
               <!-- Dynamically populated 2024 to 2032 -->
             </select>
-            <select id="jumpMonthSelect" class="bg-slate-50 border border-slate-200 rounded-lg px-2 py-1 text-xs font-semibold text-slate-800 focus:outline-none focus:ring-1 focus:ring-slate-400">
+            <select id="jumpMonthSelect" class="bg-slate-50 border border-slate-200 rounded-lg px-1.5 sm:px-2 py-1 text-xs font-semibold text-slate-800 focus:outline-none">
               <option value="0">1月</option><option value="1">2月</option><option value="2">3月</option>
               <option value="3">4月</option><option value="4">5月</option><option value="5">6月</option>
               <option value="6">7月</option><option value="7">8月</option><option value="8">9月</option>
@@ -156,53 +200,53 @@
           </div>
 
           <!-- Heading & Quick Links -->
-          <div class="flex items-center space-x-2 pl-1">
-            <h2 id="currentPeriodLabel" class="text-sm sm:text-base font-bold text-slate-900 tracking-tight">2026年 10月</h2>
-            <button id="btnJumpToOrigin" class="text-[11px] font-medium text-slate-600 hover:text-slate-900 bg-slate-100 hover:bg-slate-200 px-2 py-0.5 rounded transition">
-              起點(2026-10)
+          <div class="flex items-center space-x-1.5 pl-0.5">
+            <h2 id="currentPeriodLabel" class="text-xs sm:text-base font-bold text-slate-900 tracking-tight whitespace-nowrap">2026年 10月</h2>
+            <button id="btnJumpToOrigin" class="text-[10px] sm:text-[11px] font-medium text-slate-600 hover:text-slate-900 bg-slate-100 px-1.5 sm:px-2 py-0.5 rounded transition whitespace-nowrap">
+              起點
             </button>
-            <button id="btnJumpToToday" class="text-[11px] font-medium text-slate-600 hover:text-slate-900 bg-slate-100 hover:bg-slate-200 px-2 py-0.5 rounded transition">
+            <button id="btnJumpToToday" class="text-[10px] sm:text-[11px] font-medium text-slate-600 hover:text-slate-900 bg-slate-100 px-1.5 sm:px-2 py-0.5 rounded transition whitespace-nowrap">
               今天
             </button>
           </div>
         </div>
 
-        <!-- Sleek Segmented View Switcher -->
-        <div class="flex items-center bg-slate-100 p-0.5 rounded-lg border border-slate-200 text-xs font-medium self-stretch md:self-auto justify-center">
-          <button id="tabMonth" class="view-tab px-3 py-1 rounded-md transition text-slate-900 font-semibold bg-white shadow-2xs">
+        <!-- Sleek Segmented View Switcher (Full width on iPhone / Duo, compact on iPad / iPad Pro) -->
+        <div class="grid grid-cols-4 md:flex items-center bg-slate-100 p-0.5 rounded-lg border border-slate-200 text-xs font-medium w-full md:w-auto">
+          <button id="tabMonth" class="view-tab text-center px-2.5 sm:px-3 py-1.5 sm:py-1 rounded-md transition text-slate-900 font-semibold bg-white shadow-2xs">
             月曆
           </button>
-          <button id="tabWeek" class="view-tab px-3 py-1 rounded-md transition text-slate-600 hover:text-slate-900">
+          <button id="tabWeek" class="view-tab text-center px-2.5 sm:px-3 py-1.5 sm:py-1 rounded-md transition text-slate-600 hover:text-slate-900">
             週時段
           </button>
-          <button id="tabTable" class="view-tab px-3 py-1 rounded-md transition text-slate-600 hover:text-slate-900">
+          <button id="tabTable" class="view-tab text-center px-2.5 sm:px-3 py-1.5 sm:py-1 rounded-md transition text-slate-600 hover:text-slate-900">
             清單
           </button>
-          <button id="tabYear" class="view-tab px-3 py-1 rounded-md transition text-slate-600 hover:text-slate-900">
+          <button id="tabYear" class="view-tab text-center px-2.5 sm:px-3 py-1.5 sm:py-1 rounded-md transition text-slate-600 hover:text-slate-900">
             年度總覽
           </button>
         </div>
       </div>
 
-      <!-- Lower Controls: Compact Filters & Fast Search -->
-      <div class="pt-2 border-t border-slate-100 flex flex-wrap items-center justify-between gap-2.5 text-xs">
-        <div class="flex flex-wrap items-center gap-2">
+      <!-- Lower Controls: Horizontal Scrollable Filter Strip on Touch Screens -->
+      <div class="pt-2 border-t border-slate-100 flex items-center justify-between gap-2 overflow-x-auto no-scrollbar text-xs">
+        <div class="flex items-center space-x-2 flex-nowrap flex-shrink-0">
           <!-- Compact Search -->
-          <div class="relative">
+          <div class="relative flex-shrink-0">
             <i class="fa-solid fa-magnifying-glass absolute left-2.5 top-2 text-slate-400 text-xs"></i>
-            <input type="text" id="searchInput" placeholder="搜尋院友 / 治療師 / 節數..." class="pl-7 pr-3 py-1 bg-slate-50 border border-slate-200 rounded-lg text-xs w-44 sm:w-56 focus:bg-white focus:outline-none focus:ring-1 focus:ring-slate-400 transition">
+            <input type="text" id="searchInput" placeholder="搜尋院友 / 治療師..." class="pl-7 pr-2.5 py-1 bg-slate-50 border border-slate-200 rounded-lg text-xs w-36 sm:w-52 focus:bg-white focus:outline-none focus:ring-1 focus:ring-slate-400 transition">
           </div>
 
           <!-- Discipline Filter (Minimalist pills) -->
-          <div class="flex items-center space-x-1 bg-slate-100 p-0.5 rounded-lg border border-slate-200">
-            <button data-filter="all" class="discipline-filter-btn px-2.5 py-0.5 rounded text-xs font-semibold bg-white text-slate-800 shadow-2xs">全部</button>
-            <button data-filter="PT" class="discipline-filter-btn px-2.5 py-0.5 rounded text-xs font-medium text-emerald-700 hover:bg-emerald-50">PT 物理</button>
-            <button data-filter="OT" class="discipline-filter-btn px-2.5 py-0.5 rounded text-xs font-medium text-orange-700 hover:bg-orange-50">OT 職業</button>
-            <button data-filter="ST" class="discipline-filter-btn px-2.5 py-0.5 rounded text-xs font-medium text-blue-700 hover:bg-blue-50">ST 言語</button>
+          <div class="flex items-center space-x-1 bg-slate-100 p-0.5 rounded-lg border border-slate-200 flex-shrink-0">
+            <button data-filter="all" class="discipline-filter-btn px-2 py-0.5 rounded text-xs font-semibold bg-white text-slate-800 shadow-2xs">全部</button>
+            <button data-filter="PT" class="discipline-filter-btn px-2 py-0.5 rounded text-xs font-medium text-emerald-700 hover:bg-emerald-50">PT</button>
+            <button data-filter="OT" class="discipline-filter-btn px-2 py-0.5 rounded text-xs font-medium text-orange-700 hover:bg-orange-50">OT</button>
+            <button data-filter="ST" class="discipline-filter-btn px-2 py-0.5 rounded text-xs font-medium text-blue-700 hover:bg-blue-50">ST</button>
           </div>
 
           <!-- Staff Dropdown -->
-          <select id="staffFilter" class="bg-slate-50 border border-slate-200 rounded-lg px-2 py-1 text-xs text-slate-700 font-medium focus:outline-none">
+          <select id="staffFilter" class="bg-slate-50 border border-slate-200 rounded-lg px-2 py-1 text-xs text-slate-700 font-medium focus:outline-none flex-shrink-0">
             <option value="all">所有職員</option>
             <option value="PTA 珊">PTA 珊</option>
             <option value="PTA B哥">PTA B哥</option>
@@ -214,26 +258,15 @@
           </select>
 
           <!-- Status Dropdown -->
-          <select id="statusFilter" class="bg-slate-50 border border-slate-200 rounded-lg px-2 py-1 text-xs text-slate-700 font-medium focus:outline-none">
+          <select id="statusFilter" class="bg-slate-50 border border-slate-200 rounded-lg px-2 py-1 text-xs text-slate-700 font-medium focus:outline-none flex-shrink-0">
             <option value="all">所有狀態</option>
             <option value="active">正常排班</option>
-            <option value="cancelled">已取消節數</option>
+            <option value="cancelled">已取消</option>
           </select>
         </div>
 
-        <!-- Hong Kong Holiday & Lunar Legend Badge -->
-        <div class="hidden lg:flex items-center space-x-2 text-[11px] text-slate-500 bg-slate-50 px-2.5 py-1 rounded-lg border border-slate-200">
-          <span class="inline-flex items-center text-rose-600 font-semibold">
-            <span class="w-2 h-2 rounded-full bg-rose-500 mr-1"></span>香港公眾假期 (紅日)
-          </span>
-          <span class="text-slate-300">|</span>
-          <span class="inline-flex items-center text-slate-600">
-            <i class="fa-solid fa-moon text-amber-500 mr-1 text-[10px]"></i>農曆初一/十五及節氣
-          </span>
-        </div>
-
         <!-- Export Actions -->
-        <div class="flex items-center space-x-1.5 ml-auto">
+        <div class="flex items-center space-x-1.5 flex-shrink-0 ml-auto">
           <button id="btnExportCSV" title="匯出 CSV 表格" class="px-2.5 py-1 rounded-lg border border-slate-200 hover:bg-slate-50 text-slate-600 transition flex items-center space-x-1 text-xs">
             <i class="fa-solid fa-file-excel text-emerald-600"></i>
             <span class="hidden sm:inline">匯出</span>
@@ -246,8 +279,8 @@
       </div>
     </div>
 
-    <!-- VIEW 1: MONTH VIEW -->
-    <div id="viewMonth" class="view-content space-y-4">
+    <!-- VIEW 1: MONTH VIEW WITH ADAPTIVE DAY AGENDA FOR MOBILE -->
+    <div id="viewMonth" class="view-content space-y-3 sm:space-y-4">
       <div class="bg-white rounded-xl border border-slate-200/80 overflow-hidden shadow-2xs">
         <div class="grid grid-cols-7 border-b border-slate-200 bg-slate-50/60 text-center text-xs font-semibold text-slate-500 py-2">
           <div class="text-rose-600">日</div>
@@ -262,13 +295,30 @@
           <!-- Populated by JS -->
         </div>
       </div>
+
+      <!-- Mobile Selected Day Agenda (Appears under month grid on iPhone / Phone screens) -->
+      <div id="mobileDayAgendaContainer" class="md:hidden bg-white rounded-xl border border-slate-200/80 p-3 shadow-2xs space-y-2">
+        <div class="flex items-center justify-between border-b border-slate-100 pb-2">
+          <div class="flex items-center space-x-2">
+            <span class="w-2 h-2 rounded-full bg-slate-900"></span>
+            <h3 id="mobileDayAgendaTitle" class="text-xs font-bold text-slate-900">當日排班日程</h3>
+            <span id="mobileDayAgendaHoliday" class="hidden px-1.5 py-0.2 rounded text-[10px] bg-rose-100 text-rose-700 font-bold"></span>
+          </div>
+          <button id="btnMobileAgendaAdd" class="text-[11px] font-semibold text-indigo-600 hover:text-indigo-800 inline-flex items-center">
+            <i class="fa-solid fa-plus mr-1"></i>新增
+          </button>
+        </div>
+        <div id="mobileDayAgendaList" class="space-y-1.5 max-h-60 overflow-y-auto">
+          <!-- Populated by JS -->
+        </div>
+      </div>
     </div>
 
-    <!-- VIEW 2: WEEK TIMELINE VIEW -->
+    <!-- VIEW 2: WEEK TIMELINE VIEW (Sticky Left Hour Column for Mobile) -->
     <div id="viewWeek" class="view-content hidden space-y-4">
-      <div class="bg-white rounded-xl border border-slate-200/80 p-4 shadow-2xs overflow-x-auto">
-        <div class="min-w-[850px]">
-          <div id="weekHeaderRow" class="grid grid-cols-8 border-b border-slate-200 pb-2.5 text-xs font-semibold text-slate-600 text-center">
+      <div class="bg-white rounded-xl border border-slate-200/80 p-2 sm:p-4 shadow-2xs overflow-x-auto no-scrollbar" style="-webkit-overflow-scrolling: touch;">
+        <div class="min-w-[720px] sm:min-w-[850px]">
+          <div id="weekHeaderRow" class="grid grid-cols-8 border-b border-slate-200 pb-2 text-xs font-semibold text-slate-600 text-center">
             <!-- Populated by JS -->
           </div>
           <div id="weekTimelineBody" class="divide-y divide-slate-100 text-xs">
@@ -278,10 +328,11 @@
       </div>
     </div>
 
-    <!-- VIEW 3: TABLE LIST VIEW -->
+    <!-- VIEW 3: TABLE LIST VIEW (Responsive: Desktop Table / Mobile Card List) -->
     <div id="viewTable" class="view-content hidden space-y-4">
       <div class="bg-white rounded-xl border border-slate-200/80 overflow-hidden shadow-2xs">
-        <div class="overflow-x-auto">
+        <!-- Desktop / iPad Pro Full Table (Hidden on narrow screens) -->
+        <div class="hidden md:block overflow-x-auto">
           <table class="w-full text-left text-xs border-collapse">
             <thead class="bg-slate-50/80 border-b border-slate-200 text-slate-600 font-semibold">
               <tr>
@@ -302,6 +353,12 @@
             </tbody>
           </table>
         </div>
+
+        <!-- iPhone / Mobile Card List -->
+        <div id="mobileTableCards" class="md:hidden divide-y divide-slate-100 p-2 space-y-2">
+          <!-- Populated by JS -->
+        </div>
+
         <div id="tableEmptyState" class="hidden py-12 text-center text-slate-400 text-xs">
           <i class="fa-regular fa-calendar-xmark text-2xl mb-2 text-slate-300"></i>
           <p>沒有符合條件的排班記錄</p>
@@ -1212,6 +1269,9 @@
 
     let originalEditingEvent = null;
 
+    // Selected day tracker for mobile responsive agenda
+    state.selectedDateStr = formatDate(state.currentDate);
+
     // Smart loader: If the browser contains an older truncated cache (less than 80 items), auto-merge year-end records
     function loadLocalAppointments() {
       try {
@@ -1302,6 +1362,10 @@
       const badge = document.getElementById('auditCountBadge');
       if (badge) {
         badge.textContent = logs.length;
+      }
+      const mobileBadge = document.getElementById('auditCountBadgeMobile');
+      if (mobileBadge) {
+        mobileBadge.textContent = logs.length;
       }
     }
 
@@ -1473,6 +1537,55 @@ ${eventData.cancelReason ? `取消原因：${eventData.cancelReason}\n` : ''}${e
     const yearMatrixTitle = document.getElementById('yearMatrixTitle');
     const yearTotalCount = document.getElementById('yearTotalCount');
 
+    // Mobile navigation & Agenda elements
+    const btnMobileMoreActions = document.getElementById('btnMobileMoreActions');
+    const mobileMoreDropdown = document.getElementById('mobileMoreDropdown');
+    const btnMobileShare = document.getElementById('btnMobileShare');
+    const btnMobileAudit = document.getElementById('btnMobileAudit');
+    const btnMobileTeams = document.getElementById('btnMobileTeams');
+    const btnMobileSafety = document.getElementById('btnMobileSafety');
+    const btnMobileRecur = document.getElementById('btnMobileRecur');
+    const auditCountBadgeMobile = document.getElementById('auditCountBadgeMobile');
+    const mobileDayAgendaContainer = document.getElementById('mobileDayAgendaContainer');
+    const mobileDayAgendaTitle = document.getElementById('mobileDayAgendaTitle');
+    const mobileDayAgendaHoliday = document.getElementById('mobileDayAgendaHoliday');
+    const mobileDayAgendaList = document.getElementById('mobileDayAgendaList');
+    const btnMobileAgendaAdd = document.getElementById('btnMobileAgendaAdd');
+    const mobileTableCards = document.getElementById('mobileTableCards');
+
+    // Toggle mobile action dropdown
+    btnMobileMoreActions.addEventListener('click', (e) => {
+      e.stopPropagation();
+      mobileMoreDropdown.classList.toggle('hidden');
+    });
+
+    document.addEventListener('click', () => {
+      if (!mobileMoreDropdown.classList.contains('hidden')) {
+        mobileMoreDropdown.classList.add('hidden');
+      }
+    });
+
+    btnMobileShare.onclick = () => {
+      mobileMoreDropdown.classList.add('hidden');
+      btnOpenShareModal.click();
+    };
+    btnMobileAudit.onclick = () => {
+      mobileMoreDropdown.classList.add('hidden');
+      btnOpenAuditModal.click();
+    };
+    btnMobileTeams.onclick = () => {
+      mobileMoreDropdown.classList.add('hidden');
+      btnOpenTeamsConfig.click();
+    };
+    btnMobileSafety.onclick = () => {
+      mobileMoreDropdown.classList.add('hidden');
+      btnOpenDataSafety.click();
+    };
+    btnMobileRecur.onclick = () => {
+      mobileMoreDropdown.classList.add('hidden');
+      btnOpenRecurModal.click();
+    };
+
     // Modals
     const shareLinkModal = document.getElementById('shareLinkModal');
     const shareEditLinkInput = document.getElementById('shareEditLinkInput');
@@ -1589,10 +1702,9 @@ ${eventData.cancelReason ? `取消原因：${eventData.cancelReason}\n` : ''}${e
           diff: `系統管理員執行「重新補齊 2026 年尾排班」，現有庫存 ${mergedList.length} 節`,
           staff: '系統核心'
         });
-
         renderCurrentView();
         updateDataStatusCount();
-        showToast(`已成功補齊年尾排班！目前排班總數為 ${mergedList.length} 節`, 'success');
+        showToast('已補齊 2026 年尾完整排班！', 'success');
       }
     });
 
@@ -1849,8 +1961,8 @@ ${eventData.cancelReason ? `取消原因：${eventData.cancelReason}\n` : ''}${e
       for (let i = firstDay - 1; i >= 0; i--) {
         const d = prevDaysCount - i;
         const cell = document.createElement('div');
-        cell.className = 'min-h-[105px] p-1.5 bg-slate-50/40 text-slate-300 flex flex-col justify-between';
-        cell.innerHTML = `<span class="text-[11px] font-mono">${d}</span>`;
+        cell.className = 'min-h-[70px] sm:min-h-[105px] p-1 sm:p-1.5 bg-slate-50/40 text-slate-300 flex flex-col justify-between';
+        cell.innerHTML = `<span class="text-[10px] sm:text-[11px] font-mono">${d}</span>`;
         monthGrid.appendChild(cell);
       }
 
@@ -1861,35 +1973,35 @@ ${eventData.cancelReason ? `取消原因：${eventData.cancelReason}\n` : ''}${e
         const dayEvents = filteredList.filter(e => e.date === dateStr);
 
         const isToday = formatDate(new Date()) === dateStr;
-        const isSelectedOrigin = dateStr === '2026-10-02';
+        const isSelectedDay = state.selectedDateStr === dateStr;
         const isSunday = dObj.getDay() === 0;
         const holiday = getHolidayInfo(dateStr);
         const lunar = getLunarInfo(dObj);
 
         const cell = document.createElement('div');
-        cell.className = `min-h-[110px] p-1.5 bg-white flex flex-col justify-between transition hover:bg-slate-50/90 cursor-pointer ${
+        cell.className = `min-h-[75px] sm:min-h-[110px] p-1 sm:p-1.5 bg-white flex flex-col justify-between transition hover:bg-slate-50/90 cursor-pointer ${
           holiday.isHoliday ? 'bg-rose-50/30 ring-1 ring-rose-100' : ''
-        } ${isToday ? 'ring-2 ring-slate-900 z-10' : ''} ${isSelectedOrigin ? 'bg-amber-50/20' : ''}`;
+        } ${isToday ? 'ring-2 ring-slate-900 z-10' : ''} ${isSelectedDay ? 'ring-2 ring-indigo-500 bg-indigo-50/30' : ''}`;
 
         const header = document.createElement('div');
-        header.className = 'flex items-start justify-between mb-1';
+        header.className = 'flex items-start justify-between mb-0.5 sm:mb-1';
 
-        // Solar date number + Lunar date label + Holiday badge
-        const dateNumberClass = holiday.isHoliday || isSunday ? 'text-rose-600 font-bold' : (isToday ? 'text-white bg-slate-900 px-1.5 py-0.5 rounded-full' : 'text-slate-800 font-semibold');
+        const dateNumberClass = holiday.isHoliday || isSunday ? 'text-rose-600 font-bold' : (isToday ? 'text-white bg-slate-900 px-1 py-0.2 rounded-full' : 'text-slate-800 font-semibold');
         const lunarClass = lunar.isSpecial ? 'text-amber-600 font-semibold' : 'text-slate-400';
 
         header.innerHTML = `
-          <div class="flex items-center space-x-1.5 flex-wrap">
-            <span class="text-xs ${dateNumberClass}">${day}</span>
-            <span class="text-[10px] ${lunarClass}">${lunar.text}</span>
-            ${holiday.isHoliday ? `<span class="px-1 py-0.2 rounded text-[9px] bg-rose-100 text-rose-700 font-bold tracking-tight">${holiday.name}</span>` : ''}
+          <div class="flex items-center space-x-1 flex-wrap">
+            <span class="text-[11px] sm:text-xs ${dateNumberClass}">${day}</span>
+            <span class="text-[9px] sm:text-[10px] hidden xs:inline ${lunarClass}">${lunar.text}</span>
+            ${holiday.isHoliday ? `<span class="hidden sm:inline px-1 py-0.2 rounded text-[9px] bg-rose-100 text-rose-700 font-bold">${holiday.name}</span>` : ''}
           </div>
-          ${dayEvents.length > 0 ? `<span class="text-[10px] text-slate-400 font-mono font-medium">${dayEvents.length}</span>` : ''}
+          ${dayEvents.length > 0 ? `<span class="text-[9px] sm:text-[10px] text-slate-500 font-mono font-medium">${dayEvents.length}</span>` : ''}
         `;
         cell.appendChild(header);
 
+        // Desktop / iPad Expanded Event Pills
         const eventsContainer = document.createElement('div');
-        eventsContainer.className = 'space-y-1 overflow-y-auto max-h-[90px] pr-0.5';
+        eventsContainer.className = 'hidden md:block space-y-1 overflow-y-auto max-h-[90px] pr-0.5';
 
         dayEvents.forEach(evt => {
           const style = getDisciplineStyle(evt.discipline, evt.status);
@@ -1911,12 +2023,29 @@ ${eventData.cancelReason ? `取消原因：${eventData.cancelReason}\n` : ''}${e
           };
           eventsContainer.appendChild(evtEl);
         });
-
         cell.appendChild(eventsContainer);
 
+        // Mobile compact dot cluster (iPhone / Narrow screens)
+        const mobileDots = document.createElement('div');
+        mobileDots.className = 'md:hidden flex items-center flex-wrap gap-0.5 mt-auto pt-1';
+        dayEvents.slice(0, 4).forEach(evt => {
+          const dot = document.createElement('span');
+          const style = getDisciplineStyle(evt.discipline, evt.status);
+          dot.className = `w-1.5 h-1.5 rounded-full ${style.dot}`;
+          mobileDots.appendChild(dot);
+        });
+        if (dayEvents.length > 4) {
+          const plus = document.createElement('span');
+          plus.className = 'text-[8px] text-slate-400 font-bold';
+          plus.textContent = `+${dayEvents.length - 4}`;
+          mobileDots.appendChild(plus);
+        }
+        cell.appendChild(mobileDots);
+
         cell.onclick = () => {
-          if (state.canEdit) openAppointmentModal(null, dateStr);
-          else showToast('此連結為唯讀查閱模式，無法新增排班', 'warning');
+          state.selectedDateStr = dateStr;
+          renderMonthView();
+          renderMobileDayAgenda();
         };
 
         monthGrid.appendChild(cell);
@@ -1927,10 +2056,74 @@ ${eventData.cancelReason ? `取消原因：${eventData.cancelReason}\n` : ''}${e
       const remaining = totalCells % 7 === 0 ? 0 : 7 - (totalCells % 7);
       for (let nextDay = 1; nextDay <= remaining; nextDay++) {
         const cell = document.createElement('div');
-        cell.className = 'min-h-[105px] p-1.5 bg-slate-50/40 text-slate-300 flex flex-col justify-between';
-        cell.innerHTML = `<span class="text-[11px] font-mono">${nextDay}</span>`;
+        cell.className = 'min-h-[70px] sm:min-h-[105px] p-1 sm:p-1.5 bg-slate-50/40 text-slate-300 flex flex-col justify-between';
+        cell.innerHTML = `<span class="text-[10px] sm:text-[11px] font-mono">${nextDay}</span>`;
         monthGrid.appendChild(cell);
       }
+
+      renderMobileDayAgenda();
+    }
+
+    // Render selected day's detailed cards for mobile view
+    function renderMobileDayAgenda() {
+      if (!mobileDayAgendaContainer) return;
+      const filteredList = filterAppointments(state.appointments);
+      const dayEvents = filteredList.filter(e => e.date === state.selectedDateStr);
+      const holiday = getHolidayInfo(state.selectedDateStr);
+      const dObj = new Date(state.selectedDateStr);
+      const lunar = getLunarInfo(dObj);
+
+      mobileDayAgendaTitle.textContent = `${state.selectedDateStr} (農曆 ${lunar.text})`;
+
+      if (holiday.isHoliday) {
+        mobileDayAgendaHoliday.textContent = holiday.name;
+        mobileDayAgendaHoliday.classList.remove('hidden');
+      } else {
+        mobileDayAgendaHoliday.classList.add('hidden');
+      }
+
+      mobileDayAgendaList.innerHTML = '';
+      if (dayEvents.length === 0) {
+        mobileDayAgendaList.innerHTML = `
+          <div class="py-4 text-center text-slate-400 text-xs">
+            <i class="fa-regular fa-calendar-xmark mb-1"></i>
+            <p>當日無排班記錄</p>
+          </div>
+        `;
+        return;
+      }
+
+      dayEvents.forEach(evt => {
+        const style = getDisciplineStyle(evt.discipline, evt.status);
+        const card = document.createElement('div');
+        card.className = `p-2.5 rounded-lg border text-xs flex items-center justify-between transition ${style.bg}`;
+        card.innerHTML = `
+          <div class="space-y-0.5 flex-1 pr-2">
+            <div class="flex items-center space-x-1.5">
+              <span class="font-bold text-slate-900">${evt.client}</span>
+              <span class="px-1.5 py-0.2 rounded text-[9px] font-bold ${style.badge}">${evt.discipline}</span>
+              <span class="text-[10px] text-slate-500 font-mono">${evt.startTime}-${evt.endTime}</span>
+            </div>
+            <div class="text-[11px] text-slate-600 flex items-center space-x-2">
+              <span>${evt.staff}</span>
+              <span>·</span>
+              <span>${evt.section || evt.service}</span>
+            </div>
+          </div>
+          <button class="px-2 py-1 rounded bg-white hover:bg-slate-100 text-slate-700 border border-slate-200 text-[11px] font-medium flex-shrink-0">
+            ${state.canEdit ? '編輯' : '查閱'}
+          </button>
+        `;
+        card.onclick = () => openAppointmentModal(evt);
+        mobileDayAgendaList.appendChild(card);
+      });
+    }
+
+    if (btnMobileAgendaAdd) {
+      btnMobileAgendaAdd.onclick = () => {
+        if (state.canEdit) openAppointmentModal(null, state.selectedDateStr);
+        else showToast('唯讀查閱連結無法新增排班', 'warning');
+      };
     }
 
     function renderWeekView() {
@@ -1978,10 +2171,10 @@ ${eventData.cancelReason ? `取消原因：${eventData.cancelReason}\n` : ''}${e
 
       hours.forEach(hourStr => {
         const row = document.createElement('div');
-        row.className = 'grid grid-cols-8 min-h-[70px] py-1 border-t border-slate-100';
+        row.className = 'grid grid-cols-8 min-h-[65px] sm:min-h-[70px] py-1 border-t border-slate-100';
 
         const timeCol = document.createElement('div');
-        timeCol.className = 'p-2 font-mono text-slate-400 font-medium text-[11px]';
+        timeCol.className = 'p-1.5 sm:p-2 font-mono text-slate-400 font-medium text-[11px] sticky left-0 bg-white/95 z-10';
         timeCol.textContent = hourStr;
         row.appendChild(timeCol);
 
@@ -2030,6 +2223,7 @@ ${eventData.cancelReason ? `取消原因：${eventData.cancelReason}\n` : ''}${e
 
     function renderTableView() {
       tableBody.innerHTML = '';
+      if (mobileTableCards) mobileTableCards.innerHTML = '';
       let list = filterAppointments(state.appointments);
 
       list.sort((a, b) => {
@@ -2053,6 +2247,7 @@ ${eventData.cancelReason ? `取消原因：${eventData.cancelReason}\n` : ''}${e
         const style = getDisciplineStyle(evt.discipline, evt.status);
         const isCancelled = evt.status === 'cancelled';
 
+        // 1. Desktop / iPad Row
         const tr = document.createElement('tr');
         tr.className = `hover:bg-slate-50/70 transition ${isCancelled ? 'bg-rose-50/20 text-slate-400' : ''}`;
         tr.innerHTML = `
@@ -2082,9 +2277,39 @@ ${eventData.cancelReason ? `取消原因：${eventData.cancelReason}\n` : ''}${e
             </button>
           </td>
         `;
-
         tr.querySelector('.btn-table-edit').onclick = () => openAppointmentModal(evt);
         tableBody.appendChild(tr);
+
+        // 2. iPhone / Mobile Card Element
+        if (mobileTableCards) {
+          const card = document.createElement('div');
+          card.className = `p-3 rounded-xl border text-xs space-y-1.5 transition ${style.bg}`;
+          card.innerHTML = `
+            <div class="flex items-center justify-between">
+              <div class="flex items-center space-x-1.5">
+                <span class="font-bold text-slate-900 text-sm">${evt.client}</span>
+                <span class="px-1.5 py-0.2 rounded text-[10px] font-bold ${style.badge}">${evt.discipline}</span>
+                ${isCancelled ? `<span class="px-1.5 py-0.2 bg-rose-100 text-rose-700 rounded text-[9px] font-bold">已取消</span>` : ''}
+              </div>
+              <span class="font-mono text-slate-700 font-semibold">${evt.startTime} - ${evt.endTime}</span>
+            </div>
+            <div class="flex items-center justify-between text-[11px] text-slate-600">
+              <div class="flex items-center space-x-1">
+                <span>${evt.date} (${dayName})</span>
+                ${holiday.isHoliday ? `<span class="text-rose-600 font-bold">· ${holiday.name}</span>` : ''}
+              </div>
+              <span class="font-medium text-slate-800">${evt.staff}</span>
+            </div>
+            <div class="flex items-center justify-between pt-1 border-t border-slate-200/50 text-[11px]">
+              <span class="text-slate-500 truncate">${evt.service || ''} ${evt.section ? `(${evt.section})` : ''}</span>
+              <button class="px-2.5 py-1 rounded bg-white hover:bg-slate-100 text-slate-800 border border-slate-200 font-medium text-xs transition shadow-2xs">
+                ${state.canEdit ? '編輯' : '查閱'}
+              </button>
+            </div>
+          `;
+          card.querySelector('button').onclick = () => openAppointmentModal(evt);
+          mobileTableCards.appendChild(card);
+        }
       });
     }
 
