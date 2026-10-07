@@ -221,6 +221,17 @@
           </select>
         </div>
 
+        <!-- Hong Kong Holiday & Lunar Legend Badge -->
+        <div class="hidden lg:flex items-center space-x-2 text-[11px] text-slate-500 bg-slate-50 px-2.5 py-1 rounded-lg border border-slate-200">
+          <span class="inline-flex items-center text-rose-600 font-semibold">
+            <span class="w-2 h-2 rounded-full bg-rose-500 mr-1"></span>香港公眾假期 (紅日)
+          </span>
+          <span class="text-slate-300">|</span>
+          <span class="inline-flex items-center text-slate-600">
+            <i class="fa-solid fa-moon text-amber-500 mr-1 text-[10px]"></i>農曆初一/十五及節氣
+          </span>
+        </div>
+
         <!-- Export Actions -->
         <div class="flex items-center space-x-1.5 ml-auto">
           <button id="btnExportCSV" title="匯出 CSV 表格" class="px-2.5 py-1 rounded-lg border border-slate-200 hover:bg-slate-50 text-slate-600 transition flex items-center space-x-1 text-xs">
@@ -514,6 +525,15 @@
       <form id="appointmentForm" class="p-5 space-y-3.5 text-xs">
         <input type="hidden" id="formEventId">
 
+        <!-- Hong Kong Public Holiday Alert Notice -->
+        <div id="formHolidayNotice" class="hidden p-2.5 rounded-lg bg-rose-50 border border-rose-200 text-rose-900 text-xs flex items-start space-x-2">
+          <i class="fa-solid fa-flag text-rose-600 mt-0.5"></i>
+          <div>
+            <span class="font-bold">香港公眾假期提示：</span>
+            <span id="formHolidayDetails"></span>
+          </div>
+        </div>
+
         <!-- Conflict Notice -->
         <div id="formConflictNotice" class="hidden p-2.5 rounded-lg bg-amber-50 border border-amber-200 text-amber-900 text-xs flex items-start space-x-2">
           <i class="fa-solid fa-triangle-exclamation text-amber-600 mt-0.5"></i>
@@ -759,6 +779,15 @@
           </div>
         </div>
 
+        <!-- Public Holiday Option for Batch Generation -->
+        <div class="p-2.5 bg-rose-50/60 rounded-lg border border-rose-200 flex items-center justify-between">
+          <label class="inline-flex items-center cursor-pointer text-xs font-semibold text-rose-900">
+            <input type="checkbox" id="recurSkipHolidays" checked class="rounded text-rose-600 focus:ring-rose-500 mr-2">
+            <span>自動跳過香港公眾假期 (紅日順延不排班)</span>
+          </label>
+          <span class="text-[10px] text-rose-600 bg-rose-100/80 px-1.5 py-0.5 rounded font-mono">推薦開啟</span>
+        </div>
+
         <div class="pt-3 border-t border-slate-200 flex items-center justify-end space-x-2">
           <button type="button" id="btnCancelRecur" class="px-3 py-1.5 border border-slate-300 rounded-lg text-slate-700 hover:bg-slate-50 transition">
             取消
@@ -910,6 +939,108 @@
 
     // Current database schema version to prevent truncated cache lockouts
     const DATA_VERSION_KEY = 'mwc_data_version_v3';
+
+    // Official Hong Kong Public Holidays Database (2024 - 2028+)
+    const HK_PUBLIC_HOLIDAYS = {
+      // 2024
+      "2024-01-01": "一月一日", "2024-02-10": "農曆年初一", "2024-02-12": "農曆年初三", "2024-02-13": "農曆年初四",
+      "2024-03-29": "耶穌受難節", "2024-03-30": "耶穌受難節翌日", "2024-04-01": "復活節星期一", "2024-04-04": "清明節",
+      "2024-05-01": "勞動節", "2024-05-15": "佛誕", "2024-06-10": "端午節", "2024-07-01": "特區成立紀念日",
+      "2024-09-18": "中秋節翌日", "2024-10-01": "國慶日", "2024-10-11": "重陽節", "2024-12-25": "聖誕節", "2024-12-26": "節禮日",
+      // 2025
+      "2025-01-01": "一月一日", "2025-01-29": "農曆年初一", "2025-01-30": "農曆年初二", "2025-01-31": "農曆年初三",
+      "2025-04-04": "清明節", "2025-04-18": "耶穌受難節", "2025-04-19": "耶穌受難節翌日", "2025-04-21": "復活節星期一",
+      "2025-05-01": "勞動節", "2025-05-05": "佛誕", "2025-05-31": "端午節", "2025-07-01": "特區成立紀念日",
+      "2025-10-01": "國慶日", "2025-10-07": "中秋節翌日", "2025-10-29": "重陽節", "2025-12-25": "聖誕節", "2025-12-26": "節禮日",
+      // 2026 (MWC 主要排班年度)
+      "2026-01-01": "一月一日", "2026-02-17": "農曆年初一", "2026-02-18": "農曆年初二", "2026-02-19": "農曆年初三",
+      "2026-04-03": "耶穌受難節", "2026-04-04": "耶穌受難節翌日", "2026-04-06": "清明節翌日", "2026-04-07": "復活節星期一翌日",
+      "2026-05-01": "勞動節", "2026-05-25": "佛誕翌日", "2026-06-19": "端午節", "2026-07-01": "特區成立紀念日",
+      "2026-09-26": "中秋節翌日", "2026-10-01": "國慶日", "2026-10-19": "重陽節翌日", "2026-12-25": "聖誕節", "2026-12-26": "節禮日",
+      // 2027 (MWC 跨年延續療程年度)
+      "2027-01-01": "一月一日", "2027-02-06": "農曆年初一", "2027-02-08": "農曆年初三", "2027-02-09": "農曆年初四",
+      "2027-03-26": "耶穌受難節", "2027-03-27": "耶穌受難節翌日", "2027-03-29": "復活節星期一", "2027-04-05": "清明節",
+      "2027-05-01": "勞動節", "2027-05-13": "佛誕", "2027-06-09": "端午節", "2027-07-01": "特區成立紀念日",
+      "2027-09-16": "中秋節翌日", "2027-10-01": "國慶日", "2027-10-08": "重陽節", "2027-12-25": "聖誕節", "2027-12-27": "聖誕補假",
+      // 2028
+      "2028-01-01": "一月一日", "2028-01-27": "農曆年初一", "2028-01-28": "農曆年初二", "2028-01-29": "農曆年初三",
+      "2028-04-04": "清明節", "2028-04-14": "耶穌受難節", "2028-04-15": "耶穌受難節翌日", "2028-04-17": "復活節星期一",
+      "2028-05-01": "勞動節", "2028-05-02": "佛誕", "2028-05-28": "端午節", "2028-07-01": "特區成立紀念日",
+      "2028-10-01": "國慶日", "2028-10-02": "國慶補假", "2028-10-03": "中秋節翌日", "2028-10-26": "重陽節", "2028-12-25": "聖誕節", "2028-12-26": "節禮日"
+    };
+
+    const CHINESE_SOLAR_TERMS_MAP = {
+      "2026-10-08": "寒露", "2026-10-23": "霜降", "2026-11-07": "立冬", "2026-11-22": "小雪",
+      "2026-12-07": "大雪", "2026-12-22": "冬至", "2027-01-05": "小寒", "2027-01-20": "大寒",
+      "2027-02-04": "立春", "2027-02-19": "雨水", "2027-03-05": "驚蟄", "2027-03-20": "春分"
+    };
+
+    const LUNAR_DAY_NAMES = [
+      "", "初一", "初二", "初三", "初四", "初五", "初六", "初七", "初八", "初九", "初十",
+      "十一", "十二", "十三", "十四", "十五", "十六", "十七", "十八", "十九", "二十",
+      "廿一", "廿二", "廿三", "廿四", "廿五", "廿六", "廿七", "廿八", "廿九", "三十"
+    ];
+
+    const LUNAR_MONTH_NAMES = [
+      "", "正月", "二月", "三月", "四月", "五月", "六月", "七月", "八月", "九月", "十月", "冬月", "臘月"
+    ];
+
+    // Formatter using native browser Intl Chinese Calendar
+    let chineseCalendarFormatter = null;
+    try {
+      chineseCalendarFormatter = new Intl.DateTimeFormat('zh-u-ca-chinese', {
+        month: 'numeric',
+        day: 'numeric'
+      });
+    } catch (e) {
+      console.warn('Browser Intl Chinese calendar fallback:', e);
+    }
+
+    function getLunarInfo(date) {
+      const dateStr = formatDate(date);
+      // Check if it's a specific Solar Term
+      if (CHINESE_SOLAR_TERMS_MAP[dateStr]) {
+        return { text: CHINESE_SOLAR_TERMS_MAP[dateStr], isSpecial: true };
+      }
+
+      try {
+        if (chineseCalendarFormatter) {
+          const parts = chineseCalendarFormatter.formatToParts(date);
+          let m = 0, d = 0;
+          for (const p of parts) {
+            if (p.type === 'month') m = parseInt(p.value, 10) || 1;
+            if (p.type === 'day') d = parseInt(p.value, 10) || 1;
+          }
+
+          // Traditional festival overrides
+          if (m === 1 && d === 1) return { text: "春節", isSpecial: true };
+          if (m === 1 && d === 15) return { text: "元宵", isSpecial: true };
+          if (m === 5 && d === 5) return { text: "端午", isSpecial: true };
+          if (m === 7 && d === 7) return { text: "七夕", isSpecial: true };
+          if (m === 7 && d === 15) return { text: "中元", isSpecial: true };
+          if (m === 8 && d === 15) return { text: "中秋", isSpecial: true };
+          if (m === 9 && d === 9) return { text: "重陽", isSpecial: true };
+
+          if (d === 1) {
+            const monthText = LUNAR_MONTH_NAMES[m] || `${m}月`;
+            return { text: monthText, isSpecial: true };
+          }
+          return { text: LUNAR_DAY_NAMES[d] || `${d}日`, isSpecial: (d === 15) };
+        }
+      } catch (e) {}
+
+      // Resilient fallback: estimate lunar day based on synodic month
+      const diff = Math.floor((date - new Date(2026, 0, 1)) / (1000 * 60 * 60 * 24));
+      const estDay = ((diff % 30) + 1);
+      return { text: LUNAR_DAY_NAMES[estDay] || `初${estDay}`, isSpecial: false };
+    }
+
+    function getHolidayInfo(dateStr) {
+      if (HK_PUBLIC_HOLIDAYS[dateStr]) {
+        return { isHoliday: true, name: HK_PUBLIC_HOLIDAYS[dateStr] };
+      }
+      return { isHoliday: false, name: null };
+    }
 
     // Comprehensive authentic schedule including October (Pages 1 & 2), November, and December 2026 until year-end
     const SEED_APPOINTMENTS_DATA = [
@@ -1375,6 +1506,8 @@ ${eventData.cancelReason ? `取消原因：${eventData.cancelReason}\n` : ''}${e
     const appointmentForm = document.getElementById('appointmentForm');
     const modalTitle = document.getElementById('modalTitle');
     const formEventId = document.getElementById('formEventId');
+    const formHolidayNotice = document.getElementById('formHolidayNotice');
+    const formHolidayDetails = document.getElementById('formHolidayDetails');
     const formConflictNotice = document.getElementById('formConflictNotice');
     const formConflictDetails = document.getElementById('formConflictDetails');
     const formSendTeamsNotify = document.getElementById('formSendTeamsNotify');
@@ -1410,6 +1543,7 @@ ${eventData.cancelReason ? `取消原因：${eventData.cancelReason}\n` : ''}${e
     const recurEndDate = document.getElementById('recurEndDate');
     const recurStartTime = document.getElementById('recurStartTime');
     const recurEndTime = document.getElementById('recurEndTime');
+    const recurSkipHolidays = document.getElementById('recurSkipHolidays');
 
     // Teams Modal
     const teamsConfigModal = document.getElementById('teamsConfigModal');
@@ -1728,22 +1862,34 @@ ${eventData.cancelReason ? `取消原因：${eventData.cancelReason}\n` : ''}${e
 
         const isToday = formatDate(new Date()) === dateStr;
         const isSelectedOrigin = dateStr === '2026-10-02';
+        const isSunday = dObj.getDay() === 0;
+        const holiday = getHolidayInfo(dateStr);
+        const lunar = getLunarInfo(dObj);
 
         const cell = document.createElement('div');
         cell.className = `min-h-[110px] p-1.5 bg-white flex flex-col justify-between transition hover:bg-slate-50/90 cursor-pointer ${
-          isToday ? 'ring-2 ring-slate-900 z-10' : ''
-        } ${isSelectedOrigin ? 'bg-amber-50/20' : ''}`;
+          holiday.isHoliday ? 'bg-rose-50/30 ring-1 ring-rose-100' : ''
+        } ${isToday ? 'ring-2 ring-slate-900 z-10' : ''} ${isSelectedOrigin ? 'bg-amber-50/20' : ''}`;
 
         const header = document.createElement('div');
-        header.className = 'flex items-center justify-between mb-1';
+        header.className = 'flex items-start justify-between mb-1';
+
+        // Solar date number + Lunar date label + Holiday badge
+        const dateNumberClass = holiday.isHoliday || isSunday ? 'text-rose-600 font-bold' : (isToday ? 'text-white bg-slate-900 px-1.5 py-0.5 rounded-full' : 'text-slate-800 font-semibold');
+        const lunarClass = lunar.isSpecial ? 'text-amber-600 font-semibold' : 'text-slate-400';
+
         header.innerHTML = `
-          <span class="text-xs font-semibold ${isToday ? 'text-white bg-slate-900 px-1.5 py-0.5 rounded-full' : 'text-slate-700'}">${day}</span>
+          <div class="flex items-center space-x-1.5 flex-wrap">
+            <span class="text-xs ${dateNumberClass}">${day}</span>
+            <span class="text-[10px] ${lunarClass}">${lunar.text}</span>
+            ${holiday.isHoliday ? `<span class="px-1 py-0.2 rounded text-[9px] bg-rose-100 text-rose-700 font-bold tracking-tight">${holiday.name}</span>` : ''}
+          </div>
           ${dayEvents.length > 0 ? `<span class="text-[10px] text-slate-400 font-mono font-medium">${dayEvents.length}</span>` : ''}
         `;
         cell.appendChild(header);
 
         const eventsContainer = document.createElement('div');
-        eventsContainer.className = 'space-y-1 overflow-y-auto max-h-[95px] pr-0.5';
+        eventsContainer.className = 'space-y-1 overflow-y-auto max-h-[90px] pr-0.5';
 
         dayEvents.forEach(evt => {
           const style = getDisciplineStyle(evt.discipline, evt.status);
@@ -1810,12 +1956,19 @@ ${eventData.cancelReason ? `取消原因：${eventData.cancelReason}\n` : ''}${e
 
       const dayNames = ['日', '一', '二', '三', '四', '五', '六'];
       weekDates.forEach((d, idx) => {
+        const dateStr = formatDate(d);
+        const holiday = getHolidayInfo(dateStr);
+        const lunar = getLunarInfo(d);
+        const isToday = dateStr === formatDate(new Date());
+        const isSunday = idx === 0;
+
         const dHead = document.createElement('div');
-        const isToday = formatDate(d) === formatDate(new Date());
-        dHead.className = `p-1.5 rounded-lg ${isToday ? 'bg-slate-100 font-bold text-slate-900' : ''}`;
+        dHead.className = `p-1.5 rounded-lg ${isToday ? 'bg-slate-100 font-bold text-slate-900' : ''} ${holiday.isHoliday ? 'bg-rose-50/60' : ''}`;
         dHead.innerHTML = `
-          <div>${dayNames[idx]}</div>
+          <div class="${holiday.isHoliday || isSunday ? 'text-rose-600 font-bold' : ''}">${dayNames[idx]}</div>
           <div class="text-[10px] text-slate-400 font-mono">${d.getMonth() + 1}/${d.getDate()}</div>
+          <div class="text-[9px] ${lunar.isSpecial ? 'text-amber-600 font-semibold' : 'text-slate-400'}">${lunar.text}</div>
+          ${holiday.isHoliday ? `<div class="mt-0.5"><span class="px-1 py-0.2 rounded text-[9px] bg-rose-100 text-rose-700 font-semibold">${holiday.name}</span></div>` : ''}
         `;
         weekHeaderRow.appendChild(dHead);
       });
@@ -1834,8 +1987,9 @@ ${eventData.cancelReason ? `取消原因：${eventData.cancelReason}\n` : ''}${e
 
         weekDates.forEach(d => {
           const dateStr = formatDate(d);
+          const holiday = getHolidayInfo(dateStr);
           const cell = document.createElement('div');
-          cell.className = 'p-1 border-l border-slate-100 space-y-1 hover:bg-slate-50/70 cursor-pointer';
+          cell.className = `p-1 border-l border-slate-100 space-y-1 hover:bg-slate-50/70 cursor-pointer ${holiday.isHoliday ? 'bg-rose-50/20' : ''}`;
 
           const [h] = hourStr.split(':').map(Number);
           const slotEvents = filteredList.filter(e => {
@@ -1894,13 +2048,21 @@ ${eventData.cancelReason ? `取消原因：${eventData.cancelReason}\n` : ''}${e
       list.forEach(evt => {
         const d = new Date(evt.date);
         const dayName = weekDaysZh[d.getDay()] || '';
+        const holiday = getHolidayInfo(evt.date);
+        const lunar = getLunarInfo(d);
         const style = getDisciplineStyle(evt.discipline, evt.status);
         const isCancelled = evt.status === 'cancelled';
 
         const tr = document.createElement('tr');
         tr.className = `hover:bg-slate-50/70 transition ${isCancelled ? 'bg-rose-50/20 text-slate-400' : ''}`;
         tr.innerHTML = `
-          <td class="py-2.5 px-4 font-mono font-medium">${evt.date} (${dayName})</td>
+          <td class="py-2.5 px-4 font-mono font-medium">
+            <div class="flex items-center space-x-1 flex-wrap">
+              <span class="${holiday.isHoliday ? 'text-rose-600 font-bold' : ''}">${evt.date} (${dayName})</span>
+              <span class="text-[10px] text-slate-400 font-normal">農曆${lunar.text}</span>
+              ${holiday.isHoliday ? `<span class="px-1.5 py-0.2 rounded text-[9px] bg-rose-100 text-rose-700 font-bold ml-1">${holiday.name}</span>` : ''}
+            </div>
+          </td>
           <td class="py-2.5 px-3 font-mono ${isCancelled ? 'line-through' : 'font-semibold text-slate-800'}">${evt.startTime} - ${evt.endTime}</td>
           <td class="py-2.5 px-4 font-semibold text-slate-900">${evt.client}</td>
           <td class="py-2.5 px-3"><span class="px-2 py-0.5 rounded text-[10px] font-bold ${style.badge}">${evt.discipline}</span></td>
@@ -2214,28 +2376,46 @@ ${eventData.cancelReason ? `取消原因：${eventData.cancelReason}\n` : ''}${e
       }
       let csv = "\uFEFF時間戳記,修改人(操作者),院友姓名,動作類別,詳細變更對比,負責職員\n";
       logs.forEach(l => {
-        csv += `"${l.timestamp}","${l.operator}","${l.client}","${l.actionLabel}","${(l.diff || '').replace(/"/g, '""')}","${l.staff}"\n`;
+        csv += `"${l.timestamp}","${l.operator || ''}","${l.client || ''}","${l.actionLabel || ''}","${(l.diff || '').replace(/"/g, '""')}","${l.staff || ''}"\n`;
       });
       const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
       const url = URL.createObjectURL(blob);
       const a = document.createElement('a');
       a.href = url;
-      a.download = `MWC_排班修改報告_${formatDate(new Date())}.csv`;
+      a.download = `MWC_修改歷史報告_${formatDate(new Date())}.csv`;
       document.body.appendChild(a);
       a.click();
       document.body.removeChild(a);
-      showToast('已匯出完整修改報告 CSV', 'success');
+      showToast('已匯出 CSV 修改報告', 'success');
     });
 
     btnClearAuditLogs.addEventListener('click', async () => {
-      const ok = await showConfirmModal('清空修改歷史', '確定要清空本地的修改報告履歷嗎？此動作無法復原。');
+      const ok = await showConfirmModal('清空修改履歷', '確定要清空所有歷史修改報告嗎？此動作無法復原。');
       if (ok) {
         localStorage.removeItem('mwc_audit_logs');
-        updateAuditBadge();
         renderAuditTable();
+        updateAuditBadge();
         showToast('已清空修改履歷', 'info');
       }
     });
+
+    function checkFormDateHoliday() {
+      const selectedDate = formDate.value;
+      if (!selectedDate) {
+        formHolidayNotice.classList.add('hidden');
+        return;
+      }
+      const holiday = getHolidayInfo(selectedDate);
+      const d = new Date(selectedDate);
+      const lunar = getLunarInfo(d);
+
+      if (holiday.isHoliday) {
+        formHolidayDetails.textContent = `此日期為香港公眾假期【${holiday.name}】(農曆: ${lunar.text})。請確認院友與職員是否如常提供治療服務。`;
+        formHolidayNotice.classList.remove('hidden');
+      } else {
+        formHolidayNotice.classList.add('hidden');
+      }
+    }
 
     function checkFormTimeDiff() {
       if (!originalEditingEvent) {
@@ -2259,7 +2439,10 @@ ${eventData.cancelReason ? `取消原因：${eventData.cancelReason}\n` : ''}${e
       }
     }
 
-    formDate.addEventListener('change', checkFormTimeDiff);
+    formDate.addEventListener('change', () => {
+      checkFormTimeDiff();
+      checkFormDateHoliday();
+    });
     formStartTime.addEventListener('change', checkFormTimeDiff);
     formEndTime.addEventListener('change', checkFormTimeDiff);
 
@@ -2272,6 +2455,7 @@ ${eventData.cancelReason ? `取消原因：${eventData.cancelReason}\n` : ''}${e
       appointmentForm.reset();
       formConflictNotice.classList.add('hidden');
       teamsTimeDiffAlert.classList.add('hidden');
+      formHolidayNotice.classList.add('hidden');
 
       if (appointment) {
         originalEditingEvent = JSON.parse(JSON.stringify(appointment));
@@ -2326,6 +2510,7 @@ ${eventData.cancelReason ? `取消原因：${eventData.cancelReason}\n` : ''}${e
         btnSaveAppointment.style.display = 'inline-block';
       }
 
+      checkFormDateHoliday();
       appointmentModal.classList.remove('hidden');
     }
 
@@ -2660,6 +2845,7 @@ ${eventData.cancelReason ? `取消原因：${eventData.cancelReason}\n` : ''}${e
       const endD = new Date(recurEndDate.value);
       const startTime = recurStartTime.value;
       const endTime = recurEndTime.value;
+      const shouldSkipHolidays = recurSkipHolidays ? recurSkipHolidays.checked : true;
 
       const checkedDays = Array.from(document.querySelectorAll('input[name="recurWeekday"]:checked')).map(cb => parseInt(cb.value, 10));
 
@@ -2675,34 +2861,41 @@ ${eventData.cancelReason ? `取消原因：${eventData.cancelReason}\n` : ''}${e
       const generated = [];
       let cur = new Date(startD);
       let sessionCount = 0;
+      let skippedHolidaysCount = 0;
 
       while (cur <= endD && sessionCount < totalMax) {
         const dayOfWeek = cur.getDay();
+        const dateStr = formatDate(cur);
+        const holiday = getHolidayInfo(dateStr);
+
         if (checkedDays.includes(dayOfWeek)) {
-          sessionCount++;
-          const dateStr = formatDate(cur);
-          generated.push({
-            id: `mwc-recur-${Date.now()}-${sessionCount}`,
-            date: dateStr,
-            startTime,
-            endTime,
-            client,
-            discipline,
-            service,
-            staff,
-            section: `Section ${sessionCount}`,
-            status: 'active',
-            cancelReason: '',
-            notes: '跨年週期排班生成',
-            lastModifiedBy: state.currentOperator,
-            updatedAt: new Date().toISOString()
-          });
+          if (shouldSkipHolidays && holiday.isHoliday) {
+            skippedHolidaysCount++;
+          } else {
+            sessionCount++;
+            generated.push({
+              id: `mwc-recur-${Date.now()}-${sessionCount}`,
+              date: dateStr,
+              startTime,
+              endTime,
+              client,
+              discipline,
+              service,
+              staff,
+              section: `Section ${sessionCount}`,
+              status: 'active',
+              cancelReason: '',
+              notes: '跨年週期排班生成',
+              lastModifiedBy: state.currentOperator,
+              updatedAt: new Date().toISOString()
+            });
+          }
         }
         cur.setDate(cur.getDate() + 1);
       }
 
       if (generated.length === 0) {
-        showToast('所選範圍內無符合星期', 'warning');
+        showToast('所選範圍內無符合星期（或全數適逢公眾假期）', 'warning');
         return;
       }
 
@@ -2714,13 +2907,13 @@ ${eventData.cancelReason ? `取消原因：${eventData.cancelReason}\n` : ''}${e
         client,
         actionType: 'created',
         actionLabel: '週期排班批次生成',
-        diff: `批次生成 ${generated.length} 節排班 (${formatDate(startD)} 至 ${formatDate(endD)})`,
+        diff: `批次生成 ${generated.length} 節排班 (${formatDate(startD)} 至 ${formatDate(endD)})${skippedHolidaysCount > 0 ? `，已為您自動跳過 ${skippedHolidaysCount} 天香港公眾假期` : ''}`,
         staff
       });
 
       recurModal.classList.add('hidden');
       renderCurrentView();
-      showToast(`已批次生成 ${generated.length} 節排班並留下記錄報告`, 'success');
+      showToast(`已批次生成 ${generated.length} 節排班${skippedHolidaysCount > 0 ? ` (自動跳過 ${skippedHolidaysCount} 天紅日)` : ''}`, 'success');
     });
 
     btnOpenNewModal.onclick = () => openAppointmentModal();
