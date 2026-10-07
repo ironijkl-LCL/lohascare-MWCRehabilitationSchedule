@@ -1,0 +1,2367 @@
+<!DOCTYPE html>
+<html lang="zh-HK">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>MWC Rehabilitation Schedule Calendar</title>
+
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            pt: {
+              50: '#ecfdf5',
+              100: '#d1fae5',
+              600: '#059669',
+              700: '#047857',
+              800: '#065f46'
+            },
+            ot: {
+              50: '#fff7ed',
+              100: '#ffedd5',
+              600: '#ea580c',
+              700: '#c2410c',
+              800: '#9a3412'
+            },
+            st: {
+              50: '#eff6ff',
+              100: '#dbeafe',
+              600: '#2563eb',
+              700: '#1d4ed8',
+              800: '#1e40af'
+            },
+            teams: {
+              50: '#f5f3ff',
+              100: '#ede9fe',
+              600: '#6264a7',
+              700: '#555899',
+              800: '#464775'
+            }
+          }
+        }
+      }
+    }
+  </script>
+
+  <!-- Google Fonts: Inter -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Noto+Sans+TC:wght@400;500;700;900&display=swap" rel="stylesheet">
+
+  <!-- Font Awesome 6 Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+
+  <style>
+    body {
+      font-family: 'Inter', 'Noto Sans TC', system-ui, -apple-system, sans-serif;
+    }
+    /* Custom clean scrollbars */
+    ::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+    ::-webkit-scrollbar-track {
+      background: #f1f5f9;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: #cbd5e1;
+      border-radius: 4px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: #94a3b8;
+    }
+    @media print {
+      .no-print { display: none !important; }
+      body { background: white !important; }
+      .print-shadow-none { box-shadow: none !important; }
+    }
+  </style>
+</head>
+
+<body class="bg-slate-100 text-slate-800 min-h-screen flex flex-col antialiased">
+  <!-- Top Navigation & Role Bar -->
+  <header class="bg-white border-b border-slate-200 sticky top-0 z-40 shadow-xs no-print">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="flex items-center justify-between h-16">
+        <!-- Brand / Identity -->
+        <div class="flex items-center space-x-3">
+          <div class="h-10 w-10 rounded-xl bg-gradient-to-tr from-sky-600 via-indigo-600 to-purple-600 flex items-center justify-center text-white shadow-md shadow-sky-500/20">
+            <i class="fa-solid fa-hospital-user text-lg"></i>
+          </div>
+          <div>
+            <div class="flex items-center space-x-2">
+              <h1 class="font-bold text-slate-900 text-base sm:text-lg tracking-tight">MWC 復康治療公家排班日曆</h1>
+              <span class="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-semibold bg-emerald-100 text-emerald-800">
+                <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 mr-1 animate-pulse"></span>公家即時同步
+              </span>
+            </div>
+            <p class="text-xs text-slate-500 hidden sm:block">PT / OT / ST 跨學科排班 · Teams 異動即時通知 · 跨年延續療程</p>
+          </div>
+        </div>
+
+        <!-- Role Switcher & Action Tools -->
+        <div class="flex items-center space-x-2 sm:space-x-3">
+          <!-- Permission / Role Selector -->
+          <div class="flex items-center bg-slate-100 p-1 rounded-xl border border-slate-200 text-xs">
+            <span class="text-slate-500 px-2 font-medium hidden md:inline">權限身份:</span>
+            <select id="roleSelector" class="bg-white text-slate-800 font-semibold py-1 px-2.5 rounded-lg border border-slate-200 shadow-2xs focus:outline-none focus:ring-2 focus:ring-sky-500 text-xs">
+              <option value="admin">管理員 (Admin - 完整權限)</option>
+              <option value="editor" selected>治療師 / 職員 (可修改)</option>
+              <option value="viewer">查閱者 (唯讀模式)</option>
+            </select>
+          </div>
+
+          <!-- Cross-Year Batch Scheduler -->
+          <button id="btnOpenRecurModal" title="跨月/跨年批量週期排班" class="inline-flex items-center space-x-1.5 bg-indigo-50 hover:bg-indigo-100 text-indigo-700 border border-indigo-200 text-xs font-semibold px-2.5 py-2 rounded-lg transition shadow-2xs">
+            <i class="fa-solid fa-repeat text-indigo-600"></i>
+            <span class="hidden sm:inline">跨年週期排班</span>
+          </button>
+
+          <!-- Teams Notification Center Button -->
+          <button id="btnOpenTeamsConfig" title="Microsoft Teams 異動通知設定與歷史紀錄" class="inline-flex items-center space-x-1.5 bg-purple-50 hover:bg-purple-100 text-purple-700 border border-purple-200 text-xs font-semibold px-2.5 py-2 rounded-lg transition shadow-2xs relative">
+            <i class="fa-brands fa-microsoft text-indigo-600 text-sm"></i>
+            <span class="hidden sm:inline">Teams 異動通知</span>
+            <span id="teamsLogCountBadge" class="hidden ml-1 px-1.5 py-0.2 bg-purple-600 text-white text-[10px] rounded-full font-mono font-bold">0</span>
+          </button>
+
+          <!-- New Appointment Button -->
+          <button id="btnOpenNewModal" class="inline-flex items-center space-x-1.5 bg-sky-600 hover:bg-sky-700 active:bg-sky-800 text-white text-xs sm:text-sm font-semibold px-3 py-2 rounded-lg shadow-sm transition">
+            <i class="fa-solid fa-plus text-xs"></i>
+            <span>新增預約</span>
+          </button>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main Container -->
+  <main class="flex-1 max-w-7xl w-full mx-auto p-4 sm:p-6 lg:p-8 space-y-5">
+    <!-- Top Filter & Multi-Year Navigation Toolbar -->
+    <div class="bg-white rounded-2xl border border-slate-200 p-4 shadow-sm space-y-3.5">
+      <!-- Row 1: Cross-Year Navigation & View Mode Switcher -->
+      <div class="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-3">
+        <!-- Date Navigation Controls with Multi-Year Jump -->
+        <div class="flex flex-wrap items-center gap-2">
+          <!-- Year Step Buttons -->
+          <div class="inline-flex rounded-lg border border-slate-200 bg-slate-50 p-0.5">
+            <button id="btnPrevYear" title="上一年" class="px-2 py-1 text-slate-600 hover:text-slate-900 hover:bg-white rounded text-xs font-bold transition">
+              <i class="fa-solid fa-angles-left"></i>
+            </button>
+            <button id="btnPrevMonth" title="上一個月" class="px-2.5 py-1 text-slate-600 hover:text-slate-900 hover:bg-white rounded text-xs font-bold transition">
+              <i class="fa-solid fa-chevron-left"></i>
+            </button>
+            <button id="btnNextMonth" title="下一個月" class="px-2.5 py-1 text-slate-600 hover:text-slate-900 hover:bg-white rounded text-xs font-bold transition">
+              <i class="fa-solid fa-chevron-right"></i>
+            </button>
+            <button id="btnNextYear" title="下一年" class="px-2 py-1 text-slate-600 hover:text-slate-900 hover:bg-white rounded text-xs font-bold transition">
+              <i class="fa-solid fa-angles-right"></i>
+            </button>
+          </div>
+
+          <!-- Quick Jump Selectors -->
+          <div class="flex items-center space-x-1">
+            <select id="jumpYearSelect" class="bg-white border border-slate-300 rounded-lg px-2 py-1 text-xs font-bold text-slate-800 focus:outline-none focus:ring-2 focus:ring-sky-500">
+              <!-- Dynamically populated 2024 to 2030 -->
+            </select>
+            <select id="jumpMonthSelect" class="bg-white border border-slate-300 rounded-lg px-2 py-1 text-xs font-bold text-slate-800 focus:outline-none focus:ring-2 focus:ring-sky-500">
+              <option value="0">1月</option>
+              <option value="1">2月</option>
+              <option value="2">3月</option>
+              <option value="3">4月</option>
+              <option value="4">5月</option>
+              <option value="5">6月</option>
+              <option value="6">7月</option>
+              <option value="7">8月</option>
+              <option value="8">9月</option>
+              <option value="9">10月</option>
+              <option value="10">11月</option>
+              <option value="11">12月</option>
+            </select>
+          </div>
+
+          <!-- Display Heading -->
+          <div class="flex items-center space-x-2 pl-1">
+            <h2 id="currentPeriodLabel" class="text-base sm:text-lg font-bold text-slate-900 tracking-tight">2026年 10月</h2>
+            <button id="btnJumpToOrigin" class="text-[11px] font-semibold text-sky-600 hover:text-sky-800 bg-sky-50 hover:bg-sky-100 px-2 py-0.5 rounded-md transition" title="回到 2026 年 10 月排班起點">
+              起點 (2026-10)
+            </button>
+            <button id="btnJumpToToday" class="text-[11px] font-semibold text-slate-600 hover:text-slate-800 bg-slate-100 hover:bg-slate-200 px-2 py-0.5 rounded-md transition">
+              今天
+            </button>
+          </div>
+        </div>
+
+        <!-- View Switcher Tabs -->
+        <div class="flex items-center bg-slate-100 p-1 rounded-xl border border-slate-200 text-xs font-medium self-stretch sm:self-auto justify-center">
+          <button id="tabMonth" class="view-tab px-3 py-1.5 rounded-lg text-slate-700 font-semibold transition active-tab bg-white shadow-2xs text-sky-700">
+            <i class="fa-regular fa-calendar-days mr-1.5"></i>月視圖
+          </button>
+          <button id="tabWeek" class="view-tab px-3 py-1.5 rounded-lg text-slate-600 hover:text-slate-900 transition">
+            <i class="fa-solid fa-timeline mr-1.5"></i>週時間軸
+          </button>
+          <button id="tabTable" class="view-tab px-3 py-1.5 rounded-lg text-slate-600 hover:text-slate-900 transition">
+            <i class="fa-solid fa-table-list mr-1.5"></i>總覽清單
+          </button>
+          <button id="tabYear" class="view-tab px-3 py-1.5 rounded-lg text-slate-600 hover:text-slate-900 transition">
+            <i class="fa-solid fa-calendar mr-1.5"></i>年度總覽
+          </button>
+        </div>
+      </div>
+
+      <!-- Row 2: Filtering and Quick Search -->
+      <div class="pt-3 border-t border-slate-100 flex flex-wrap items-center justify-between gap-3 text-xs">
+        <div class="flex flex-wrap items-center gap-2">
+          <!-- Search Input -->
+          <div class="relative">
+            <i class="fa-solid fa-magnifying-glass absolute left-3 top-2.5 text-slate-400 text-xs"></i>
+            <input type="text" id="searchInput" placeholder="搜尋院友 / 治療師 / 節數..." class="pl-8 pr-3 py-1.5 bg-slate-50 border border-slate-200 rounded-lg text-xs w-48 sm:w-60 focus:bg-white focus:outline-none focus:ring-2 focus:ring-sky-500 transition">
+          </div>
+
+          <!-- Discipline Filter Badges -->
+          <div class="flex items-center space-x-1 bg-slate-100 p-1 rounded-lg border border-slate-200">
+            <button data-filter="all" class="discipline-filter-btn px-2.5 py-1 rounded text-xs font-semibold bg-white text-slate-800 shadow-2xs">全部</button>
+            <button data-filter="PT" class="discipline-filter-btn px-2.5 py-1 rounded text-xs font-semibold text-emerald-700 hover:bg-emerald-50">PT 物理</button>
+            <button data-filter="OT" class="discipline-filter-btn px-2.5 py-1 rounded text-xs font-semibold text-orange-700 hover:bg-orange-50">OT 職業</button>
+            <button data-filter="ST" class="discipline-filter-btn px-2.5 py-1 rounded text-xs font-semibold text-blue-700 hover:bg-blue-50">ST 言語</button>
+          </div>
+
+          <!-- Staff Dropdown -->
+          <select id="staffFilter" class="bg-white border border-slate-200 rounded-lg px-2.5 py-1.5 text-xs text-slate-700 font-medium focus:outline-none focus:ring-2 focus:ring-sky-500">
+            <option value="all">所有負責職員</option>
+            <option value="PTA 珊">PTA 珊</option>
+            <option value="PTA B哥">PTA B哥</option>
+            <option value="PT Sing">PT Sing</option>
+            <option value="ST Tammy">ST Tammy</option>
+            <option value="ST Kelvin">ST Kelvin</option>
+            <option value="OTA Rebecca">OTA Rebecca</option>
+            <option value="OT Ken">OT Ken</option>
+          </select>
+
+          <!-- Status Filter -->
+          <select id="statusFilter" class="bg-white border border-slate-200 rounded-lg px-2.5 py-1.5 text-xs text-slate-700 font-medium focus:outline-none focus:ring-2 focus:ring-sky-500">
+            <option value="all">所有狀態 (含已取消)</option>
+            <option value="active">僅顯示有效預約</option>
+            <option value="cancelled">僅顯示已取消節數</option>
+          </select>
+        </div>
+
+        <!-- Export & Reset Actions -->
+        <div class="flex items-center space-x-2">
+          <button id="btnExportCSV" class="inline-flex items-center space-x-1 px-2.5 py-1.5 rounded-lg border border-slate-200 bg-white hover:bg-slate-50 text-slate-700 font-medium transition shadow-2xs">
+            <i class="fa-solid fa-file-excel text-emerald-600"></i>
+            <span>匯出 Excel/CSV</span>
+          </button>
+          <button id="btnPrint" class="inline-flex items-center space-x-1 px-2.5 py-1.5 rounded-lg border border-slate-200 bg-white hover:bg-slate-50 text-slate-700 font-medium transition shadow-2xs">
+            <i class="fa-solid fa-print text-slate-500"></i>
+            <span>列印排班表</span>
+          </button>
+          <button id="btnResetSeedData" title="重設為 Excel 原始排班種子資料" class="text-rose-600 hover:text-rose-700 px-2 py-1.5 text-[11px] font-semibold transition hidden" id="adminResetBtn">
+            重設資料
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- VIEW CONTAINER 1: MONTH CALENDAR VIEW -->
+    <div id="viewMonth" class="view-content space-y-4">
+      <div class="bg-white rounded-2xl border border-slate-200 overflow-hidden shadow-sm">
+        <!-- Weekday Header -->
+        <div class="grid grid-cols-7 border-b border-slate-200 bg-slate-50/80 text-center text-xs font-bold text-slate-600 py-2.5 uppercase tracking-wider">
+          <div class="text-rose-600">日 (Sun)</div>
+          <div>一 (Mon)</div>
+          <div>二 (Tue)</div>
+          <div>三 (Wed)</div>
+          <div>四 (Thu)</div>
+          <div>五 (Fri)</div>
+          <div class="text-indigo-600">六 (Sat)</div>
+        </div>
+        <!-- Days Grid -->
+        <div id="monthGrid" class="grid grid-cols-7 auto-rows-fr divide-x divide-y divide-slate-100 bg-slate-100">
+          <!-- Dynamically populated via JS -->
+        </div>
+      </div>
+    </div>
+
+    <!-- VIEW CONTAINER 2: WEEK TIMELINE VIEW -->
+    <div id="viewWeek" class="view-content hidden space-y-4">
+      <div class="bg-white rounded-2xl border border-slate-200 p-4 shadow-sm overflow-x-auto">
+        <div class="min-w-[850px]">
+          <!-- Week Header Row -->
+          <div id="weekHeaderRow" class="grid grid-cols-8 border-b border-slate-200 pb-3 text-xs font-bold text-slate-600 text-center">
+            <!-- Dynamically populated -->
+          </div>
+          <!-- Hourly Timeline Body -->
+          <div id="weekTimelineBody" class="divide-y divide-slate-100 text-xs">
+            <!-- Dynamically generated rows -->
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- VIEW CONTAINER 3: EXCEL REGISTER TABLE VIEW -->
+    <div id="viewTable" class="view-content hidden space-y-4">
+      <div class="bg-white rounded-2xl border border-slate-200 overflow-hidden shadow-sm">
+        <div class="overflow-x-auto">
+          <table class="w-full text-left text-xs border-collapse">
+            <thead class="bg-slate-50 border-b border-slate-200 text-slate-700 font-bold uppercase tracking-wider">
+              <tr>
+                <th class="py-3 px-4">日期</th>
+                <th class="py-3 px-3">星期</th>
+                <th class="py-3 px-3">時間時段</th>
+                <th class="py-3 px-4">院友姓名</th>
+                <th class="py-3 px-3">部別</th>
+                <th class="py-3 px-4">服務項目</th>
+                <th class="py-3 px-3">節數進度</th>
+                <th class="py-3 px-4">負責職員</th>
+                <th class="py-3 px-3">狀態</th>
+                <th class="py-3 px-4 text-right no-print">操作</th>
+              </tr>
+            </thead>
+            <tbody id="tableBody" class="divide-y divide-slate-100 font-normal">
+              <!-- Dynamically populated -->
+            </tbody>
+          </table>
+        </div>
+        <div id="tableEmptyState" class="hidden py-12 text-center text-slate-400 text-xs">
+          <i class="fa-regular fa-folder-open text-3xl mb-2 text-slate-300"></i>
+          <p>沒有符合條件的排班記錄</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- VIEW CONTAINER 4: ANNUAL 12-MONTH MATRIX OVERVIEW -->
+    <div id="viewYear" class="view-content hidden space-y-4">
+      <div class="bg-white rounded-2xl border border-slate-200 p-5 shadow-sm space-y-4">
+        <div class="flex items-center justify-between border-b border-slate-100 pb-3">
+          <div>
+            <h3 id="yearMatrixTitle" class="text-base font-bold text-slate-900">2026 全年度復康排班矩陣</h3>
+            <p class="text-xs text-slate-500">點擊任意月份卡片可直接跳轉至該月排班檢視</p>
+          </div>
+          <div class="text-xs text-slate-600 font-medium">
+            全年度排班總數：<span id="yearTotalCount" class="font-bold text-indigo-700">0</span> 節
+          </div>
+        </div>
+        <!-- 12-Month Mini Cards Grid -->
+        <div id="yearMonthsGrid" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+          <!-- Dynamically generated 12 months -->
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <!-- MODAL: ADD / EDIT APPOINTMENT (WITH MICROSOFT TEAMS TIME DIFF NOTIFIER) -->
+  <div id="appointmentModal" class="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/50 backdrop-blur-xs hidden p-4">
+    <div class="bg-white rounded-2xl shadow-2xl max-w-lg w-full overflow-hidden border border-slate-200 transition-all">
+      <!-- Modal Header -->
+      <div class="px-6 py-4 bg-gradient-to-r from-sky-600 to-indigo-600 text-white flex items-center justify-between">
+        <div class="flex items-center space-x-2">
+          <i class="fa-solid fa-calendar-check text-lg"></i>
+          <h3 id="modalTitle" class="text-base font-bold">新增 / 編輯治療排班</h3>
+        </div>
+        <button id="btnCloseModal" class="text-white/80 hover:text-white rounded-lg p-1 hover:bg-white/10 transition">
+          <i class="fa-solid fa-xmark text-lg"></i>
+        </button>
+      </div>
+
+      <!-- Modal Body -->
+      <form id="appointmentForm" class="p-6 space-y-4 text-xs">
+        <input type="hidden" id="formEventId">
+
+        <!-- Conflict Alert Banner (Dynamic) -->
+        <div id="formConflictNotice" class="hidden p-3 rounded-lg bg-amber-50 border border-amber-300 text-amber-900 text-xs">
+          <div class="flex items-start space-x-2">
+            <i class="fa-solid fa-triangle-exclamation text-amber-600 mt-0.5"></i>
+            <div>
+              <p class="font-semibold">排班時段衝突警告：</p>
+              <p id="formConflictDetails" class="text-amber-800 mt-0.5"></p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Microsoft Teams Notification Section (Highlighting Reschedule Alert) -->
+        <div id="teamsNoticeBox" class="p-3 bg-gradient-to-r from-purple-50/90 to-indigo-50/90 rounded-xl border border-purple-200 space-y-2">
+          <div class="flex items-center justify-between">
+            <div class="flex items-center space-x-1.5">
+              <i class="fa-brands fa-microsoft text-indigo-700 text-sm"></i>
+              <span class="font-bold text-indigo-950">Teams 異動即時通知</span>
+            </div>
+            <label class="inline-flex items-center cursor-pointer">
+              <input type="checkbox" id="formSendTeamsNotify" checked class="rounded text-indigo-600 focus:ring-indigo-500">
+              <span class="ml-1.5 text-indigo-900 font-semibold">儲存時通知頻道與紀錄</span>
+            </label>
+          </div>
+
+          <!-- Dynamic Reschedule Diff Banner: Shows old time vs new time -->
+          <div id="teamsTimeDiffAlert" class="hidden text-[11px] p-2.5 bg-amber-50 border border-amber-300 rounded-lg text-amber-900 shadow-2xs">
+            <div class="font-bold flex items-center text-amber-800">
+              <i class="fa-solid fa-clock-rotate-left mr-1.5 text-amber-600"></i>
+              <span>偵測到治療時段更改 (Reschedule Detected)：</span>
+            </div>
+            <div id="teamsTimeDiffDetails" class="mt-1 text-xs font-mono font-medium text-slate-800 pl-3 border-l-2 border-amber-400">
+              <!-- Populated by JS -->
+            </div>
+          </div>
+
+          <p class="text-[11px] text-slate-600 leading-tight">
+            儲存時將自動派送格式化異動卡片至 Teams 頻道，亦可點擊下方按鈕直接在 Teams 密聊負責同事。
+          </p>
+
+          <div class="flex items-center space-x-2 pt-1 flex-wrap gap-y-1">
+            <button type="button" id="btnDirectTeamsChat" class="px-2.5 py-1 bg-white hover:bg-purple-100 border border-purple-300 rounded-lg text-purple-900 font-semibold text-[11px] transition inline-flex items-center shadow-2xs">
+              <i class="fa-solid fa-comments text-purple-600 mr-1.5"></i>在 Teams 密聊負責同事
+            </button>
+            <button type="button" id="btnCopyTeamsText" class="px-2.5 py-1 bg-white hover:bg-indigo-100 border border-indigo-300 rounded-lg text-indigo-900 font-semibold text-[11px] transition inline-flex items-center shadow-2xs">
+              <i class="fa-solid fa-copy text-indigo-600 mr-1.5"></i>複製 Teams 訊息範本
+            </button>
+          </div>
+        </div>
+
+        <!-- Client Name -->
+        <div>
+          <label class="block font-bold text-slate-700 mb-1">院友姓名 *</label>
+          <input type="text" id="formClientName" required placeholder="例如：何愛蘭、石家璐..." class="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-sky-500 focus:outline-none">
+        </div>
+
+        <!-- Discipline & Service -->
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="block font-bold text-slate-700 mb-1">專職部別 *</label>
+            <select id="formDiscipline" class="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-sky-500 focus:outline-none font-medium">
+              <option value="PT">PT (物理治療)</option>
+              <option value="OT">OT (職業治療)</option>
+              <option value="ST">ST (言語治療)</option>
+            </select>
+          </div>
+          <div>
+            <label class="block font-bold text-slate-700 mb-1">服務項目 / 總節數</label>
+            <input type="text" id="formService" placeholder="如：PTA (8 Sessions)" class="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-sky-500 focus:outline-none">
+          </div>
+        </div>
+
+        <!-- Staff & Section -->
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="block font-bold text-slate-700 mb-1">負責職員 *</label>
+            <select id="formStaff" class="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-sky-500 focus:outline-none font-medium">
+              <option value="PTA 珊">PTA 珊</option>
+              <option value="PTA B哥">PTA B哥</option>
+              <option value="PT Sing">PT Sing</option>
+              <option value="ST Tammy">ST Tammy</option>
+              <option value="ST Kelvin">ST Kelvin</option>
+              <option value="OTA Rebecca">OTA Rebecca</option>
+              <option value="OT Ken">OT Ken</option>
+              <option value="PT Sing + PTA 珊">PT Sing + PTA 珊 (共同)</option>
+            </select>
+          </div>
+          <div>
+            <label class="block font-bold text-slate-700 mb-1">節數進度</label>
+            <input type="text" id="formSection" placeholder="如：Section 1, Section 8" class="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-sky-500 focus:outline-none">
+          </div>
+        </div>
+
+        <!-- Date & Time Range -->
+        <div class="grid grid-cols-3 gap-2">
+          <div class="col-span-1">
+            <label class="block font-bold text-slate-700 mb-1">排班日期 *</label>
+            <input type="date" id="formDate" required class="w-full px-2 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-sky-500 focus:outline-none">
+          </div>
+          <div>
+            <label class="block font-bold text-slate-700 mb-1">開始時間 *</label>
+            <input type="time" id="formStartTime" required value="09:30" class="w-full px-2 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-sky-500 focus:outline-none">
+          </div>
+          <div>
+            <label class="block font-bold text-slate-700 mb-1">結束時間 *</label>
+            <input type="time" id="formEndTime" required value="10:30" class="w-full px-2 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-sky-500 focus:outline-none">
+          </div>
+        </div>
+
+        <!-- Status & Cancellation Reason -->
+        <div>
+          <label class="block font-bold text-slate-700 mb-1">預約狀態</label>
+          <div class="flex items-center space-x-4">
+            <label class="inline-flex items-center cursor-pointer">
+              <input type="radio" name="formStatusRadio" value="active" checked class="text-emerald-600 focus:ring-emerald-500">
+              <span class="ml-1.5 font-medium text-slate-800">正常排班</span>
+            </label>
+            <label class="inline-flex items-center cursor-pointer">
+              <input type="radio" name="formStatusRadio" value="cancelled" class="text-rose-600 focus:ring-rose-500">
+              <span class="ml-1.5 font-medium text-rose-700 font-bold">取消節數 (Cancel)</span>
+            </label>
+          </div>
+        </div>
+
+        <div id="cancelReasonContainer" class="hidden">
+          <label class="block font-bold text-rose-700 mb-1">取消原因 (例如：院友不適、覆診、外出...)</label>
+          <input type="text" id="formCancelReason" placeholder="請註明取消原因" class="w-full px-3 py-2 border border-rose-300 bg-rose-50/50 rounded-lg focus:ring-2 focus:ring-rose-500 focus:outline-none text-rose-900">
+        </div>
+
+        <!-- Clinical Notes -->
+        <div>
+          <label class="block font-bold text-slate-700 mb-1">臨床備註 (Notes)</label>
+          <textarea id="formNotes" rows="2" placeholder="特殊復康重點、輔具需求或注意事項..." class="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-sky-500 focus:outline-none"></textarea>
+        </div>
+
+        <!-- Footer Actions -->
+        <div class="pt-3 border-t border-slate-200 flex items-center justify-between">
+          <button type="button" id="btnDeleteEvent" class="text-rose-600 hover:text-rose-800 font-semibold transition px-2 py-1 rounded hidden">
+            <i class="fa-regular fa-trash-can mr-1"></i>刪除此節
+          </button>
+          <div class="flex items-center space-x-2 ml-auto">
+            <button type="button" id="btnCancelForm" class="px-4 py-2 border border-slate-300 rounded-lg text-slate-700 hover:bg-slate-50 font-medium transition">
+              取消
+            </button>
+            <button type="submit" id="btnSaveAppointment" class="px-5 py-2 bg-sky-600 hover:bg-sky-700 text-white font-medium rounded-lg shadow-sm transition">
+              儲存排班
+            </button>
+          </div>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- MODAL: CROSS-YEAR RECURRING BATCH SCHEDULER -->
+  <div id="recurModal" class="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/50 backdrop-blur-xs hidden p-4">
+    <div class="bg-white rounded-2xl shadow-2xl max-w-lg w-full overflow-hidden border border-slate-200 transition-all">
+      <div class="px-6 py-4 bg-gradient-to-r from-indigo-600 to-purple-600 text-white flex items-center justify-between">
+        <div class="flex items-center space-x-2">
+          <i class="fa-solid fa-repeat text-lg"></i>
+          <div>
+            <h3 class="text-base font-bold">跨年 / 跨月週期排班精靈</h3>
+            <p class="text-[11px] text-indigo-100">支援設定跨越年度的定期治療循環</p>
+          </div>
+        </div>
+        <button id="btnCloseRecurModal" class="text-white/80 hover:text-white rounded-lg p-1 hover:bg-white/10 transition">
+          <i class="fa-solid fa-xmark text-lg"></i>
+        </button>
+      </div>
+
+      <form id="recurForm" class="p-6 space-y-4 text-xs">
+        <div>
+          <label class="block font-bold text-slate-700 mb-1">院友姓名 *</label>
+          <input type="text" id="recurClientName" required placeholder="例如：陳迎華、關黃兆平..." class="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:outline-none">
+        </div>
+
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="block font-bold text-slate-700 mb-1">專職部別 *</label>
+            <select id="recurDiscipline" class="w-full px-3 py-2 border border-slate-300 rounded-lg font-medium">
+              <option value="PT">PT (物理治療)</option>
+              <option value="OT">OT (職業治療)</option>
+              <option value="ST">ST (言語治療)</option>
+            </select>
+          </div>
+          <div>
+            <label class="block font-bold text-slate-700 mb-1">負責職員 *</label>
+            <select id="recurStaff" class="w-full px-3 py-2 border border-slate-300 rounded-lg font-medium">
+              <option value="PTA 珊">PTA 珊</option>
+              <option value="PTA B哥">PTA B哥</option>
+              <option value="PT Sing">PT Sing</option>
+              <option value="ST Tammy">ST Tammy</option>
+              <option value="ST Kelvin">ST Kelvin</option>
+              <option value="OTA Rebecca">OTA Rebecca</option>
+              <option value="OT Ken">OT Ken</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="block font-bold text-slate-700 mb-1">服務標籤</label>
+            <input type="text" id="recurService" value="PTA (8 Sessions)" class="w-full px-3 py-2 border border-slate-300 rounded-lg">
+          </div>
+          <div>
+            <label class="block font-bold text-slate-700 mb-1">總節數 (循環上限)</label>
+            <input type="number" id="recurTotalSessions" value="8" min="1" max="50" class="w-full px-3 py-2 border border-slate-300 rounded-lg">
+          </div>
+        </div>
+
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="block font-bold text-slate-700 mb-1">排班起始日 *</label>
+            <input type="date" id="recurStartDate" required class="w-full px-3 py-2 border border-slate-300 rounded-lg">
+          </div>
+          <div>
+            <label class="block font-bold text-slate-700 mb-1">跨年至截止日 *</label>
+            <input type="date" id="recurEndDate" required class="w-full px-3 py-2 border border-slate-300 rounded-lg">
+          </div>
+        </div>
+
+        <div>
+          <label class="block font-bold text-slate-700 mb-1">每週循環星期 (可複選)</label>
+          <div class="flex items-center space-x-2 pt-1 flex-wrap">
+            <label class="inline-flex items-center p-1.5 border border-slate-200 rounded-lg bg-slate-50 cursor-pointer">
+              <input type="checkbox" name="recurWeekday" value="1" class="text-indigo-600 rounded">
+              <span class="ml-1 text-slate-700 font-semibold">一</span>
+            </label>
+            <label class="inline-flex items-center p-1.5 border border-slate-200 rounded-lg bg-slate-50 cursor-pointer">
+              <input type="checkbox" name="recurWeekday" value="2" checked class="text-indigo-600 rounded">
+              <span class="ml-1 text-slate-700 font-semibold">二</span>
+            </label>
+            <label class="inline-flex items-center p-1.5 border border-slate-200 rounded-lg bg-slate-50 cursor-pointer">
+              <input type="checkbox" name="recurWeekday" value="3" class="text-indigo-600 rounded">
+              <span class="ml-1 text-slate-700 font-semibold">三</span>
+            </label>
+            <label class="inline-flex items-center p-1.5 border border-slate-200 rounded-lg bg-slate-50 cursor-pointer">
+              <input type="checkbox" name="recurWeekday" value="4" checked class="text-indigo-600 rounded">
+              <span class="ml-1 text-slate-700 font-semibold">四</span>
+            </label>
+            <label class="inline-flex items-center p-1.5 border border-slate-200 rounded-lg bg-slate-50 cursor-pointer">
+              <input type="checkbox" name="recurWeekday" value="5" class="text-indigo-600 rounded">
+              <span class="ml-1 text-slate-700 font-semibold">五</span>
+            </label>
+            <label class="inline-flex items-center p-1.5 border border-slate-200 rounded-lg bg-slate-50 cursor-pointer">
+              <input type="checkbox" name="recurWeekday" value="6" class="text-indigo-600 rounded">
+              <span class="ml-1 text-slate-700 font-semibold">六</span>
+            </label>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="block font-bold text-slate-700 mb-1">開始時間</label>
+            <input type="time" id="recurStartTime" value="09:30" class="w-full px-3 py-2 border border-slate-300 rounded-lg">
+          </div>
+          <div>
+            <label class="block font-bold text-slate-700 mb-1">結束時間</label>
+            <input type="time" id="recurEndTime" value="10:30" class="w-full px-3 py-2 border border-slate-300 rounded-lg">
+          </div>
+        </div>
+
+        <div class="pt-3 border-t border-slate-200 flex items-center justify-end space-x-2">
+          <button type="button" id="btnCancelRecur" class="px-4 py-2 border border-slate-300 rounded-lg text-slate-700 hover:bg-slate-50 font-medium transition">
+            取消
+          </button>
+          <button type="submit" id="btnExecuteRecur" class="px-5 py-2 bg-indigo-600 hover:bg-indigo-700 text-white font-medium rounded-lg shadow-sm transition">
+            <i class="fa-solid fa-wand-magic-sparkles mr-1.5"></i>批次生成跨年排班
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- MODAL: MICROSOFT TEAMS SETTINGS & NOTIFICATION AUDIT LOG -->
+  <div id="teamsConfigModal" class="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/50 backdrop-blur-xs hidden p-4">
+    <div class="bg-white rounded-2xl shadow-2xl max-w-xl w-full overflow-hidden border border-slate-200 transition-all flex flex-col max-h-[90vh]">
+      <div class="px-6 py-4 bg-gradient-to-r from-purple-700 to-indigo-700 text-white flex items-center justify-between">
+        <div class="flex items-center space-x-2">
+          <i class="fa-brands fa-microsoft text-xl"></i>
+          <div>
+            <h3 class="text-base font-bold">Microsoft Teams 異動通知設定與紀錄</h3>
+            <p class="text-[11px] text-purple-200">排班異動即時推播至 Teams 頻道及治療師私訊</p>
+          </div>
+        </div>
+        <button id="btnCloseTeamsConfigModal" class="text-white/80 hover:text-white rounded-lg p-1 hover:bg-white/10 transition">
+          <i class="fa-solid fa-xmark text-lg"></i>
+        </button>
+      </div>
+
+      <div class="p-6 space-y-4 overflow-y-auto text-xs flex-1">
+        <!-- Webhook configuration -->
+        <div class="bg-slate-50 border border-slate-200 rounded-xl p-3.5 space-y-2.5">
+          <div class="flex items-center justify-between">
+            <label class="font-bold text-slate-800 flex items-center">
+              <i class="fa-solid fa-link text-indigo-600 mr-1.5"></i>Teams 頻道 Incoming Webhook URL
+            </label>
+            <span class="text-[10px] text-slate-500 bg-white px-2 py-0.5 rounded border border-slate-200">支援 Power Automate / Webhook</span>
+          </div>
+          <input type="url" id="teamsWebhookInput" placeholder="https://outlook.office.com/webhook/... 或 Power Automate Webhook URL" class="w-full px-3 py-2 border border-slate-300 rounded-lg text-xs font-mono outline-none focus:ring-2 focus:ring-indigo-500 bg-white">
+          <p class="text-[11px] text-slate-500">
+            在 MS Teams 頻道的「連接器 (Connectors)」中新增 <strong>Incoming Webhook</strong> 或使用 <strong>Power Automate</strong> 流程，將 URL 貼在此處即可啟用即時推播。
+          </p>
+          <div class="flex items-center space-x-2 pt-1">
+            <button type="button" id="btnSaveTeamsWebhook" class="px-3 py-1.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg font-semibold transition">
+              儲存 Webhook
+            </button>
+            <button type="button" id="btnTestTeamsWebhook" class="px-3 py-1.5 bg-white hover:bg-slate-100 text-slate-700 border border-slate-300 rounded-lg font-semibold transition">
+              <i class="fa-solid fa-paper-plane mr-1 text-indigo-600"></i>測試發送卡片
+            </button>
+          </div>
+        </div>
+
+        <!-- Staff Teams Email Directory -->
+        <div class="border border-slate-200 rounded-xl p-3.5">
+          <div class="flex items-center justify-between mb-2">
+            <h4 class="font-bold text-slate-800 flex items-center">
+              <i class="fa-solid fa-address-book text-indigo-600 mr-1.5"></i>同事 Teams 電郵名冊 (點擊可直接密聊)
+            </h4>
+            <span class="text-[10px] text-slate-500">自動生成 Teams 密聊連結</span>
+          </div>
+          <div id="staffTeamsList" class="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs">
+            <!-- Dynamically populated -->
+          </div>
+        </div>
+
+        <!-- Notification History Log -->
+        <div class="border border-slate-200 rounded-xl p-3.5">
+          <div class="flex items-center justify-between mb-2">
+            <h4 class="font-bold text-slate-800 flex items-center">
+              <i class="fa-solid fa-clock-rotate-left text-indigo-600 mr-1.5"></i>近期異動通知發送紀錄 (Audit Trail)
+            </h4>
+            <button type="button" id="btnClearTeamsLogs" class="text-rose-600 hover:text-rose-700 text-[11px] font-semibold">
+              清除紀錄
+            </button>
+          </div>
+          <div id="teamsNotificationLogContainer" class="space-y-2 max-h-48 overflow-y-auto pr-1">
+            <!-- Dynamically populated logs -->
+          </div>
+        </div>
+      </div>
+
+      <div class="p-4 bg-slate-50 border-t border-slate-200 flex justify-end">
+        <button type="button" id="btnCloseTeamsConfigFooter" class="px-4 py-2 bg-slate-700 hover:bg-slate-800 text-white rounded-lg text-xs font-semibold transition">
+          關閉
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL: CUSTOM CONFIRMATION (REPLACES native confirm()) -->
+  <div id="confirmModal" class="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/50 backdrop-blur-xs hidden p-4">
+    <div class="bg-white rounded-2xl shadow-2xl max-w-sm w-full p-6 space-y-4 border border-slate-200">
+      <div class="flex items-center space-x-3 text-amber-600">
+        <i class="fa-solid fa-triangle-exclamation text-2xl"></i>
+        <h4 id="confirmModalTitle" class="text-base font-bold text-slate-900">請確認操作</h4>
+      </div>
+      <p id="confirmModalMessage" class="text-xs text-slate-600 leading-relaxed"></p>
+      <div class="flex justify-end space-x-2 pt-2">
+        <button id="btnConfirmCancel" class="px-3.5 py-1.5 rounded-lg border border-slate-300 text-slate-700 text-xs font-semibold hover:bg-slate-50 transition">取消</button>
+        <button id="btnConfirmOk" class="px-4 py-1.5 rounded-lg bg-rose-600 hover:bg-rose-700 text-white text-xs font-semibold shadow-xs transition">確認執行</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- FLOATING TOAST NOTIFICATION STACK -->
+  <div id="toastContainer" class="fixed bottom-4 right-4 z-50 flex flex-col space-y-2 pointer-events-none"></div>
+
+  <!-- APPLICATION SCRIPT LOGIC (MODULE INTEGRATED) -->
+  <script type="module">
+    // Firebase Web SDK Modules (v11)
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+    import { getAuth, signInAnonymously, signInWithCustomToken } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+    import { getFirestore, doc, collection, onSnapshot, setDoc, deleteDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
+    // Initial Seed Dataset extracted directly from MWC_Calendar202610.xlsx
+    const SEED_APPOINTMENTS_DATA = [
+      { id: "mwc-001", date: "2026-10-02", startTime: "09:30", endTime: "10:30", client: "何愛蘭", service: "PT+PTA (9 Sessions)", discipline: "PT", staff: "PTA 珊", section: "Section 9 Cancel", status: "cancelled", cancelReason: "原排班表標記取消", notes: "" },
+      { id: "mwc-002", date: "2026-10-02", startTime: "09:30", endTime: "10:15", client: "全興棠", service: "OTA (8 Sessions)", discipline: "OT", staff: "OTA Rebecca", section: "Section 9", status: "active", cancelReason: "", notes: "" },
+      { id: "mwc-003", date: "2026-10-02", startTime: "13:30", endTime: "14:15", client: "羅屏蘇", service: "ST (10 Sessions)", discipline: "ST", staff: "ST Kelvin", section: "Section 9", status: "active", cancelReason: "", notes: "" },
+      { id: "mwc-004", date: "2026-10-02", startTime: "15:30", endTime: "16:15", client: "黃婉霞", service: "ST (10 Sessions)", discipline: "ST", staff: "ST Kelvin", section: "Section 6", status: "active", cancelReason: "", notes: "" },
+      { id: "mwc-005", date: "2026-10-02", startTime: "14:00", endTime: "15:00", client: "鄧源", service: "PTA (8 Sessions)", discipline: "PT", staff: "PTA 珊", section: "Section 5", status: "active", cancelReason: "", notes: "" },
+      { id: "mwc-006", date: "2026-10-05", startTime: "09:30", endTime: "10:30", client: "石家璐", service: "PTA (8 Sessions)", discipline: "PT", staff: "PTA 珊", section: "Section 7", status: "active", cancelReason: "", notes: "" },
+      { id: "mwc-007", date: "2026-10-05", startTime: "15:00", endTime: "16:00", client: "陳碧玉", service: "PTA (8 Sessions)", discipline: "PT", staff: "PTA 珊", section: "Section 7", status: "active", cancelReason: "", notes: "" },
+      { id: "mwc-008", date: "2026-10-05", startTime: "16:00", endTime: "17:00", client: "連楚珠(8節)", service: "PTA (8 Sessions)", discipline: "PT", staff: "PTA 珊", section: "Section 7", status: "active", cancelReason: "", notes: "" },
+      { id: "mwc-009", date: "2026-10-05", startTime: "13:30", endTime: "14:30", client: "鄧源", service: "PTA (8 Sessions)", discipline: "PT", staff: "PTA 珊", section: "Section 6", status: "active", cancelReason: "", notes: "" },
+      { id: "mwc-010", date: "2026-10-06", startTime: "14:00", endTime: "14:45", client: "陳迎華(10節)", service: "ST (10 Sessions)", discipline: "ST", staff: "ST Tammy", section: "Section 2", status: "active", cancelReason: "", notes: "" },
+      { id: "mwc-011", date: "2026-10-06", startTime: "14:30", endTime: "15:30", client: "羅屏蘇", service: "OTA (8 Sessions)", discipline: "OT", staff: "OTA Rebecca", section: "Section 8", status: "active", cancelReason: "", notes: "" },
+      { id: "mwc-012", date: "2026-10-07", startTime: "09:45", endTime: "10:45", client: "繆馬松", service: "PTA (8 Sessions)", discipline: "PT", staff: "PTA B哥", section: "Section 8 Cancel", status: "cancelled", cancelReason: "原排班表標記取消", notes: "" },
+      { id: "mwc-013", date: "2026-10-07", startTime: "12:00", endTime: "13:00", client: "羅漢星", service: "PTA (8 Sessions)", discipline: "PT", staff: "PTA B哥", section: "Section 6 Cancel", status: "cancelled", cancelReason: "原排班表標記取消", notes: "" },
+      { id: "mwc-014", date: "2026-10-07", startTime: "13:30", endTime: "14:15", client: "羅屏蘇", service: "ST (10 Sessions)", discipline: "ST", staff: "ST Kelvin", section: "Section 10 Cancel", status: "cancelled", cancelReason: "原排班表標記取消", notes: "" },
+      { id: "mwc-015", date: "2026-10-07", startTime: "09:30", endTime: "10:30", client: "曾昭群", service: "PT+PTA (9 Sessions)", discipline: "PT", staff: "PT Sing + PTA 珊", section: "Section 1", status: "active", cancelReason: "", notes: "" },
+      { id: "mwc-016", date: "2026-10-07", startTime: "16:30", endTime: "17:30", client: "關黃兆平", service: "PT+PTA (9 Sessions)", discipline: "PT", staff: "PTA B哥", section: "Section 2 Cancel", status: "cancelled", cancelReason: "原排班表標記取消", notes: "" },
+      { id: "mwc-017", date: "2026-10-07", startTime: "09:30", endTime: "10:30", client: "吳淑媛", service: "OT+OTA (7 Sessions)", discipline: "OT", staff: "OT Ken", section: "Section 1", status: "active", cancelReason: "", notes: "" },
+      { id: "mwc-018", date: "2026-10-08", startTime: "14:30", endTime: "15:15", client: "周錦全", service: "ST (10 Sessions)", discipline: "ST", staff: "ST Tammy", section: "Section 3", status: "active", cancelReason: "", notes: "" },
+      { id: "mwc-019", date: "2026-10-08", startTime: "16:00", endTime: "17:00", client: "吳燦燊", service: "PTA (8 Sessions)", discipline: "PT", staff: "PTA 珊", section: "Section 4", status: "active", cancelReason: "", notes: "" },
+      { id: "mwc-020", date: "2026-10-08", startTime: "09:45", endTime: "10:45", client: "張明清", service: "PT+PTA (9 Sessions)", discipline: "PT", staff: "PTA 珊", section: "Section 1", status: "active", cancelReason: "", notes: "" },
+      { id: "mwc-021", date: "2026-10-09", startTime: "15:30", endTime: "16:15", client: "黃婉霞", service: "ST (10 Sessions)", discipline: "ST", staff: "ST Kelvin", section: "Section 7 Cancel", status: "cancelled", cancelReason: "原排班表標記取消", notes: "" },
+      { id: "mwc-022", date: "2026-10-09", startTime: "14:00", endTime: "15:00", client: "鄧源", service: "PTA (8 Sessions)", discipline: "PT", staff: "PTA 珊", section: "Section 7", status: "active", cancelReason: "", notes: "" },
+      { id: "mwc-023", date: "2026-10-09", startTime: "13:30", endTime: "14:15", client: "羅屏蘇", service: "ST (10 Sessions)", discipline: "ST", staff: "ST Kelvin", section: "Section 10 Cancel", status: "cancelled", cancelReason: "原排班表標記取消", notes: "" },
+      { id: "mwc-024", date: "2026-10-09", startTime: "09:30", endTime: "10:30", client: "何愛蘭", service: "PT+PTA (9 Sessions)", discipline: "PT", staff: "PTA 珊", section: "Section 9", status: "active", cancelReason: "", notes: "" },
+      { id: "mwc-025", date: "2026-10-10", startTime: "09:30", endTime: "10:30", client: "何愛蘭", service: "PTA (8 Sessions)", discipline: "PT", staff: "PTA 珊", section: "Section 1", status: "active", cancelReason: "", notes: "" },
+      { id: "mwc-026", date: "2026-10-12", startTime: "09:30", endTime: "10:30", client: "石家璐", service: "PTA (8 Sessions)", discipline: "PT", staff: "PTA 珊", section: "Section 8", status: "active", cancelReason: "", notes: "" },
+      { id: "mwc-027", date: "2026-10-12", startTime: "15:00", endTime: "16:00", client: "陳碧玉", service: "PTA (8 Sessions)", discipline: "PT", staff: "PTA 珊", section: "Section 8", status: "active", cancelReason: "", notes: "" },
+      { id: "mwc-028", date: "2026-10-12", startTime: "16:00", endTime: "17:00", client: "連楚珠(8節)", service: "PTA (8 Sessions)", discipline: "PT", staff: "PTA 珊", section: "Section 8", status: "active", cancelReason: "", notes: "" },
+      { id: "mwc-029", date: "2026-10-12", startTime: "13:30", endTime: "14:30", client: "鄧源", service: "PTA (8 Sessions)", discipline: "PT", staff: "PTA 珊", section: "Section 8", status: "active", cancelReason: "", notes: "" },
+      { id: "mwc-030", date: "2026-10-13", startTime: "14:00", endTime: "14:45", client: "陳迎華(10節)", service: "ST (10 Sessions)", discipline: "ST", staff: "ST Tammy", section: "Section 3", status: "active", cancelReason: "", notes: "" },
+      { id: "mwc-031", date: "2026-10-13", startTime: "14:30", endTime: "15:30", client: "羅屏蘇", service: "OTA (8 Sessions)", discipline: "OT", staff: "OTA Rebecca", section: "Section 1", status: "active", cancelReason: "", notes: "" },
+      { id: "mwc-032", date: "2026-10-14", startTime: "09:45", endTime: "10:45", client: "繆馬松", service: "PTA (8 Sessions)", discipline: "PT", staff: "PTA B哥", section: "Section 8", status: "active", cancelReason: "", notes: "" },
+      { id: "mwc-033", date: "2026-10-14", startTime: "12:00", endTime: "13:00", client: "羅漢星", service: "PTA (8 Sessions)", discipline: "PT", staff: "PTA B哥", section: "Section 7", status: "active", cancelReason: "", notes: "" },
+      { id: "mwc-034", date: "2026-10-14", startTime: "16:30", endTime: "17:30", client: "關黃兆平", service: "PT+PTA (9 Sessions)", discipline: "PT", staff: "PTA B哥", section: "Section 2", status: "active", cancelReason: "", notes: "" },
+      { id: "mwc-035", date: "2026-10-14", startTime: "13:30", endTime: "14:15", client: "羅屏蘇", service: "ST (10 Sessions)", discipline: "ST", staff: "ST Kelvin", section: "Section 1", status: "active", cancelReason: "", notes: "" },
+      { id: "mwc-036", date: "2026-10-15", startTime: "16:00", endTime: "17:00", client: "吳燦燊", service: "PTA (8 Sessions)", discipline: "PT", staff: "PTA 珊", section: "Section 5", status: "active", cancelReason: "", notes: "" },
+      { id: "mwc-037", date: "2026-10-15", startTime: "14:00", endTime: "15:00", client: "羅屏蘇", service: "PTA (8 Sessions)", discipline: "PT", staff: "PTA 珊", section: "Section 1", status: "active", cancelReason: "", notes: "" },
+      { id: "mwc-038", date: "2026-10-15", startTime: "09:45", endTime: "10:45", client: "張明清", service: "PT+PTA (9 Sessions)", discipline: "PT", staff: "PT Sing + PTA 珊", section: "Section 2", status: "active", cancelReason: "", notes: "" },
+      { id: "mwc-039", date: "2026-10-16", startTime: "15:30", endTime: "16:15", client: "黃婉霞", service: "ST (10 Sessions)", discipline: "ST", staff: "ST Kelvin", section: "Section 7 Cancel", status: "cancelled", cancelReason: "原排班表標記取消", notes: "" },
+      { id: "mwc-040", date: "2026-10-16", startTime: "09:30", endTime: "10:30", client: "何愛蘭", service: "PTA (8 Sessions)", discipline: "PT", staff: "PTA 珊", section: "Section 2", status: "active", cancelReason: "", notes: "" },
+      { id: "mwc-041", date: "2026-10-16", startTime: "14:00", endTime: "15:00", client: "鄧源", service: "PTA (8 Sessions)", discipline: "PT", staff: "PTA 珊", section: "Section 1", status: "active", cancelReason: "", notes: "" },
+      { id: "mwc-042", date: "2026-10-16", startTime: "13:30", endTime: "14:15", client: "羅屏蘇", service: "ST (10 Sessions)", discipline: "ST", staff: "ST Kelvin", section: "Section 2", status: "active", cancelReason: "", notes: "" },
+      { id: "mwc-043", date: "2026-10-20", startTime: "09:30", endTime: "10:30", client: "何愛蘭", service: "PTA (8 Sessions)", discipline: "PT", staff: "PTA 珊", section: "Section 3", status: "active", cancelReason: "", notes: "" },
+      { id: "mwc-044", date: "2026-10-20", startTime: "14:30", endTime: "15:30", client: "羅屏蘇", service: "OTA (8 Sessions)", discipline: "OT", staff: "OTA Rebecca", section: "Section 2", status: "active", cancelReason: "", notes: "" },
+      { id: "mwc-045", date: "2026-10-21", startTime: "09:45", endTime: "10:45", client: "繆馬松", service: "PT+PTA (9 Sessions)", discipline: "PT", staff: "PTA B哥", section: "Section 1", status: "active", cancelReason: "", notes: "" },
+      { id: "mwc-046", date: "2026-10-21", startTime: "12:00", endTime: "13:00", client: "羅漢星", service: "PTA (8 Sessions)", discipline: "PT", staff: "PTA B哥", section: "Section 8", status: "active", cancelReason: "", notes: "" },
+      { id: "mwc-047", date: "2026-10-21", startTime: "13:30", endTime: "14:15", client: "羅屏蘇", service: "ST (10 Sessions)", discipline: "ST", staff: "ST Kelvin", section: "Section 2", status: "active", cancelReason: "", notes: "" },
+      { id: "mwc-048", date: "2026-10-22", startTime: "14:30", endTime: "15:15", client: "周錦全", service: "ST (10 Sessions)", discipline: "ST", staff: "ST Tammy", section: "Section 4", status: "active", cancelReason: "", notes: "" },
+      { id: "mwc-049", date: "2026-10-22", startTime: "16:00", endTime: "17:00", client: "吳燦燊", service: "PTA (8 Sessions)", discipline: "PT", staff: "PTA 珊", section: "Section 6", status: "active", cancelReason: "", notes: "" },
+      { id: "mwc-050", date: "2026-10-22", startTime: "14:00", endTime: "15:00", client: "羅屏蘇", service: "PTA (8 Sessions)", discipline: "PT", staff: "PTA 珊", section: "Section 2", status: "active", cancelReason: "", notes: "" },
+      { id: "mwc-051", date: "2026-10-22", startTime: "09:45", endTime: "10:45", client: "張明清", service: "PT+PTA (9 Sessions)", discipline: "PT", staff: "PTA 珊", section: "Section 3", status: "active", cancelReason: "", notes: "" },
+      { id: "mwc-052", date: "2026-10-23", startTime: "15:30", endTime: "16:15", client: "黃婉霞", service: "ST (10 Sessions)", discipline: "ST", staff: "ST Kelvin", section: "Section 7", status: "active", cancelReason: "", notes: "" },
+      { id: "mwc-053", date: "2026-10-23", startTime: "14:00", endTime: "15:00", client: "鄧源", service: "PTA (8 Sessions)", discipline: "PT", staff: "PTA 珊", section: "Section 1", status: "active", cancelReason: "", notes: "" },
+      { id: "mwc-054", date: "2026-10-23", startTime: "13:30", endTime: "14:15", client: "羅屏蘇", service: "ST (10 Sessions)", discipline: "ST", staff: "ST Kelvin", section: "Section 3", status: "active", cancelReason: "", notes: "" },
+      { id: "mwc-055", date: "2026-10-24", startTime: "09:30", endTime: "10:30", client: "何愛蘭", service: "PTA (8 Sessions)", discipline: "PT", staff: "PTA 珊", section: "Section 4", status: "active", cancelReason: "", notes: "" },
+      { id: "mwc-056", date: "2026-10-27", startTime: "09:30", endTime: "10:30", client: "何愛蘭", service: "PTA (8 Sessions)", discipline: "PT", staff: "PTA 珊", section: "Section 5", status: "active", cancelReason: "", notes: "" },
+      { id: "mwc-057", date: "2026-10-27", startTime: "14:30", endTime: "15:30", client: "羅屏蘇", service: "OTA (8 Sessions)", discipline: "OT", staff: "OTA Rebecca", section: "Section 3", status: "active", cancelReason: "", notes: "" },
+      { id: "mwc-058", date: "2026-10-28", startTime: "09:45", endTime: "10:45", client: "繆馬松", service: "PTA (9 Sessions)", discipline: "PT", staff: "PTA B哥", section: "Section 2", status: "active", cancelReason: "", notes: "" },
+      { id: "mwc-059", date: "2026-10-28", startTime: "12:00", endTime: "13:00", client: "羅漢星", service: "PTA (8 Sessions)", discipline: "PT", staff: "PTA B哥", section: "Section 1", status: "active", cancelReason: "", notes: "" },
+      { id: "mwc-060", date: "2026-10-28", startTime: "09:30", endTime: "10:30", client: "吳淑媛", service: "OT+OTA (7 Sessions)", discipline: "OT", staff: "OTA Rebecca", section: "Section 2", status: "active", cancelReason: "", notes: "" },
+      { id: "mwc-061", date: "2026-10-28", startTime: "13:30", endTime: "14:15", client: "羅屏蘇", service: "ST (10 Sessions)", discipline: "ST", staff: "ST Kelvin", section: "Section 3", status: "active", cancelReason: "", notes: "" },
+      { id: "mwc-062", date: "2026-10-29", startTime: "14:30", endTime: "15:15", client: "周錦全", service: "ST (10 Sessions)", discipline: "ST", staff: "ST Tammy", section: "Section 5", status: "active", cancelReason: "", notes: "" },
+      { id: "mwc-063", date: "2026-10-29", startTime: "14:00", endTime: "15:00", client: "羅屏蘇", service: "PTA (8 Sessions)", discipline: "PT", staff: "PTA 珊", section: "Section 3", status: "active", cancelReason: "", notes: "" },
+      { id: "mwc-064", date: "2026-10-29", startTime: "09:45", endTime: "10:45", client: "張明清", service: "PT+PTA (9 Sessions)", discipline: "PT", staff: "PTA 珊", section: "Section 4", status: "active", cancelReason: "", notes: "" },
+      { id: "mwc-065", date: "2026-10-30", startTime: "15:30", endTime: "16:15", client: "黃婉霞", service: "ST (10 Sessions)", discipline: "ST", staff: "ST Kelvin", section: "Section 8", status: "active", cancelReason: "", notes: "" },
+      { id: "mwc-066", date: "2026-10-30", startTime: "13:30", endTime: "14:15", client: "羅屏蘇", service: "ST (10 Sessions)", discipline: "ST", staff: "ST Kelvin", section: "Section 5", status: "active", cancelReason: "", notes: "" },
+      { id: "mwc-067", date: "2026-11-03", startTime: "09:30", endTime: "10:30", client: "何愛蘭", service: "PTA (8 Sessions)", discipline: "PT", staff: "PTA 珊", section: "Section 6", status: "active", cancelReason: "", notes: "" },
+      { id: "mwc-068", date: "2026-11-03", startTime: "14:30", endTime: "15:30", client: "羅屏蘇", service: "OTA (8 Sessions)", discipline: "OT", staff: "OTA Rebecca", section: "Section 4", status: "active", cancelReason: "", notes: "" },
+      { id: "mwc-069", date: "2026-11-04", startTime: "09:45", endTime: "10:45", client: "繆馬松", service: "PTA (9 Sessions)", discipline: "PT", staff: "PTA B哥", section: "Section 3", status: "active", cancelReason: "", notes: "" },
+      { id: "mwc-070", date: "2026-11-04", startTime: "12:00", endTime: "13:00", client: "羅漢星", service: "PTA (8 Sessions)", discipline: "PT", staff: "PTA B哥", section: "Section 2", status: "active", cancelReason: "", notes: "" },
+      { id: "mwc-071", date: "2026-11-04", startTime: "09:30", endTime: "10:30", client: "吳淑媛", service: "OT+OTA (7 Sessions)", discipline: "OT", staff: "OTA Rebecca", section: "Section 3", status: "active", cancelReason: "", notes: "" },
+      { id: "mwc-072", date: "2026-11-04", startTime: "13:30", endTime: "14:15", client: "羅屏蘇", service: "ST (10 Sessions)", discipline: "ST", staff: "ST Kelvin", section: "Section 4", status: "active", cancelReason: "", notes: "" },
+      { id: "mwc-073", date: "2026-11-05", startTime: "09:45", endTime: "10:45", client: "張明清", service: "PT+PTA (9 Sessions)", discipline: "PT", staff: "PTA 珊", section: "Section 5", status: "active", cancelReason: "", notes: "" },
+      { id: "mwc-074", date: "2026-11-06", startTime: "15:30", endTime: "16:15", client: "黃婉霞", service: "ST (10 Sessions)", discipline: "ST", staff: "ST Kelvin", section: "Section 9", status: "active", cancelReason: "", notes: "" },
+      { id: "mwc-075", date: "2026-11-07", startTime: "09:30", endTime: "10:30", client: "何愛蘭", service: "PTA (8 Sessions)", discipline: "PT", staff: "PTA 珊", section: "Section 7", status: "active", cancelReason: "", notes: "" },
+      { id: "mwc-076", date: "2026-11-10", startTime: "09:30", endTime: "10:30", client: "何愛蘭", service: "PTA (8 Sessions)", discipline: "PT", staff: "PTA 珊", section: "Section 8", status: "active", cancelReason: "", notes: "" },
+      { id: "mwc-077", date: "2026-11-11", startTime: "09:45", endTime: "10:45", client: "繆馬松", service: "PTA (9 Sessions)", discipline: "PT", staff: "PTA B哥", section: "Section 4", status: "active", cancelReason: "", notes: "" },
+      { id: "mwc-078", date: "2026-11-11", startTime: "12:00", endTime: "13:00", client: "羅漢星", service: "PTA (8 Sessions)", discipline: "PT", staff: "PTA B哥", section: "Section 3", status: "active", cancelReason: "", notes: "" },
+      { id: "mwc-079", date: "2026-11-11", startTime: "09:30", endTime: "10:30", client: "吳淑媛", service: "OT+OTA (7 Sessions)", discipline: "OT", staff: "OTA Rebecca", section: "Section 4", status: "active", cancelReason: "", notes: "" },
+      { id: "mwc-080", date: "2026-11-12", startTime: "09:45", endTime: "10:45", client: "張明清", service: "PT+PTA (9 Sessions)", discipline: "PT", staff: "PTA 珊", section: "Section 6", status: "active", cancelReason: "", notes: "" },
+      { id: "mwc-081", date: "2026-11-13", startTime: "15:30", endTime: "16:15", client: "黃婉霞", service: "ST (10 Sessions)", discipline: "ST", staff: "ST Kelvin", section: "Section 10", status: "active", cancelReason: "", notes: "" },
+      { id: "mwc-082", date: "2026-11-17", startTime: "14:30", endTime: "15:30", client: "羅屏蘇", service: "OTA (8 Sessions)", discipline: "OT", staff: "OTA Rebecca", section: "Section 5", status: "active", cancelReason: "", notes: "" },
+      { id: "mwc-083", date: "2026-11-18", startTime: "09:45", endTime: "10:45", client: "繆馬松", service: "PTA (9 Sessions)", discipline: "PT", staff: "PTA B哥", section: "Section 5", status: "active", cancelReason: "", notes: "" },
+      { id: "mwc-084", date: "2026-11-18", startTime: "12:00", endTime: "13:00", client: "羅漢星", service: "PTA (8 Sessions)", discipline: "PT", staff: "PTA B哥", section: "Section 4", status: "active", cancelReason: "", notes: "" },
+      { id: "mwc-085", date: "2026-11-18", startTime: "09:30", endTime: "10:30", client: "吳淑媛", service: "OT+OTA (7 Sessions)", discipline: "OT", staff: "OTA Rebecca", section: "Section 5", status: "active", cancelReason: "", notes: "" },
+      { id: "mwc-086", date: "2026-11-19", startTime: "14:00", endTime: "15:00", client: "羅屏蘇", service: "PTA (8 Sessions)", discipline: "PT", staff: "PTA 珊", section: "Section 4", status: "active", cancelReason: "", notes: "" },
+      { id: "mwc-087", date: "2026-11-19", startTime: "09:45", endTime: "10:45", client: "張明清", service: "PT+PTA (9 Sessions)", discipline: "PT", staff: "PTA 珊", section: "Section 7", status: "active", cancelReason: "", notes: "" },
+      { id: "mwc-088", date: "2026-11-24", startTime: "14:30", endTime: "15:30", client: "羅屏蘇", service: "OTA (8 Sessions)", discipline: "OT", staff: "OTA Rebecca", section: "Section 6", status: "active", cancelReason: "", notes: "" },
+      { id: "mwc-089", date: "2026-11-25", startTime: "09:45", endTime: "10:45", client: "繆馬松", service: "PTA (9 Sessions)", discipline: "PT", staff: "PTA B哥", section: "Section 6", status: "active", cancelReason: "", notes: "" },
+      { id: "mwc-090", date: "2026-11-25", startTime: "12:00", endTime: "13:00", client: "羅漢星", service: "PTA (8 Sessions)", discipline: "PT", staff: "PTA B哥", section: "Section 5", status: "active", cancelReason: "", notes: "" },
+      { id: "mwc-091", date: "2026-11-25", startTime: "09:30", endTime: "10:30", client: "吳淑媛", service: "OT+OTA (7 Sessions)", discipline: "OT", staff: "OTA Rebecca", section: "Section 6", status: "active", cancelReason: "", notes: "" },
+      { id: "mwc-092", date: "2026-11-26", startTime: "14:00", endTime: "15:00", client: "羅屏蘇", service: "PTA (8 Sessions)", discipline: "PT", staff: "PTA 珊", section: "Section 5", status: "active", cancelReason: "", notes: "" },
+      { id: "mwc-093", date: "2026-11-26", startTime: "09:45", endTime: "10:45", client: "張明清", service: "PT+PTA (9 Sessions)", discipline: "PT", staff: "PTA 珊", section: "Section 8", status: "active", cancelReason: "", notes: "" },
+      { id: "mwc-094", date: "2026-12-01", startTime: "14:30", endTime: "15:30", client: "羅屏蘇", service: "OTA (8 Sessions)", discipline: "OT", staff: "OTA Rebecca", section: "Section 7", status: "active", cancelReason: "", notes: "" },
+      { id: "mwc-095", date: "2026-12-02", startTime: "09:45", endTime: "10:45", client: "繆馬松", service: "PTA (9 Sessions)", discipline: "PT", staff: "PTA B哥", section: "Section 7", status: "active", cancelReason: "", notes: "" },
+      { id: "mwc-096", date: "2026-12-02", startTime: "12:00", endTime: "13:00", client: "羅漢星", service: "PTA (8 Sessions)", discipline: "PT", staff: "PTA B哥", section: "Section 6", status: "active", cancelReason: "", notes: "" },
+      { id: "mwc-097", date: "2026-12-02", startTime: "09:30", endTime: "10:30", client: "吳淑媛", service: "OT+OTA (7 Sessions)", discipline: "OT", staff: "OTA Rebecca", section: "Section 7", status: "active", cancelReason: "", notes: "" },
+      { id: "mwc-098", date: "2026-12-03", startTime: "14:00", endTime: "15:00", client: "羅屏蘇", service: "PTA (8 Sessions)", discipline: "PT", staff: "PTA 珊", section: "Section 6", status: "active", cancelReason: "", notes: "" },
+      { id: "mwc-099", date: "2026-12-03", startTime: "09:45", endTime: "10:45", client: "張明清", service: "PT+PTA (9 Sessions)", discipline: "PT", staff: "PTA 珊", section: "Section 9", status: "active", cancelReason: "", notes: "" },
+      { id: "mwc-100", date: "2026-12-08", startTime: "14:30", endTime: "15:30", client: "羅屏蘇", service: "OTA (8 Sessions)", discipline: "OT", staff: "OTA Rebecca", section: "Section 8", status: "active", cancelReason: "", notes: "" },
+      { id: "mwc-101", date: "2026-12-09", startTime: "09:45", endTime: "10:45", client: "繆馬松", service: "PTA (9 Sessions)", discipline: "PT", staff: "PTA B哥", section: "Section 8", status: "active", cancelReason: "", notes: "" },
+      { id: "mwc-102", date: "2026-12-09", startTime: "12:00", endTime: "13:00", client: "羅漢星", service: "PTA (8 Sessions)", discipline: "PT", staff: "PTA B哥", section: "Section 7", status: "active", cancelReason: "", notes: "" },
+      { id: "mwc-103", date: "2026-12-10", startTime: "14:00", endTime: "15:00", client: "羅屏蘇", service: "PTA (8 Sessions)", discipline: "PT", staff: "PTA 珊", section: "Section 7", status: "active", cancelReason: "", notes: "" },
+      { id: "mwc-104", date: "2026-12-16", startTime: "09:45", endTime: "10:45", client: "繆馬松", service: "PTA (9 Sessions)", discipline: "PT", staff: "PTA B哥", section: "Section 9", status: "active", cancelReason: "", notes: "" },
+      { id: "mwc-105", date: "2026-12-16", startTime: "12:00", endTime: "13:00", client: "羅漢星", service: "PTA (8 Sessions)", discipline: "PT", staff: "PTA B哥", section: "Section 8", status: "active", cancelReason: "", notes: "" },
+      { id: "mwc-106", date: "2026-12-17", startTime: "14:00", endTime: "15:00", client: "羅屏蘇", service: "PTA (8 Sessions)", discipline: "PT", staff: "PTA 珊", section: "Section 8", status: "active", cancelReason: "", notes: "" },
+      // 2027 Cross-Year Continuous Rehabilitation Samples
+      { id: "mwc-2027-001", date: "2027-01-05", startTime: "09:30", endTime: "10:30", client: "何愛蘭", service: "PT+PTA (9 Sessions)", discipline: "PT", staff: "PTA 珊", section: "Section 1", status: "active", cancelReason: "", notes: "2027 跨年新療程開始" },
+      { id: "mwc-2027-002", date: "2027-01-06", startTime: "14:00", endTime: "15:00", client: "羅漢星", service: "PTA (8 Sessions)", discipline: "PT", staff: "PTA B哥", section: "Section 1", status: "active", cancelReason: "", notes: "" },
+      { id: "mwc-2027-003", date: "2027-01-07", startTime: "10:00", endTime: "11:00", client: "張明清", service: "PT+PTA (9 Sessions)", discipline: "PT", staff: "PTA 珊", section: "Section 1", status: "active", cancelReason: "", notes: "" },
+      { id: "mwc-2027-004", date: "2027-02-09", startTime: "09:30", endTime: "10:30", client: "何愛蘭", service: "PT+PTA (9 Sessions)", discipline: "PT", staff: "PTA 珊", section: "Section 5", status: "active", cancelReason: "", notes: "" },
+      { id: "mwc-2027-005", date: "2027-03-02", startTime: "14:30", endTime: "15:15", client: "周錦全", service: "ST (10 Sessions)", discipline: "ST", staff: "ST Tammy", section: "Section 1", status: "active", cancelReason: "", notes: "" }
+    ];
+
+    // Staff Microsoft Teams Email Directory
+    const DEFAULT_STAFF_EMAILS = {
+      'PTA 珊': 'shan.pta@mwc-rehab.hk',
+      'PTA B哥': 'bbrother.pta@mwc-rehab.hk',
+      'PT Sing': 'sing.pt@mwc-rehab.hk',
+      'ST Tammy': 'tammy.st@mwc-rehab.hk',
+      'ST Kelvin': 'kelvin.st@mwc-rehab.hk',
+      'OTA Rebecca': 'rebecca.ota@mwc-rehab.hk',
+      'OT Ken': 'ken.ot@mwc-rehab.hk'
+    };
+
+    // Central Application State
+    const state = {
+      currentRole: 'editor', // 'admin' | 'editor' | 'viewer'
+      currentDate: new Date(2026, 9, 2), // Default initial view: 2026-10-02
+      currentView: 'month', // 'month' | 'week' | 'table' | 'year'
+      appointments: [],
+      filterDiscipline: 'all',
+      filterStaff: 'all',
+      filterStatus: 'all',
+      searchQuery: '',
+      isFirebaseReady: false
+    };
+
+    // Keep reference to event before edit to detect time/date changes
+    let originalEditingEvent = null;
+
+    // Load initial local appointments
+    function loadLocalAppointments() {
+      try {
+        const raw = localStorage.getItem('mwc_appointments_data');
+        if (raw) {
+          const parsed = JSON.parse(raw);
+          if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+        }
+      } catch (e) {
+        console.warn('LocalStorage read error:', e);
+      }
+      return [...SEED_APPOINTMENTS_DATA];
+    }
+
+    function saveLocalAppointments(arr) {
+      state.appointments = arr;
+      localStorage.setItem('mwc_appointments_data', JSON.stringify(arr));
+    }
+
+    state.appointments = loadLocalAppointments();
+
+    // Microsoft Teams Integration Utilities
+    function getTeamsConfig() {
+      try {
+        const raw = localStorage.getItem('mwc_teams_config');
+        if (raw) return JSON.parse(raw);
+      } catch (e) {
+        console.warn('Teams config read error:', e);
+      }
+      return {
+        webhookUrl: '',
+        staffEmails: { ...DEFAULT_STAFF_EMAILS }
+      };
+    }
+
+    function saveTeamsConfig(cfg) {
+      localStorage.setItem('mwc_teams_config', JSON.stringify(cfg));
+    }
+
+    function getTeamsLogs() {
+      try {
+        const raw = localStorage.getItem('mwc_teams_logs');
+        if (raw) return JSON.parse(raw);
+      } catch (e) {
+        console.warn('Teams logs read error:', e);
+      }
+      return [];
+    }
+
+    function addTeamsLog(logItem) {
+      const logs = getTeamsLogs();
+      logs.unshift({
+        id: 'log-' + Date.now(),
+        timestamp: new Date().toLocaleString('zh-HK', { hour12: false }),
+        ...logItem
+      });
+      if (logs.length > 50) logs.length = 50;
+      localStorage.setItem('mwc_teams_logs', JSON.stringify(logs));
+      renderTeamsLogs();
+    }
+
+    function generateTeamsFormattedMessage(eventData, origData, changeType) {
+      const typeLabel = changeType === 'rescheduled' ? '⚠️【治療時間更改通知】' :
+                        changeType === 'cancelled' ? '🚫【治療排班取消通知】' :
+                        changeType === 'created' ? '✨【新增治療排班通知】' : '📝【治療排班資料更新】';
+
+      let timeDetails = `📅 **排班日期**：${eventData.date}\n⏰ **治療時間**：${eventData.startTime} - ${eventData.endTime}`;
+      if (changeType === 'rescheduled' && origData) {
+        timeDetails = `⏰ **原定時間**：~~${origData.date} ${origData.startTime}-${origData.endTime}~~\n👉 **更改為**：**${eventData.date} ${eventData.startTime}-${eventData.endTime}**`;
+      }
+
+      return `${typeLabel}
+院友姓名：**${eventData.client}**
+專職部別：**${eventData.discipline}** (${eventData.service})
+負責職員：**${eventData.staff}**
+節數進度：**${eventData.section}**
+${timeDetails}
+狀態：${eventData.status === 'cancelled' ? '🔴 已取消' : '🟢 正常排班'}
+${eventData.cancelReason ? `取消原因：${eventData.cancelReason}\n` : ''}${eventData.notes ? `臨床備註：${eventData.notes}\n` : ''}更新人員：${state.currentRole} (MWC 復康排班系統)
+時間：${new Date().toLocaleString('zh-HK', { hour12: false })}`;
+    }
+
+    function openTeamsDirectChat(targetEmail, prefilledMessage) {
+      if (!targetEmail) {
+        showToast('找不到該同事的 Teams 電郵地址', 'warning');
+        return;
+      }
+      const teamsUrl = `https://teams.microsoft.com/l/chat/0/0?users=${encodeURIComponent(targetEmail)}&message=${encodeURIComponent(prefilledMessage)}`;
+      window.open(teamsUrl, '_blank');
+      showToast(`正在開啟與 ${targetEmail} 的 Teams 私聊對話...`, 'info');
+    }
+
+    async function sendTeamsWebhookMessage(payload) {
+      const cfg = getTeamsConfig();
+      if (!cfg.webhookUrl || !cfg.webhookUrl.trim()) {
+        return false;
+      }
+
+      try {
+        const body = {
+          "@type": "MessageCard",
+          "@context": "http://schema.org/extensions",
+          "themeColor": payload.color || "0076D7",
+          "summary": payload.title,
+          "sections": [{
+            "activityTitle": payload.title,
+            "activitySubtitle": `發送者: MWC 復康治療排班系統 (${state.currentRole})`,
+            "activityImage": "https://cdn-icons-png.flaticon.com/512/3652/3652191.png",
+            "facts": payload.facts || [],
+            "markdown": true
+          }]
+        };
+
+        const res = await fetch(cfg.webhookUrl, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(body)
+        });
+
+        return res.ok;
+      } catch (err) {
+        console.warn('Teams Webhook 發送異常 (可能因跨域 CORS 或網絡隔離):', err);
+        return false;
+      }
+    }
+
+    let db = null;
+    let auth = null;
+    let appointmentsColRef = null;
+
+    async function initFirebaseServices() {
+      try {
+        if (typeof __firebase_config === 'undefined') {
+          console.info('Running in offline/single-session memory mode');
+          return;
+        }
+
+        const firebaseConfig = JSON.parse(__firebase_config);
+        const app = initializeApp(firebaseConfig);
+        db = getFirestore(app);
+        auth = getAuth(app);
+
+        if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
+          await signInWithCustomToken(auth, __initial_auth_token);
+        } else {
+          await signInAnonymously(auth);
+        }
+
+        const appId = typeof __app_id !== 'undefined' ? __app_id : 'mwc-rehab-app';
+        appointmentsColRef = collection(db, 'artifacts', appId, 'public', 'data', 'appointments');
+
+        state.isFirebaseReady = true;
+
+        onSnapshot(appointmentsColRef, (snapshot) => {
+          if (!snapshot.empty) {
+            const remoteList = [];
+            snapshot.forEach(docSnap => {
+              remoteList.push({ id: docSnap.id, ...docSnap.data() });
+            });
+            state.appointments = remoteList;
+            saveLocalAppointments(remoteList);
+          } else {
+            // Seed database if empty
+            SEED_APPOINTMENTS_DATA.forEach(item => {
+              setDoc(doc(appointmentsColRef, item.id), item).catch(console.error);
+            });
+          }
+          if (typeof renderCurrentView === 'function') {
+            renderCurrentView();
+          }
+        }, (err) => {
+          console.warn('Firestore snapshot listener warning:', err);
+        });
+
+      } catch (e) {
+        console.warn('Firebase initialisation fallback to localStorage:', e);
+      }
+    }
+
+    async function saveAppointmentRemote(item) {
+      if (state.isFirebaseReady && appointmentsColRef) {
+        await setDoc(doc(appointmentsColRef, item.id), item);
+      }
+      const existingIdx = state.appointments.findIndex(a => a.id === item.id);
+      if (existingIdx >= 0) {
+        state.appointments[existingIdx] = item;
+      } else {
+        state.appointments.push(item);
+      }
+      saveLocalAppointments(state.appointments);
+    }
+
+    async function deleteAppointmentRemote(id) {
+      if (state.isFirebaseReady && appointmentsColRef) {
+        await deleteDoc(doc(appointmentsColRef, id));
+      }
+      state.appointments = state.appointments.filter(a => a.id !== id);
+      saveLocalAppointments(state.appointments);
+    }
+
+    // DOM Elements
+    const roleSelector = document.getElementById('roleSelector');
+    const btnOpenNewModal = document.getElementById('btnOpenNewModal');
+    const btnOpenRecurModal = document.getElementById('btnOpenRecurModal');
+    const btnOpenTeamsConfig = document.getElementById('btnOpenTeamsConfig');
+    const teamsLogCountBadge = document.getElementById('teamsLogCountBadge');
+
+    const btnPrevYear = document.getElementById('btnPrevYear');
+    const btnPrevMonth = document.getElementById('btnPrevMonth');
+    const btnNextMonth = document.getElementById('btnNextMonth');
+    const btnNextYear = document.getElementById('btnNextYear');
+    const jumpYearSelect = document.getElementById('jumpYearSelect');
+    const jumpMonthSelect = document.getElementById('jumpMonthSelect');
+    const currentPeriodLabel = document.getElementById('currentPeriodLabel');
+    const btnJumpToOrigin = document.getElementById('btnJumpToOrigin');
+    const btnJumpToToday = document.getElementById('btnJumpToToday');
+
+    const tabMonth = document.getElementById('tabMonth');
+    const tabWeek = document.getElementById('tabWeek');
+    const tabTable = document.getElementById('tabTable');
+    const tabYear = document.getElementById('tabYear');
+    const viewMonth = document.getElementById('viewMonth');
+    const viewWeek = document.getElementById('viewWeek');
+    const viewTable = document.getElementById('viewTable');
+    const viewYear = document.getElementById('viewYear');
+
+    const searchInput = document.getElementById('searchInput');
+    const staffFilter = document.getElementById('staffFilter');
+    const statusFilter = document.getElementById('statusFilter');
+    const disciplineBtns = document.querySelectorAll('.discipline-filter-btn');
+
+    const monthGrid = document.getElementById('monthGrid');
+    const weekHeaderRow = document.getElementById('weekHeaderRow');
+    const weekTimelineBody = document.getElementById('weekTimelineBody');
+    const tableBody = document.getElementById('tableBody');
+    const tableEmptyState = document.getElementById('tableEmptyState');
+    const yearMonthsGrid = document.getElementById('yearMonthsGrid');
+    const yearMatrixTitle = document.getElementById('yearMatrixTitle');
+    const yearTotalCount = document.getElementById('yearTotalCount');
+
+    // Appointment Modal Elements
+    const appointmentModal = document.getElementById('appointmentModal');
+    const btnCloseModal = document.getElementById('btnCloseModal');
+    const btnCancelForm = document.getElementById('btnCancelForm');
+    const appointmentForm = document.getElementById('appointmentForm');
+    const modalTitle = document.getElementById('modalTitle');
+    const formEventId = document.getElementById('formEventId');
+    const formConflictNotice = document.getElementById('formConflictNotice');
+    const formConflictDetails = document.getElementById('formConflictDetails');
+    const teamsNoticeBox = document.getElementById('teamsNoticeBox');
+    const formSendTeamsNotify = document.getElementById('formSendTeamsNotify');
+    const teamsTimeDiffAlert = document.getElementById('teamsTimeDiffAlert');
+    const teamsTimeDiffDetails = document.getElementById('teamsTimeDiffDetails');
+    const btnDirectTeamsChat = document.getElementById('btnDirectTeamsChat');
+    const btnCopyTeamsText = document.getElementById('btnCopyTeamsText');
+    const formClientName = document.getElementById('formClientName');
+    const formDiscipline = document.getElementById('formDiscipline');
+    const formService = document.getElementById('formService');
+    const formStaff = document.getElementById('formStaff');
+    const formSection = document.getElementById('formSection');
+    const formDate = document.getElementById('formDate');
+    const formStartTime = document.getElementById('formStartTime');
+    const formEndTime = document.getElementById('formEndTime');
+    const cancelReasonContainer = document.getElementById('cancelReasonContainer');
+    const formCancelReason = document.getElementById('formCancelReason');
+    const formNotes = document.getElementById('formNotes');
+    const btnDeleteEvent = document.getElementById('btnDeleteEvent');
+    const btnSaveAppointment = document.getElementById('btnSaveAppointment');
+
+    // Recur Modal Elements
+    const recurModal = document.getElementById('recurModal');
+    const btnCloseRecurModal = document.getElementById('btnCloseRecurModal');
+    const btnCancelRecur = document.getElementById('btnCancelRecur');
+    const recurForm = document.getElementById('recurForm');
+    const recurClientName = document.getElementById('recurClientName');
+    const recurDiscipline = document.getElementById('recurDiscipline');
+    const recurStaff = document.getElementById('recurStaff');
+    const recurService = document.getElementById('recurService');
+    const recurTotalSessions = document.getElementById('recurTotalSessions');
+    const recurStartDate = document.getElementById('recurStartDate');
+    const recurEndDate = document.getElementById('recurEndDate');
+    const recurStartTime = document.getElementById('recurStartTime');
+    const recurEndTime = document.getElementById('recurEndTime');
+
+    // Teams Modal Elements
+    const teamsConfigModal = document.getElementById('teamsConfigModal');
+    const btnCloseTeamsConfigModal = document.getElementById('btnCloseTeamsConfigModal');
+    const btnCloseTeamsConfigFooter = document.getElementById('btnCloseTeamsConfigFooter');
+    const teamsWebhookInput = document.getElementById('teamsWebhookInput');
+    const btnSaveTeamsWebhook = document.getElementById('btnSaveTeamsWebhook');
+    const btnTestTeamsWebhook = document.getElementById('btnTestTeamsWebhook');
+    const staffTeamsList = document.getElementById('staffTeamsList');
+    const teamsNotificationLogContainer = document.getElementById('teamsNotificationLogContainer');
+    const btnClearTeamsLogs = document.getElementById('btnClearTeamsLogs');
+
+    // Custom Toast Notification System
+    function showToast(message, type = 'info') {
+      const container = document.getElementById('toastContainer');
+      const toast = document.createElement('div');
+      const iconMap = {
+        success: 'fa-circle-check text-emerald-500',
+        danger: 'fa-circle-xmark text-rose-500',
+        warning: 'fa-triangle-exclamation text-amber-500',
+        info: 'fa-circle-info text-sky-500'
+      };
+      toast.className = 'pointer-events-auto flex items-center space-x-2.5 px-4 py-3 rounded-xl bg-slate-900 text-white text-xs shadow-xl border border-slate-700 transition transform duration-200 translate-y-2 opacity-0 max-w-sm';
+      toast.innerHTML = `
+        <i class="fa-solid ${iconMap[type] || iconMap.info} text-base flex-shrink-0"></i>
+        <span class="flex-1">${message}</span>
+      `;
+      container.appendChild(toast);
+      requestAnimationFrame(() => {
+        toast.classList.remove('translate-y-2', 'opacity-0');
+      });
+      setTimeout(() => {
+        toast.classList.add('opacity-0', 'translate-y-2');
+        setTimeout(() => toast.remove(), 250);
+      }, 3500);
+    }
+
+    // Custom Modal Confirmation (Safe Replacement for native confirm())
+    function showConfirmModal(title, message) {
+      return new Promise((resolve) => {
+        const modal = document.getElementById('confirmModal');
+        document.getElementById('confirmModalTitle').textContent = title;
+        document.getElementById('confirmModalMessage').textContent = message;
+        modal.classList.remove('hidden');
+
+        const btnOk = document.getElementById('btnConfirmOk');
+        const btnCancel = document.getElementById('btnConfirmCancel');
+
+        const cleanup = (result) => {
+          modal.classList.add('hidden');
+          btnOk.removeEventListener('click', handleOk);
+          btnCancel.removeEventListener('click', handleCancel);
+          resolve(result);
+        };
+        const handleOk = () => cleanup(true);
+        const handleCancel = () => cleanup(false);
+
+        btnOk.addEventListener('click', handleOk);
+        btnCancel.addEventListener('click', handleCancel);
+      });
+    }
+
+    // Initialize Jump Year Selector (2024 to 2030+)
+    function initYearSelector() {
+      jumpYearSelect.innerHTML = '';
+      for (let y = 2024; y <= 2032; y++) {
+        const opt = document.createElement('option');
+        opt.value = y;
+        opt.textContent = `${y}年`;
+        jumpYearSelect.appendChild(opt);
+      }
+    }
+    initYearSelector();
+
+    function updateHeaderDates() {
+      const y = state.currentDate.getFullYear();
+      const m = state.currentDate.getMonth();
+      jumpYearSelect.value = y;
+      jumpMonthSelect.value = m;
+      currentPeriodLabel.textContent = `${y}年 ${m + 1}月`;
+    }
+
+    jumpYearSelect.addEventListener('change', () => {
+      state.currentDate.setFullYear(parseInt(jumpYearSelect.value, 10));
+      updateHeaderDates();
+      renderCurrentView();
+    });
+
+    jumpMonthSelect.addEventListener('change', () => {
+      state.currentDate.setMonth(parseInt(jumpMonthSelect.value, 10));
+      updateHeaderDates();
+      renderCurrentView();
+    });
+
+    btnPrevYear.addEventListener('click', () => {
+      state.currentDate.setFullYear(state.currentDate.getFullYear() - 1);
+      updateHeaderDates();
+      renderCurrentView();
+    });
+
+    btnNextYear.addEventListener('click', () => {
+      state.currentDate.setFullYear(state.currentDate.getFullYear() + 1);
+      updateHeaderDates();
+      renderCurrentView();
+    });
+
+    btnPrevMonth.addEventListener('click', () => {
+      state.currentDate.setMonth(state.currentDate.getMonth() - 1);
+      updateHeaderDates();
+      renderCurrentView();
+    });
+
+    btnNextMonth.addEventListener('click', () => {
+      state.currentDate.setMonth(state.currentDate.getMonth() + 1);
+      updateHeaderDates();
+      renderCurrentView();
+    });
+
+    btnJumpToOrigin.addEventListener('click', () => {
+      state.currentDate = new Date(2026, 9, 2);
+      updateHeaderDates();
+      renderCurrentView();
+      showToast('已回到 2026 年 10 月排班起點', 'info');
+    });
+
+    btnJumpToToday.addEventListener('click', () => {
+      state.currentDate = new Date();
+      updateHeaderDates();
+      renderCurrentView();
+    });
+
+    // Formatting date helpers
+    function formatDate(d) {
+      const year = d.getFullYear();
+      const month = String(d.getMonth() + 1).padStart(2, '0');
+      const day = String(d.getDate()).padStart(2, '0');
+      return `${year}-${month}-${day}`;
+    }
+
+    function getDisciplineStyle(disc, status) {
+      if (status === 'cancelled') {
+        return {
+          bg: 'bg-rose-50 border-rose-200 text-rose-800 line-through opacity-75',
+          badge: 'bg-rose-200 text-rose-800',
+          dot: 'bg-rose-500'
+        };
+      }
+      switch (disc) {
+        case 'PT':
+          return {
+            bg: 'bg-emerald-50/90 hover:bg-emerald-100 border-emerald-300 text-emerald-950',
+            badge: 'bg-emerald-600 text-white',
+            dot: 'bg-emerald-500'
+          };
+        case 'OT':
+          return {
+            bg: 'bg-orange-50/90 hover:bg-orange-100 border-orange-300 text-orange-950',
+            badge: 'bg-orange-600 text-white',
+            dot: 'bg-orange-500'
+          };
+        case 'ST':
+          return {
+            bg: 'bg-blue-50/90 hover:bg-blue-100 border-blue-300 text-blue-950',
+            badge: 'bg-blue-600 text-white',
+            dot: 'bg-blue-500'
+          };
+        default:
+          return {
+            bg: 'bg-slate-50 hover:bg-slate-100 border-slate-300 text-slate-800',
+            badge: 'bg-slate-500 text-white',
+            dot: 'bg-slate-400'
+          };
+      }
+    }
+
+    function filterAppointments(list) {
+      return list.filter(item => {
+        // Discipline filter
+        if (state.filterDiscipline !== 'all' && item.discipline !== state.filterDiscipline) {
+          return false;
+        }
+        // Staff filter
+        if (state.filterStaff !== 'all' && !item.staff.includes(state.filterStaff)) {
+          return false;
+        }
+        // Status filter
+        if (state.filterStatus === 'active' && item.status === 'cancelled') {
+          return false;
+        }
+        if (state.filterStatus === 'cancelled' && item.status !== 'cancelled') {
+          return false;
+        }
+        // Search query
+        if (state.searchQuery.trim()) {
+          const q = state.searchQuery.toLowerCase();
+          const matchClient = item.client && item.client.toLowerCase().includes(q);
+          const matchStaff = item.staff && item.staff.toLowerCase().includes(q);
+          const matchSection = item.section && item.section.toLowerCase().includes(q);
+          const matchService = item.service && item.service.toLowerCase().includes(q);
+          const matchNotes = item.notes && item.notes.toLowerCase().includes(q);
+          if (!matchClient && !matchStaff && !matchSection && !matchService && !matchNotes) {
+            return false;
+          }
+        }
+        return true;
+      });
+    }
+
+    function checkTherapistConflict(date, startTime, endTime, staff, excludeId = null) {
+      return state.appointments.filter(a => {
+        if (a.id === excludeId) return false;
+        if (a.date !== date) return false;
+        if (a.status === 'cancelled') return false;
+        if (a.staff !== staff) return false;
+        return (startTime < a.endTime && endTime > a.startTime);
+      });
+    }
+
+    // 1. RENDER MONTH VIEW
+    function renderMonthView() {
+      monthGrid.innerHTML = '';
+      const year = state.currentDate.getFullYear();
+      const month = state.currentDate.getMonth();
+
+      const firstDay = new Date(year, month, 1).getDay(); // 0 is Sunday
+      const daysInMonth = new Date(year, month + 1, 0).getDate();
+      const prevDaysCount = new Date(year, month, 0).getDate();
+
+      const filteredList = filterAppointments(state.appointments);
+
+      // Render leading days from previous month
+      for (let i = firstDay - 1; i >= 0; i--) {
+        const d = prevDaysCount - i;
+        const cell = document.createElement('div');
+        cell.className = 'min-h-[110px] p-1.5 bg-slate-50/50 text-slate-400 border-slate-100 flex flex-col justify-between';
+        cell.innerHTML = `<span class="text-[11px] font-semibold">${d}</span>`;
+        monthGrid.appendChild(cell);
+      }
+
+      // Render active month days
+      for (let day = 1; day <= daysInMonth; day++) {
+        const dObj = new Date(year, month, day);
+        const dateStr = formatDate(dObj);
+        const dayEvents = filteredList.filter(e => e.date === dateStr);
+
+        const isToday = formatDate(new Date()) === dateStr;
+        const isSelectedOrigin = dateStr === '2026-10-02';
+
+        const cell = document.createElement('div');
+        cell.className = `min-h-[120px] p-1.5 bg-white flex flex-col justify-between transition hover:bg-slate-50/80 cursor-pointer ${
+          isToday ? 'ring-2 ring-sky-500 z-10' : ''
+        } ${isSelectedOrigin ? 'bg-amber-50/30' : ''}`;
+
+        // Day header
+        const header = document.createElement('div');
+        header.className = 'flex items-center justify-between mb-1';
+        header.innerHTML = `
+          <span class="text-xs font-bold ${isToday ? 'text-sky-600 bg-sky-100 px-1.5 py-0.5 rounded-full' : 'text-slate-800'}">${day}</span>
+          ${dayEvents.length > 0 ? `<span class="text-[10px] text-slate-500 font-mono font-bold">${dayEvents.length} 節</span>` : ''}
+        `;
+        cell.appendChild(header);
+
+        // Day events list container
+        const eventsContainer = document.createElement('div');
+        eventsContainer.className = 'space-y-1 overflow-y-auto max-h-[105px] pr-0.5';
+
+        dayEvents.forEach(evt => {
+          const style = getDisciplineStyle(evt.discipline, evt.status);
+          const evtEl = document.createElement('div');
+          evtEl.className = `p-1 rounded-md border text-[11px] leading-tight transition shadow-2xs ${style.bg}`;
+          evtEl.innerHTML = `
+            <div class="flex items-center justify-between font-bold">
+              <span class="truncate">${evt.client}</span>
+              <span class="text-[9px] px-1 rounded ${style.badge}">${evt.discipline}</span>
+            </div>
+            <div class="text-[10px] text-slate-600 flex items-center justify-between mt-0.5">
+              <span>${evt.startTime}</span>
+              <span class="truncate text-[10px] text-slate-500 ml-1">${evt.staff}</span>
+            </div>
+            ${evt.status === 'cancelled' ? '<div class="text-[9px] text-rose-700 font-bold mt-0.5">已取消</div>' : ''}
+          `;
+
+          evtEl.onclick = (e) => {
+            e.stopPropagation();
+            openAppointmentModal(evt);
+          };
+          eventsContainer.appendChild(evtEl);
+        });
+
+        cell.appendChild(eventsContainer);
+
+        // Click cell to create new event on this date
+        cell.onclick = () => {
+          if (state.currentRole !== 'viewer') {
+            openAppointmentModal(null, dateStr);
+          }
+        };
+
+        monthGrid.appendChild(cell);
+      }
+
+      // Fill remaining cells for grid completeness
+      const totalCells = (firstDay + daysInMonth);
+      const remaining = totalCells % 7 === 0 ? 0 : 7 - (totalCells % 7);
+      for (let nextDay = 1; nextDay <= remaining; nextDay++) {
+        const cell = document.createElement('div');
+        cell.className = 'min-h-[110px] p-1.5 bg-slate-50/50 text-slate-400 border-slate-100 flex flex-col justify-between';
+        cell.innerHTML = `<span class="text-[11px] font-semibold">${nextDay}</span>`;
+        monthGrid.appendChild(cell);
+      }
+    }
+
+    // 2. RENDER WEEK TIMELINE VIEW
+    function renderWeekView() {
+      weekHeaderRow.innerHTML = '';
+      weekTimelineBody.innerHTML = '';
+
+      // Determine week start (Sunday)
+      const cur = new Date(state.currentDate);
+      const dayOfWeek = cur.getDay();
+      const startOfWeek = new Date(cur);
+      startOfWeek.setDate(cur.getDate() - dayOfWeek);
+
+      const weekDates = [];
+      for (let i = 0; i < 7; i++) {
+        const d = new Date(startOfWeek);
+        d.setDate(startOfWeek.getDate() + i);
+        weekDates.push(d);
+      }
+
+      // Column 1: Time label header
+      const timeHead = document.createElement('div');
+      timeHead.className = 'p-2 text-slate-400 font-medium';
+      timeHead.textContent = '時段';
+      weekHeaderRow.appendChild(timeHead);
+
+      const dayNames = ['日 (Sun)', '一 (Mon)', '二 (Tue)', '三 (Wed)', '四 (Thu)', '五 (Fri)', '六 (Sat)'];
+      weekDates.forEach((d, idx) => {
+        const dHead = document.createElement('div');
+        const isToday = formatDate(d) === formatDate(new Date());
+        dHead.className = `p-2 rounded-lg ${isToday ? 'bg-sky-50 text-sky-800 font-bold' : ''}`;
+        dHead.innerHTML = `
+          <div>${dayNames[idx]}</div>
+          <div class="text-[11px] text-slate-500 font-mono mt-0.5">${d.getMonth() + 1}/${d.getDate()}</div>
+        `;
+        weekHeaderRow.appendChild(dHead);
+      });
+
+      // Hourly slots from 09:00 to 17:00
+      const hours = ['09:00', '10:00', '11:00', '12:00', '13:00', '14:00', '15:00', '16:00', '17:00'];
+      const filteredList = filterAppointments(state.appointments);
+
+      hours.forEach(hourStr => {
+        const row = document.createElement('div');
+        row.className = 'grid grid-cols-8 min-h-[75px] py-1 border-t border-slate-100';
+
+        // Time Label
+        const timeCol = document.createElement('div');
+        timeCol.className = 'p-2 font-mono text-slate-400 font-bold text-[11px]';
+        timeCol.textContent = hourStr;
+        row.appendChild(timeCol);
+
+        // 7 Days
+        weekDates.forEach(d => {
+          const dateStr = formatDate(d);
+          const cell = document.createElement('div');
+          cell.className = 'p-1 border-l border-slate-100 space-y-1 hover:bg-slate-50/70 cursor-pointer';
+
+          const [h] = hourStr.split(':').map(Number);
+          const slotEvents = filteredList.filter(e => {
+            if (e.date !== dateStr) return false;
+            const [startH] = e.startTime.split(':').map(Number);
+            return startH === h;
+          });
+
+          slotEvents.forEach(evt => {
+            const style = getDisciplineStyle(evt.discipline, evt.status);
+            const block = document.createElement('div');
+            block.className = `p-1.5 rounded-lg border text-[11px] transition shadow-2xs ${style.bg}`;
+            block.innerHTML = `
+              <div class="font-bold flex items-center justify-between">
+                <span>${evt.client}</span>
+                <span class="text-[9px] px-1 rounded ${style.badge}">${evt.discipline}</span>
+              </div>
+              <div class="text-[10px] text-slate-600 mt-0.5">${evt.startTime}-${evt.endTime}</div>
+              <div class="text-[10px] text-slate-500 font-medium">${evt.staff}</div>
+            `;
+            block.onclick = (e) => {
+              e.stopPropagation();
+              openAppointmentModal(evt);
+            };
+            cell.appendChild(block);
+          });
+
+          cell.onclick = () => {
+            if (state.currentRole !== 'viewer') {
+              openAppointmentModal(null, dateStr);
+            }
+          };
+
+          row.appendChild(cell);
+        });
+
+        weekTimelineBody.appendChild(row);
+      });
+    }
+
+    // 3. RENDER EXCEL-STYLE REGISTER TABLE VIEW
+    function renderTableView() {
+      tableBody.innerHTML = '';
+      let list = filterAppointments(state.appointments);
+
+      // Sort by date and startTime ascending
+      list.sort((a, b) => {
+        if (a.date !== b.date) return a.date.localeCompare(b.date);
+        return a.startTime.localeCompare(b.startTime);
+      });
+
+      if (list.length === 0) {
+        tableEmptyState.classList.remove('hidden');
+        return;
+      }
+      tableEmptyState.classList.add('hidden');
+
+      const weekDaysZh = ['日', '一', '二', '三', '四', '五', '六'];
+
+      list.forEach(evt => {
+        const d = new Date(evt.date);
+        const dayName = weekDaysZh[d.getDay()] || '';
+        const style = getDisciplineStyle(evt.discipline, evt.status);
+        const isCancelled = evt.status === 'cancelled';
+
+        const tr = document.createElement('tr');
+        tr.className = `hover:bg-slate-50/80 transition ${isCancelled ? 'bg-rose-50/20 text-slate-500' : ''}`;
+        tr.innerHTML = `
+          <td class="py-2.5 px-4 font-mono font-semibold">${evt.date}</td>
+          <td class="py-2.5 px-3">星期${dayName}</td>
+          <td class="py-2.5 px-3 font-mono font-bold ${isCancelled ? 'line-through' : 'text-slate-800'}">${evt.startTime} - ${evt.endTime}</td>
+          <td class="py-2.5 px-4 font-bold text-slate-900">${evt.client}</td>
+          <td class="py-2.5 px-3"><span class="px-2 py-0.5 rounded text-[10px] font-bold ${style.badge}">${evt.discipline}</span></td>
+          <td class="py-2.5 px-4 text-slate-600">${evt.service || '-'}</td>
+          <td class="py-2.5 px-3 text-slate-700 font-mono">${evt.section || '-'}</td>
+          <td class="py-2.5 px-4 font-semibold text-slate-800">${evt.staff}</td>
+          <td class="py-2.5 px-3">
+            ${isCancelled 
+              ? `<span class="px-2 py-0.5 bg-rose-100 text-rose-800 rounded text-[10px] font-bold" title="${evt.cancelReason || '已取消'}">已取消</span>`
+              : `<span class="px-2 py-0.5 bg-emerald-100 text-emerald-800 rounded text-[10px] font-bold">排班正常</span>`
+            }
+          </td>
+          <td class="py-2.5 px-4 text-right no-print">
+            <button class="btn-table-edit px-2.5 py-1 text-sky-600 hover:text-sky-800 font-semibold text-xs transition">
+              <i class="fa-regular fa-pen-to-square mr-1"></i>編輯
+            </button>
+          </td>
+        `;
+
+        tr.querySelector('.btn-table-edit').onclick = () => openAppointmentModal(evt);
+        tableBody.appendChild(tr);
+      });
+    }
+
+    // 4. RENDER ANNUAL 12-MONTH MATRIX VIEW
+    function renderYearView() {
+      yearMonthsGrid.innerHTML = '';
+      const year = state.currentDate.getFullYear();
+      yearMatrixTitle.textContent = `${year} 全年度復康治療排班矩陣`;
+
+      const yearEvents = state.appointments.filter(a => {
+        if (!a.date) return false;
+        return new Date(a.date).getFullYear() === year;
+      });
+
+      yearTotalCount.textContent = yearEvents.length;
+
+      const monthNames = ['1月 (Jan)', '2月 (Feb)', '3月 (Mar)', '4月 (Apr)', '5月 (May)', '6月 (Jun)',
+                          '7月 (Jul)', '8月 (Aug)', '9月 (Sep)', '10月 (Oct)', '11月 (Nov)', '12月 (Dec)'];
+
+      for (let m = 0; m < 12; m++) {
+        const mEvents = yearEvents.filter(a => new Date(a.date).getMonth() === m);
+        const ptCount = mEvents.filter(e => e.discipline === 'PT' && e.status !== 'cancelled').length;
+        const otCount = mEvents.filter(e => e.discipline === 'OT' && e.status !== 'cancelled').length;
+        const stCount = mEvents.filter(e => e.discipline === 'ST' && e.status !== 'cancelled').length;
+        const cancelCount = mEvents.filter(e => e.status === 'cancelled').length;
+
+        const card = document.createElement('div');
+        card.className = 'border border-slate-200 rounded-xl p-3 bg-slate-50/50 hover:bg-white hover:border-sky-300 hover:shadow-md transition cursor-pointer flex flex-col justify-between';
+        card.innerHTML = `
+          <div>
+            <div class="flex items-center justify-between border-b border-slate-200 pb-2 mb-2">
+              <span class="font-bold text-slate-800 text-sm">${monthNames[m]}</span>
+              <span class="text-xs font-mono font-bold ${mEvents.length > 0 ? 'text-indigo-600 bg-indigo-50 px-2 py-0.5 rounded-full' : 'text-slate-400'}">${mEvents.length} 節</span>
+            </div>
+            <div class="grid grid-cols-2 gap-1.5 text-[11px] text-slate-600">
+              <div class="flex items-center space-x-1.5"><span class="w-2 h-2 rounded-full bg-emerald-500"></span><span>PT: <strong>${ptCount}</strong></span></div>
+              <div class="flex items-center space-x-1.5"><span class="w-2 h-2 rounded-full bg-orange-500"></span><span>OT: <strong>${otCount}</strong></span></div>
+              <div class="flex items-center space-x-1.5"><span class="w-2 h-2 rounded-full bg-blue-500"></span><span>ST: <strong>${stCount}</strong></span></div>
+              <div class="flex items-center space-x-1.5"><span class="w-2 h-2 rounded-full bg-rose-500"></span><span>取消: <strong>${cancelCount}</strong></span></div>
+            </div>
+          </div>
+          <div class="mt-3 text-right">
+            <span class="text-[10px] font-semibold text-sky-600 hover:text-sky-800 inline-flex items-center">
+              開啟月排班 <i class="fa-solid fa-arrow-right ml-1"></i>
+            </span>
+          </div>
+        `;
+
+        card.onclick = () => {
+          state.currentDate = new Date(year, m, 1);
+          updateHeaderDates();
+          switchView('month');
+        };
+
+        yearMonthsGrid.appendChild(card);
+      }
+    }
+
+    function switchView(viewName) {
+      state.currentView = viewName;
+      document.querySelectorAll('.view-tab').forEach(b => {
+        b.classList.remove('bg-white', 'shadow-2xs', 'text-sky-700', 'font-semibold');
+        b.classList.add('text-slate-600');
+      });
+
+      document.querySelectorAll('.view-content').forEach(c => c.classList.add('hidden'));
+
+      if (viewName === 'month') {
+        tabMonth.classList.add('bg-white', 'shadow-2xs', 'text-sky-700', 'font-semibold');
+        viewMonth.classList.remove('hidden');
+        renderMonthView();
+      } else if (viewName === 'week') {
+        tabWeek.classList.add('bg-white', 'shadow-2xs', 'text-sky-700', 'font-semibold');
+        viewWeek.classList.remove('hidden');
+        renderWeekView();
+      } else if (viewName === 'table') {
+        tabTable.classList.add('bg-white', 'shadow-2xs', 'text-sky-700', 'font-semibold');
+        viewTable.classList.remove('hidden');
+        renderTableView();
+      } else if (viewName === 'year') {
+        tabYear.classList.add('bg-white', 'shadow-2xs', 'text-sky-700', 'font-semibold');
+        viewYear.classList.remove('hidden');
+        renderYearView();
+      }
+    }
+
+    function renderCurrentView() {
+      if (state.currentView === 'month') renderMonthView();
+      else if (state.currentView === 'week') renderWeekView();
+      else if (state.currentView === 'table') renderTableView();
+      else if (state.currentView === 'year') renderYearView();
+    }
+
+    tabMonth.onclick = () => switchView('month');
+    tabWeek.onclick = () => switchView('week');
+    tabTable.onclick = () => switchView('table');
+    tabYear.onclick = () => switchView('year');
+
+    // Open Appointment Modal & Time Diff Detection
+    function checkFormTimeDiff() {
+      if (!originalEditingEvent) {
+        teamsTimeDiffAlert.classList.add('hidden');
+        return;
+      }
+
+      const newDate = formDate.value;
+      const newStart = formStartTime.value;
+      const newEnd = formEndTime.value;
+      const isDateChanged = newDate !== originalEditingEvent.date;
+      const isTimeChanged = newStart !== originalEditingEvent.startTime || newEnd !== originalEditingEvent.endTime;
+
+      if (isDateChanged || isTimeChanged) {
+        teamsTimeDiffAlert.classList.remove('hidden');
+        teamsTimeDiffDetails.innerHTML = `
+          <div>原定：<span class="line-through text-slate-500">${originalEditingEvent.date} ${originalEditingEvent.startTime}-${originalEditingEvent.endTime}</span></div>
+          <div class="text-rose-700 font-bold">更改為：${newDate} ${newStart}-${newEnd}</div>
+        `;
+      } else {
+        teamsTimeDiffAlert.classList.add('hidden');
+      }
+    }
+
+    formDate.addEventListener('change', checkFormTimeDiff);
+    formStartTime.addEventListener('change', checkFormTimeDiff);
+    formEndTime.addEventListener('change', checkFormTimeDiff);
+
+    function openAppointmentModal(appointment = null, defaultDate = null) {
+      if (state.currentRole === 'viewer') {
+        showToast('查閱者唯讀權限無法新增或編輯排班', 'warning');
+        return;
+      }
+
+      appointmentForm.reset();
+      formConflictNotice.classList.add('hidden');
+      teamsTimeDiffAlert.classList.add('hidden');
+
+      if (appointment) {
+        originalEditingEvent = JSON.parse(JSON.stringify(appointment));
+        formEventId.value = appointment.id;
+        modalTitle.textContent = `編輯治療排班 - ${appointment.client}`;
+        formClientName.value = appointment.client || '';
+        formDate.value = appointment.date || '';
+        formDiscipline.value = appointment.discipline || 'PT';
+        formService.value = appointment.service || 'PTA (8 Sessions)';
+        formStaff.value = appointment.staff || 'PTA 珊';
+        formSection.value = appointment.section || 'Section 1';
+        formStartTime.value = appointment.startTime || '09:30';
+        formEndTime.value = appointment.endTime || '10:30';
+        formNotes.value = appointment.notes || '';
+
+        if (appointment.status === 'cancelled') {
+          document.querySelector('input[name="formStatusRadio"][value="cancelled"]').checked = true;
+          cancelReasonContainer.classList.remove('hidden');
+          formCancelReason.value = appointment.cancelReason || '';
+        } else {
+          document.querySelector('input[name="formStatusRadio"][value="active"]').checked = true;
+          cancelReasonContainer.classList.add('hidden');
+          formCancelReason.value = '';
+        }
+
+        btnDeleteEvent.classList.remove('hidden');
+        btnSaveAppointment.textContent = '儲存排班變更';
+        btnDirectTeamsChat.classList.remove('hidden');
+      } else {
+        originalEditingEvent = null;
+        formEventId.value = '';
+        modalTitle.textContent = '新增治療排班';
+        formDate.value = defaultDate || formatDate(state.currentDate);
+        formDiscipline.value = 'PT';
+        formService.value = 'PTA (8 Sessions)';
+        formStaff.value = 'PTA 珊';
+        formSection.value = 'Section 1';
+        formStartTime.value = '09:30';
+        formEndTime.value = '10:30';
+        formNotes.value = '';
+        document.querySelector('input[name="formStatusRadio"][value="active"]').checked = true;
+        cancelReasonContainer.classList.add('hidden');
+        formCancelReason.value = '';
+        btnDeleteEvent.classList.add('hidden');
+        btnSaveAppointment.textContent = '新增排班';
+      }
+
+      appointmentModal.classList.remove('hidden');
+    }
+
+    function closeAppointmentModal() {
+      appointmentModal.classList.add('hidden');
+      originalEditingEvent = null;
+    }
+
+    btnCloseModal.onclick = closeAppointmentModal;
+    btnCancelForm.onclick = closeAppointmentModal;
+
+    // Toggle cancel reason input
+    document.querySelectorAll('input[name="formStatusRadio"]').forEach(r => {
+      r.addEventListener('change', () => {
+        if (r.value === 'cancelled') {
+          cancelReasonContainer.classList.remove('hidden');
+        } else {
+          cancelReasonContainer.classList.add('hidden');
+        }
+      });
+    });
+
+    // Handle Appointment Form Submit
+    appointmentForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+
+      if (state.currentRole === 'viewer') {
+        showToast('唯讀權限無法儲存', 'warning');
+        return;
+      }
+
+      const id = formEventId.value;
+      const client = formClientName.value.trim();
+      const discipline = formDiscipline.value;
+      const service = formService.value.trim();
+      const staff = formStaff.value;
+      const section = formSection.value.trim();
+      const date = formDate.value;
+      const startTime = formStartTime.value;
+      const endTime = formEndTime.value;
+      const status = document.querySelector('input[name="formStatusRadio"]:checked').value;
+      const cancelReason = formCancelReason.value.trim();
+      const notes = formNotes.value.trim();
+
+      if (startTime >= endTime) {
+        showToast('結束時間必須晚於開始時間', 'warning');
+        return;
+      }
+
+      // Check conflict
+      if (status !== 'cancelled') {
+        const conflicts = checkTherapistConflict(date, startTime, endTime, staff, id);
+        if (conflicts.length > 0) {
+          const cNames = conflicts.map(c => `${c.client} (${c.startTime}-${c.endTime})`).join(', ');
+          formConflictDetails.textContent = `職員 ${staff} 於同一時段已有其他治療安排：${cNames}`;
+          formConflictNotice.classList.remove('hidden');
+          const proceed = await showConfirmModal('排班衝突提示', `職員 ${staff} 在此時段已有其他個案排班 (${cNames})，確定仍要安排重疊時間嗎？`);
+          if (!proceed) return;
+        }
+      }
+
+      const isCancelled = status === 'cancelled';
+      let changeType = 'created';
+      let changeTitle = `新增治療排班 - ${client}`;
+      let isTimeOrDateChanged = false;
+
+      if (id && originalEditingEvent) {
+        const isDateChanged = originalEditingEvent.date !== date;
+        const isTimeChanged = originalEditingEvent.startTime !== startTime || originalEditingEvent.endTime !== endTime;
+        isTimeOrDateChanged = isDateChanged || isTimeChanged;
+
+        if (isCancelled && originalEditingEvent.status !== 'cancelled') {
+          changeType = 'cancelled';
+          changeTitle = `治療排班取消 - ${client}`;
+        } else if (isTimeOrDateChanged) {
+          changeType = 'rescheduled';
+          changeTitle = `治療時間更改 - ${client}`;
+        } else {
+          changeType = 'updated';
+          changeTitle = `治療排班更新 - ${client}`;
+        }
+      }
+
+      const eventData = {
+        id: id || ('mwc-' + Date.now()),
+        date,
+        startTime,
+        endTime,
+        client,
+        discipline,
+        service,
+        staff,
+        section,
+        status,
+        cancelReason: isCancelled ? cancelReason : '',
+        notes,
+        updatedBy: state.currentRole,
+        updatedAt: new Date().toISOString()
+      };
+
+      try {
+        await saveAppointmentRemote(eventData);
+
+        // Microsoft Teams Notification Trigger
+        if (formSendTeamsNotify.checked) {
+          let summaryDesc = `${date} ${startTime}-${endTime} · ${staff} (${discipline})`;
+          if (changeType === 'rescheduled' && originalEditingEvent) {
+            summaryDesc = `原：${originalEditingEvent.date} ${originalEditingEvent.startTime}-${originalEditingEvent.endTime} ➔ 更改為：${date} ${startTime}-${endTime}`;
+          } else if (changeType === 'cancelled') {
+            summaryDesc = `已取消原定 ${date} ${startTime}-${endTime} 治療 (${cancelReason || '無原因'})`;
+          }
+
+          const facts = [
+            { name: "個案姓名", value: client },
+            { name: "負責職員", value: staff },
+            { name: "專職類別", value: `${discipline} (${service})` },
+            { name: "節數進度", value: section }
+          ];
+
+          if (changeType === 'rescheduled' && originalEditingEvent) {
+            facts.push({ name: "原定時段", value: `~~${originalEditingEvent.date} ${originalEditingEvent.startTime}-${originalEditingEvent.endTime}~~` });
+            facts.push({ name: "最新調動時段", value: `**${date} ${startTime}-${endTime}**` });
+          } else {
+            facts.push({ name: "排班時段", value: `${date} ${startTime}-${endTime}` });
+          }
+
+          if (isCancelled) facts.push({ name: "取消原因", value: cancelReason || "未註明" });
+          if (notes) facts.push({ name: "臨床備註", value: notes });
+          facts.push({ name: "操作人員", value: `${state.currentRole} (公家日曆)` });
+
+          const channelSent = await sendTeamsWebhookMessage({
+            title: `🔔 [MWC 復康排班] ${changeTitle}`,
+            color: changeType === 'rescheduled' ? 'D97706' : changeType === 'cancelled' ? 'DC2626' : '0284C7',
+            facts
+          });
+
+          addTeamsLog({
+            type: changeType,
+            title: changeTitle,
+            summary: summaryDesc,
+            staff,
+            user: state.currentRole,
+            channelSent
+          });
+
+          if (channelSent) {
+            showToast(`已發送異動通知至 Teams 頻道！`, 'success');
+          } else if (changeType === 'rescheduled') {
+            showToast(`時間更改已儲存！可點擊 Teams 按鈕密聊通知 ${staff}`, 'info');
+          }
+        }
+
+        closeAppointmentModal();
+        renderCurrentView();
+        showToast(id ? '排班資料已更新' : '已成功新增排班', 'success');
+      } catch (err) {
+        console.error('Save error:', err);
+        showToast('儲存失敗，請重試', 'danger');
+      }
+    });
+
+    // Delete Event
+    btnDeleteEvent.addEventListener('click', async () => {
+      const id = formEventId.value;
+      if (!id) return;
+
+      const confirmed = await showConfirmModal('刪除排班記錄', '確定要永久刪除此節排班記錄嗎？此動作無法復原。');
+      if (confirmed) {
+        await deleteAppointmentRemote(id);
+        closeAppointmentModal();
+        renderCurrentView();
+        showToast('已刪除該排班記錄', 'info');
+      }
+    });
+
+    btnDirectTeamsChat.addEventListener('click', () => {
+      const staffName = formStaff.value;
+      const cfg = getTeamsConfig();
+      const email = cfg.staffEmails[staffName] || DEFAULT_STAFF_EMAILS[staffName];
+
+      const currentData = {
+        client: formClientName.value || '院友',
+        service: formService.value,
+        discipline: formDiscipline.value,
+        staff: staffName,
+        section: formSection.value,
+        date: formDate.value,
+        startTime: formStartTime.value,
+        endTime: formEndTime.value,
+        status: document.querySelector('input[name="formStatusRadio"]:checked').value,
+        cancelReason: formCancelReason.value,
+        notes: formNotes.value
+      };
+
+      const changeType = originalEditingEvent && 
+        (originalEditingEvent.date !== currentData.date || originalEditingEvent.startTime !== currentData.startTime) 
+        ? 'rescheduled' : 'update';
+
+      const msg = generateTeamsFormattedMessage(currentData, originalEditingEvent, changeType);
+      openTeamsDirectChat(email, msg);
+    });
+
+    btnCopyTeamsText.addEventListener('click', () => {
+      const currentData = {
+        client: formClientName.value || '院友',
+        service: formService.value,
+        discipline: formDiscipline.value,
+        staff: formStaff.value,
+        section: formSection.value,
+        date: formDate.value,
+        startTime: formStartTime.value,
+        endTime: formEndTime.value,
+        status: document.querySelector('input[name="formStatusRadio"]:checked').value,
+        cancelReason: formCancelReason.value,
+        notes: formNotes.value
+      };
+
+      const changeType = originalEditingEvent && 
+        (originalEditingEvent.date !== currentData.date || originalEditingEvent.startTime !== currentData.startTime) 
+        ? 'rescheduled' : 'update';
+
+      const text = generateTeamsFormattedMessage(currentData, originalEditingEvent, changeType);
+
+      // Safe clipboard copy using document.execCommand
+      const tempTextArea = document.createElement('textarea');
+      tempTextArea.value = text;
+      tempTextArea.style.position = 'fixed';
+      tempTextArea.style.opacity = '0';
+      document.body.appendChild(tempTextArea);
+      tempTextArea.focus();
+      tempTextArea.select();
+      try {
+        document.execCommand('copy');
+        showToast('已複製 Teams 異動公告格式文字！可直接貼上 Teams 群組', 'success');
+      } catch (e) {
+        showToast('複製失敗，請手動複製', 'danger');
+      }
+      document.body.removeChild(tempTextArea);
+    });
+
+    function renderStaffTeamsDirectory() {
+      const cfg = getTeamsConfig();
+      staffTeamsList.innerHTML = '';
+
+      Object.entries(cfg.staffEmails).forEach(([staffName, email]) => {
+        const row = document.createElement('div');
+        row.className = 'flex items-center justify-between p-2 rounded-lg bg-slate-50 border border-slate-200';
+        row.innerHTML = `
+          <div>
+            <span class="font-bold text-slate-800">${staffName}</span>
+            <div class="text-[10px] text-slate-500 font-mono">${email}</div>
+          </div>
+          <button type="button" class="px-2 py-1 bg-white hover:bg-purple-50 text-purple-700 border border-purple-200 rounded text-[11px] font-semibold transition flex items-center shadow-2xs">
+            <i class="fa-brands fa-microsoft mr-1 text-purple-600"></i>密聊
+          </button>
+        `;
+
+        row.querySelector('button').onclick = () => {
+          openTeamsDirectChat(email, `【MWC 復康排班查詢】同事好，想與您確認近期治療排班事宜。`);
+        };
+
+        staffTeamsList.appendChild(row);
+      });
+    }
+
+    function renderTeamsLogs() {
+      const logs = getTeamsLogs();
+      if (teamsLogCountBadge) {
+        if (logs.length > 0) {
+          teamsLogCountBadge.textContent = logs.length;
+          teamsLogCountBadge.classList.remove('hidden');
+        } else {
+          teamsLogCountBadge.classList.add('hidden');
+        }
+      }
+
+      teamsNotificationLogContainer.innerHTML = '';
+      if (logs.length === 0) {
+        teamsNotificationLogContainer.innerHTML = `
+          <div class="text-center py-4 text-slate-400 text-xs">
+            <i class="fa-regular fa-bell-slash text-base mb-1"></i>
+            <p>暫無異動通知紀錄</p>
+          </div>
+        `;
+        return;
+      }
+
+      logs.forEach(log => {
+        const item = document.createElement('div');
+        const isTimeChange = log.type === 'rescheduled';
+        const isCancel = log.type === 'cancelled';
+
+        item.className = `p-2 rounded-lg border text-xs ${
+          isTimeChange ? 'bg-amber-50/70 border-amber-200 text-amber-900' :
+          isCancel ? 'bg-rose-50/70 border-rose-200 text-rose-900' :
+          'bg-slate-50 border-slate-200 text-slate-800'
+        }`;
+
+        item.innerHTML = `
+          <div class="flex items-center justify-between font-bold">
+            <span class="flex items-center">
+              <i class="fa-solid ${isTimeChange ? 'fa-clock-rotate-left text-amber-600' : isCancel ? 'fa-xmark text-rose-600' : 'fa-plus text-sky-600'} mr-1.5"></i>
+              ${log.title}
+            </span>
+            <span class="text-[10px] text-slate-500 font-normal font-mono">${log.timestamp}</span>
+          </div>
+          <div class="text-[11px] mt-0.5 text-slate-700">${log.summary}</div>
+          <div class="text-[10px] text-slate-500 mt-0.5 flex items-center justify-between">
+            <span>負責職員: <strong>${log.staff || '-'}</strong> · 操作者: <strong>${log.user || '-'}</strong></span>
+            <span class="font-semibold ${log.channelSent ? 'text-emerald-700' : 'text-slate-400'}">${log.channelSent ? '✓ 已推播 Webhook' : '未連接 Webhook'}</span>
+          </div>
+        `;
+        teamsNotificationLogContainer.appendChild(item);
+      });
+    }
+
+    btnOpenTeamsConfig.addEventListener('click', () => {
+      const cfg = getTeamsConfig();
+      teamsWebhookInput.value = cfg.webhookUrl || '';
+      renderStaffTeamsDirectory();
+      renderTeamsLogs();
+      teamsConfigModal.classList.remove('hidden');
+    });
+
+    btnCloseTeamsConfigModal.onclick = () => teamsConfigModal.classList.add('hidden');
+    btnCloseTeamsConfigFooter.onclick = () => teamsConfigModal.classList.add('hidden');
+
+    btnSaveTeamsWebhook.addEventListener('click', () => {
+      const cfg = getTeamsConfig();
+      cfg.webhookUrl = teamsWebhookInput.value.trim();
+      saveTeamsConfig(cfg);
+      showToast('已儲存 Teams Webhook URL 設定', 'success');
+    });
+
+    btnTestTeamsWebhook.addEventListener('click', async () => {
+      const webhookUrl = teamsWebhookInput.value.trim();
+      if (!webhookUrl) {
+        showToast('請先填寫 Teams Webhook URL', 'warning');
+        return;
+      }
+
+      const success = await sendTeamsWebhookMessage({
+        title: '🔔 [MWC 復康排班] Teams 通知連線測試',
+        color: '6B21A8',
+        facts: [
+          { name: '測試時間', value: new Date().toLocaleString('zh-HK') },
+          { name: '測試人員', value: `${state.currentRole} (MWC Rehab Team)` },
+          { name: '連線狀態', value: '測試卡片發送成功！' }
+        ]
+      });
+
+      if (success) {
+        showToast('Teams 測試卡片已成功發送至頻道！', 'success');
+        addTeamsLog({
+          type: 'test',
+          title: 'Teams 連線測試',
+          summary: '成功發送測試卡片至指定 Teams 頻道',
+          staff: '全體頻道',
+          user: state.currentRole,
+          channelSent: true
+        });
+      } else {
+        showToast('發送測試卡片失敗，請檢查 URL 是否有效或瀏覽器 CORS 限制', 'warning');
+      }
+    });
+
+    btnClearTeamsLogs.addEventListener('click', () => {
+      localStorage.removeItem('mwc_teams_logs');
+      renderTeamsLogs();
+      showToast('已清空異動通知紀錄', 'info');
+    });
+
+    btnOpenRecurModal.addEventListener('click', () => {
+      if (state.currentRole === 'viewer') {
+        showToast('唯讀權限無法執行週期排班', 'warning');
+        return;
+      }
+      recurStartDate.value = formatDate(state.currentDate);
+      const nextYear = new Date(state.currentDate);
+      nextYear.setMonth(nextYear.getMonth() + 3);
+      recurEndDate.value = formatDate(nextYear);
+      recurModal.classList.remove('hidden');
+    });
+
+    btnCloseRecurModal.onclick = () => recurModal.classList.add('hidden');
+    btnCancelRecur.onclick = () => recurModal.classList.add('hidden');
+
+    recurForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+
+      const client = recurClientName.value.trim();
+      const discipline = recurDiscipline.value;
+      const staff = recurStaff.value;
+      const service = recurService.value.trim();
+      const totalMax = parseInt(recurTotalSessions.value, 10) || 8;
+      const startD = new Date(recurStartDate.value);
+      const endD = new Date(recurEndDate.value);
+      const startTime = recurStartTime.value;
+      const endTime = recurEndTime.value;
+
+      const checkedDays = Array.from(document.querySelectorAll('input[name="recurWeekday"]:checked'))
+                               .map(cb => parseInt(cb.value, 10));
+
+      if (checkedDays.length === 0) {
+        showToast('請至少選擇一個循環星期', 'warning');
+        return;
+      }
+
+      if (startD > endD) {
+        showToast('結束日期不能早於起始日期', 'warning');
+        return;
+      }
+
+      const generated = [];
+      let cur = new Date(startD);
+      let sessionCount = 0;
+
+      while (cur <= endD && sessionCount < totalMax) {
+        const dayOfWeek = cur.getDay(); // 0-6
+        if (checkedDays.includes(dayOfWeek)) {
+          sessionCount++;
+          const dateStr = formatDate(cur);
+          generated.push({
+            id: `mwc-recur-${Date.now()}-${sessionCount}`,
+            date: dateStr,
+            startTime,
+            endTime,
+            client,
+            discipline,
+            service,
+            staff,
+            section: `Section ${sessionCount}`,
+            status: 'active',
+            cancelReason: '',
+            notes: '跨年週期排班生成',
+            updatedBy: state.currentRole,
+            updatedAt: new Date().toISOString()
+          });
+        }
+        cur.setDate(cur.getDate() + 1);
+      }
+
+      if (generated.length === 0) {
+        showToast('所選日期範圍內沒有符合的星期排班', 'warning');
+        return;
+      }
+
+      for (const item of generated) {
+        await saveAppointmentRemote(item);
+      }
+
+      recurModal.classList.add('hidden');
+      renderCurrentView();
+      showToast(`已成功批次生成 ${generated.length} 節跨年排班！`, 'success');
+    });
+
+    btnOpenNewModal.onclick = () => openAppointmentModal();
+
+    function updateRoleUI() {
+      const isViewer = state.currentRole === 'viewer';
+      const isAdmin = state.currentRole === 'admin';
+
+      btnOpenNewModal.style.display = isViewer ? 'none' : 'inline-flex';
+      btnOpenRecurModal.style.display = isViewer ? 'none' : 'inline-flex';
+
+      const resetBtn = document.getElementById('adminResetBtn');
+      if (resetBtn) {
+        resetBtn.style.display = isAdmin ? 'inline-block' : 'none';
+      }
+    }
+
+    roleSelector.addEventListener('change', () => {
+      state.currentRole = roleSelector.value;
+      updateRoleUI();
+      renderCurrentView();
+      showToast(`已切換至權限模式: ${roleSelector.options[roleSelector.selectedIndex].text}`, 'info');
+    });
+
+    // Filters and Search
+    disciplineBtns.forEach(btn => {
+      btn.addEventListener('click', () => {
+        disciplineBtns.forEach(b => {
+          b.classList.remove('bg-white', 'text-slate-800', 'shadow-2xs');
+        });
+        btn.classList.add('bg-white', 'text-slate-800', 'shadow-2xs');
+        state.filterDiscipline = btn.getAttribute('data-filter');
+        renderCurrentView();
+      });
+    });
+
+    staffFilter.addEventListener('change', () => {
+      state.filterStaff = staffFilter.value;
+      renderCurrentView();
+    });
+
+    statusFilter.addEventListener('change', () => {
+      state.filterStatus = statusFilter.value;
+      renderCurrentView();
+    });
+
+    searchInput.addEventListener('input', () => {
+      state.searchQuery = searchInput.value;
+      renderCurrentView();
+    });
+
+    // Export CSV
+    document.getElementById('btnExportCSV').addEventListener('click', () => {
+      const list = filterAppointments(state.appointments);
+      if (list.length === 0) {
+        showToast('無排班資料可匯出', 'warning');
+        return;
+      }
+
+      let csv = "\uFEFF日期,開始時間,結束時間,院友姓名,部別,服務項目,節數,負責職員,狀態,取消原因,備註\n";
+      list.forEach(r => {
+        csv += `"${r.date}","${r.startTime}","${r.endTime}","${r.client}","${r.discipline}","${r.service}","${r.section}","${r.staff}","${r.status}","${r.cancelReason || ''}","${r.notes || ''}"\n`;
+      });
+
+      const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `MWC_Rehab_Schedule_${formatDate(state.currentDate)}.csv`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      showToast('已成功下載排班 Excel/CSV 檔案', 'success');
+    });
+
+    // Print
+    document.getElementById('btnPrint').addEventListener('click', () => {
+      window.print();
+    });
+
+    // Admin Reset
+    const adminResetBtn = document.getElementById('adminResetBtn');
+    if (adminResetBtn) {
+      adminResetBtn.addEventListener('click', async () => {
+        const ok = await showConfirmModal('重設資料庫', '確定將所有排班資料重設回 Excel 原始種子數據嗎？所有新增的排班將被清除。');
+        if (ok) {
+          saveLocalAppointments([...SEED_APPOINTMENTS_DATA]);
+          renderCurrentView();
+          showToast('已還原為原始種子排班表', 'success');
+        }
+      });
+    }
+
+    // Initialize application
+    updateHeaderDates();
+    updateRoleUI();
+    renderCurrentView();
+    renderTeamsLogs();
+    initFirebaseServices();
+  </script>
+</body>
+</html>
