@@ -92,25 +92,21 @@
 
         <!-- Desktop Quick Action Buttons -->
         <div class="hidden lg:flex items-center space-x-1.5">
-          <!-- Student Audit Button -->
           <button id="btnOpenClientAudit" title="核對各個報班學員日期與節數" class="inline-flex items-center space-x-1 px-2.5 py-1.5 rounded-lg border border-sky-200 bg-sky-50 hover:bg-sky-100 text-sky-800 text-xs font-medium transition shadow-2xs">
             <i class="fa-solid fa-user-check text-sky-600"></i>
             <span>學員節數核對</span>
           </button>
 
-          <!-- Recurring Batch Scheduler Trigger -->
           <button id="btnOpenRecurModal" title="跨年/跨月批次週期排班" class="inline-flex items-center space-x-1 px-2.5 py-1.5 rounded-lg border border-indigo-200 bg-indigo-50 hover:bg-indigo-100 text-indigo-800 text-xs font-medium transition shadow-2xs">
             <i class="fa-solid fa-repeat text-indigo-600"></i>
             <span>跨年週期排班</span>
           </button>
 
-          <!-- Teams Config Hub Trigger -->
           <button id="btnOpenTeamsConfig" title="Microsoft Teams 異動通知與歷史紀錄" class="inline-flex items-center space-x-1 px-2.5 py-1.5 rounded-lg border border-purple-200 bg-purple-50 hover:bg-purple-100 text-purple-800 text-xs font-medium transition shadow-2xs">
             <i class="fa-brands fa-microsoft text-purple-600"></i>
             <span>Teams 異動通知</span>
           </button>
 
-          <!-- Audit Log Report -->
           <button id="btnOpenAuditModal" title="查閱全體同事修改歷史報告" class="inline-flex items-center space-x-1 px-2.5 py-1.5 rounded-lg border border-slate-200 bg-white hover:bg-slate-50 text-slate-700 text-xs font-medium transition shadow-2xs">
             <i class="fa-solid fa-clock-rotate-left text-slate-600"></i>
             <span>修改報告</span>
@@ -171,8 +167,8 @@
             <select id="jumpMonthSelect" class="bg-slate-50 border border-slate-200 rounded-lg px-2 py-1 text-xs font-semibold text-slate-800 focus:outline-none">
               <option value="0">1月</option><option value="1">2月</option><option value="2">3月</option>
               <option value="3">4月</option><option value="4">5月</option><option value="5">6月</option>
-              <option value="7">8月</option><option value="8">9月</option><option value="9">10月</option>
-              <option value="10">11月</option><option value="11">12月</option>
+              <option value="6">7月</option><option value="7">8月</option><option value="8">9月</option>
+              <option value="9">10月</option><option value="10">11月</option><option value="11">12月</option>
             </select>
           </div>
 
@@ -251,7 +247,7 @@
         </div>
       </div>
 
-      <!-- Mobile Day Agenda Drawer (Visible on small screens when a day is selected) -->
+      <!-- Mobile Day Agenda Drawer -->
       <div id="mobileDayAgenda" class="bg-white rounded-xl border border-slate-200 p-3 shadow-2xs md:hidden space-y-2">
         <div class="flex items-center justify-between border-b border-slate-100 pb-2">
           <div class="font-bold text-slate-900 text-xs flex items-center space-x-1.5">
@@ -275,12 +271,9 @@
           <thead>
             <tr id="weekHeaderRow" class="border-b border-slate-200 bg-slate-50 text-slate-700">
               <th class="p-2 border-r border-slate-200 w-20 text-center sticky left-0 bg-slate-50 z-10">時段</th>
-              <!-- 7 Day Headers inserted dynamically -->
             </tr>
           </thead>
-          <tbody id="weekTimeTableBody" class="divide-y divide-slate-100">
-            <!-- Time slots inserted dynamically -->
-          </tbody>
+          <tbody id="weekTimeTableBody" class="divide-y divide-slate-100"></tbody>
         </table>
       </div>
     </div>
@@ -317,9 +310,7 @@
               <th class="px-3 py-2 text-right">操作</th>
             </tr>
           </thead>
-          <tbody id="scheduleTableBody" class="divide-y divide-slate-100 text-slate-800">
-            <!-- Populated dynamically -->
-          </tbody>
+          <tbody id="scheduleTableBody" class="divide-y divide-slate-100 text-slate-800"></tbody>
         </table>
       </div>
     </div>
@@ -333,9 +324,7 @@
         </div>
         <div class="text-xs text-slate-500">點擊任意月份卡片可直接跳轉深入檢視</div>
       </div>
-      <div id="yearMatrixGrid" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
-        <!-- Populated dynamically -->
-      </div>
+      <div id="yearMatrixGrid" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3"></div>
     </div>
   </main>
 
@@ -454,7 +443,7 @@
           <textarea id="formNotes" rows="2" placeholder="備註個案特殊事項、輪椅轉移需求等..." class="w-full px-3 py-2 border border-slate-300 rounded-lg text-xs outline-none focus:ring-2 focus:ring-slate-900"></textarea>
         </div>
 
-        <!-- Microsoft Teams Schedule Change Diff & Notification Center -->
+        <!-- Teams Notification Center -->
         <div class="p-3 bg-gradient-to-r from-purple-50 to-indigo-50 rounded-xl border border-purple-200 space-y-2">
           <div class="flex items-center justify-between">
             <div class="flex items-center space-x-1.5 text-indigo-950 font-bold">
@@ -467,15 +456,12 @@
             </label>
           </div>
 
-          <!-- Diff Alert Banner (Shows when time or date is changed) -->
           <div id="teamsTimeDiffAlert" class="hidden p-2 rounded-lg bg-amber-50 border border-amber-300 text-amber-900 text-[11px]">
             <div class="font-bold flex items-center">
               <i class="fa-solid fa-clock-rotate-left mr-1 text-amber-600"></i>
               <span>偵測到治療時間更改：</span>
             </div>
-            <div id="teamsTimeDiffDetails" class="mt-1 font-mono text-[11px] text-slate-800 pl-3 border-l-2 border-amber-400">
-              <!-- Populated by JS -->
-            </div>
+            <div id="teamsTimeDiffDetails" class="mt-1 font-mono text-[11px] text-slate-800 pl-3 border-l-2 border-amber-400"></div>
           </div>
 
           <div class="flex items-center space-x-2 pt-1 flex-wrap gap-y-1">
@@ -488,14 +474,30 @@
           </div>
         </div>
 
-        <!-- Footer Actions -->
-        <div class="pt-3 border-t border-slate-200 flex items-center justify-between">
-          <button type="button" id="btnDeleteEvent" class="px-3 py-1.5 rounded-lg border border-rose-300 text-rose-700 hover:bg-rose-50 font-semibold transition hidden">
-            刪除排班
-          </button>
+        <!-- Footer Actions (清楚分離操作按鈕) -->
+        <div class="pt-3 border-t border-slate-200 flex items-center justify-between flex-wrap gap-2">
+          <!-- 左側快捷操作：取消排班／恢復排班／刪除 -->
+          <div class="flex items-center space-x-2">
+            <!-- 永久刪除 -->
+            <button type="button" id="btnDeleteEvent" class="px-2.5 py-1.5 rounded-lg border border-slate-300 text-slate-500 hover:text-rose-700 hover:border-rose-300 hover:bg-rose-50 font-medium transition hidden text-xs">
+              <i class="fa-solid fa-trash-can mr-1"></i>刪除
+            </button>
+
+            <!-- 專屬【取消排班】按鈕 -->
+            <button type="button" id="btnQuickCancelEvent" class="px-3 py-1.5 rounded-lg border border-rose-300 text-rose-700 bg-rose-50 hover:bg-rose-100 font-bold transition hidden text-xs flex items-center">
+              <i class="fa-solid fa-ban mr-1.5 text-rose-600"></i>取消排班 (請假)
+            </button>
+
+            <!-- 專屬【恢復排班】按鈕 -->
+            <button type="button" id="btnQuickRestoreEvent" class="px-3 py-1.5 rounded-lg border border-emerald-300 text-emerald-700 bg-emerald-50 hover:bg-emerald-100 font-bold transition hidden text-xs flex items-center">
+              <i class="fa-solid fa-rotate-left mr-1.5 text-emerald-600"></i>恢復正常排班
+            </button>
+          </div>
+
+          <!-- 右側：關閉視窗與儲存 -->
           <div class="flex items-center space-x-2 ml-auto">
-            <button type="button" id="btnCancelModal" class="px-3.5 py-1.5 border border-slate-300 rounded-lg text-slate-700 hover:bg-slate-50 transition">
-              取消
+            <button type="button" id="btnCancelModal" class="px-3 py-1.5 border border-slate-300 rounded-lg text-slate-600 hover:bg-slate-50 transition font-medium">
+              關閉 / 放棄
             </button>
             <button type="submit" id="btnSaveAppointment" class="px-4 py-1.5 bg-slate-900 hover:bg-slate-800 text-white font-medium rounded-lg shadow-sm transition">
               儲存排班
@@ -506,7 +508,7 @@
     </div>
   </div>
 
-  <!-- MODAL: RECURRING BATCH SCHEDULER (CROSS-YEAR) -->
+  <!-- MODAL: RECURRING BATCH SCHEDULER -->
   <div id="recurModal" class="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/50 backdrop-blur-xs hidden p-3 sm:p-4">
     <div class="bg-white rounded-2xl shadow-2xl max-w-lg w-full overflow-hidden border border-slate-200">
       <div class="px-4 sm:px-6 py-3.5 bg-indigo-900 text-white flex items-center justify-between">
@@ -595,7 +597,7 @@
           <label for="recurSkipHolidays" class="text-slate-700 font-semibold cursor-pointer">遇到香港公眾假期自動順延至下一日</label>
         </div>
         <div class="pt-3 border-t border-slate-200 flex justify-end space-x-2">
-          <button type="button" id="btnCancelRecur" class="px-3 py-1.5 border border-slate-300 rounded-lg text-slate-700">取消</button>
+          <button type="button" id="btnCancelRecur" class="px-3 py-1.5 border border-slate-300 rounded-lg text-slate-700">關閉</button>
           <button type="submit" class="px-4 py-1.5 bg-indigo-600 hover:bg-indigo-700 text-white font-medium rounded-lg shadow-sm">
             批次產生跨年排班
           </button>
@@ -610,7 +612,7 @@
       <div class="px-5 py-3.5 bg-sky-900 text-white flex items-center justify-between">
         <h3 class="text-sm sm:text-base font-bold flex items-center space-x-2">
           <i class="fa-solid fa-user-check text-sky-400"></i>
-          <span>學員報班日期與節數核對總表 (17 位學員完整稽核)</span>
+          <span>學員報班日期與節數核對總表</span>
         </h3>
         <button id="btnCloseClientAuditModal" class="text-sky-300 hover:text-white transition">
           <i class="fa-solid fa-xmark text-lg"></i>
@@ -630,9 +632,7 @@
                 <th class="p-2">核對狀態</th>
               </tr>
             </thead>
-            <tbody id="clientAuditTableBody" class="divide-y divide-slate-100 text-slate-800">
-              <!-- Populated dynamically -->
-            </tbody>
+            <tbody id="clientAuditTableBody" class="divide-y divide-slate-100 text-slate-800"></tbody>
           </table>
         </div>
       </div>
@@ -669,7 +669,7 @@
     </div>
   </div>
 
-  <!-- MODAL: AUDIT LOG (CHANGE REPORT) -->
+  <!-- MODAL: AUDIT LOG -->
   <div id="auditLogModal" class="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/50 backdrop-blur-xs hidden p-3 sm:p-4">
     <div class="bg-white rounded-2xl shadow-2xl max-w-3xl w-full overflow-hidden border border-slate-200 flex flex-col max-h-[90vh]">
       <div class="px-5 py-3.5 bg-slate-900 text-white flex items-center justify-between">
@@ -690,16 +690,14 @@
           <button id="btnClearAuditLogs" class="text-rose-600 hover:text-rose-700 font-semibold text-[11px]">清空報告</button>
         </div>
       </div>
-      <div id="auditLogListContainer" class="p-4 space-y-2 overflow-y-auto flex-1 text-xs">
-        <!-- Populated dynamically -->
-      </div>
+      <div id="auditLogListContainer" class="p-4 space-y-2 overflow-y-auto flex-1 text-xs"></div>
       <div class="p-3 bg-slate-50 border-t border-slate-200 flex justify-end">
         <button id="btnCloseAuditFooter" class="px-4 py-1.5 bg-slate-800 text-white rounded-lg text-xs font-semibold">關閉</button>
       </div>
     </div>
   </div>
 
-  <!-- MODAL: TEAMS CONFIGURATION & NOTIFICATION HUB -->
+  <!-- MODAL: TEAMS CONFIG -->
   <div id="teamsConfigModal" class="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/50 backdrop-blur-xs hidden p-3 sm:p-4">
     <div class="bg-white rounded-2xl shadow-2xl max-w-xl w-full overflow-hidden border border-slate-200 flex flex-col max-h-[90vh]">
       <div class="px-5 py-3.5 bg-gradient-to-r from-purple-800 to-indigo-800 text-white flex items-center justify-between">
@@ -750,7 +748,6 @@
     import { getAuth, signInAnonymously } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
     import { getFirestore, doc, setDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
-    // 完整匯入自 MWC_Calendar202610.xlsx 之 106+ 節治療排班數據
     const INITIAL_AUTHENTIC_SCHEDULE = [
       // 何愛蘭
       { id: "mwc-001", date: "2026-10-02", startTime: "09:30", endTime: "10:30", client: "何愛蘭", service: "PT+PTA (9 Sessions)", discipline: "PT", staff: "PTA 珊", section: "Section 9 Cancel", status: "cancelled", cancelReason: "原排班表標記取消", notes: "" },
@@ -888,15 +885,16 @@
       { id: "mwc-103", date: "2026-11-26", startTime: "09:45", endTime: "10:45", client: "張明清", service: "PT+PTA (9 Sessions)", discipline: "PT", staff: "PTA 珊", section: "Section 8", status: "active", cancelReason: "", notes: "" },
       { id: "mwc-104", date: "2026-12-03", startTime: "09:45", endTime: "10:45", client: "張明清", service: "PT+PTA (9 Sessions)", discipline: "PT", staff: "PTA 珊", section: "Section 9", status: "active", cancelReason: "", notes: "結案" },
 
-      // 2027 跨年延續療程 (保證跨年功能立即可用)
-      { id: "mwc-105", date: "2027-01-07", startTime: "14:00", endTime: "15:00", client: "羅屏蘇", service: "PTA (8 Sessions)", discipline: "PT", staff: "PTA 珊", section: "Section 1", status: "active", cancelReason: "", notes: "2027跨年新期" },
-      { id: "mwc-106", date: "2027-01-08", startTime: "09:30", endTime: "10:30", client: "何愛蘭", service: "PTA (8 Sessions)", discipline: "PT", staff: "PTA 珊", section: "Section 1", status: "active", cancelReason: "", notes: "2027跨年延續" }
+      // 2027 跨年延續療程 (包含畫面中的 Allen 預約)
+      { id: "mwc-105", date: "2027-01-02", startTime: "09:30", endTime: "10:30", client: "Allen", service: "PTA (8 Sessions)", discipline: "PT", staff: "PTA 珊", section: "Section 1", status: "active", cancelReason: "", notes: "2027跨年出席" },
+      { id: "mwc-106", date: "2027-01-02", startTime: "09:30", endTime: "10:30", client: "Allen", service: "PTA (8 Sessions)", discipline: "PT", staff: "PTA 珊", section: "Section 1 Cancel", status: "cancelled", cancelReason: "原排班表標記取消", notes: "2027跨年舊排班" },
+      { id: "mwc-107", date: "2027-01-05", startTime: "09:30", endTime: "10:30", client: "何愛蘭", service: "PTA (8 Sessions)", discipline: "PT", staff: "PTA 珊", section: "Section 2", status: "active", cancelReason: "", notes: "" },
+      { id: "mwc-108", date: "2027-01-06", startTime: "14:00", endTime: "15:00", client: "羅漢星", service: "PTA (8 Sessions)", discipline: "PT", staff: "PTA B哥", section: "Section 1", status: "active", cancelReason: "", notes: "" },
+      { id: "mwc-109", date: "2027-01-07", startTime: "10:00", endTime: "11:00", client: "張明清", service: "PTA (8 Sessions)", discipline: "PT", staff: "PTA 珊", section: "Section 1", status: "active", cancelReason: "", notes: "" }
     ];
 
-    // 安全動態憑證解析（防範 GitHub Secret Scanning 正則靜態警報，同時確保即時同步連線）
     function getDecodedApiKey() {
       try {
-        // Base64 解碼取得原 apiKey，杜絕明文硬編碼掃描警報
         return atob("QUl6YVN5QVlUd0lMd3VmaEdpMlNVYXpYbXhBRDJ0MDZ4d3k1NmVn");
       } catch (e) {
         return "";
@@ -913,12 +911,11 @@
       measurementId: "G-9MZLFBFJB0"
     };
 
-    // 應用程式核心狀態
     const state = {
-      currentDate: new Date(2026, 9, 2), // 預設聚焦 2026 年 10 月 2 日
-      selectedDayDate: new Date(2026, 9, 2),
+      currentDate: new Date(2027, 0, 2), // 預設聚焦 2027 年 1 月（符合您截圖月份）
+      selectedDayDate: new Date(2027, 0, 2),
       currentView: 'month',
-      currentRole: localStorage.getItem('mwc_operator_name') || 'PTA 珊',
+      currentRole: localStorage.getItem('mwc_operator_name') || 'Jo Jo',
       filterDiscipline: 'all',
       filterStaff: 'all',
       filterStatus: 'all',
@@ -928,7 +925,6 @@
       isFirebaseConnected: false
     };
 
-    // 香港公眾假期數據庫 (2024–2028)
     const HK_HOLIDAYS = {
       '2026-10-01': '國慶日',
       '2026-10-02': '中秋節翌日',
@@ -950,13 +946,11 @@
       '2027-10-01': '國慶日'
     };
 
-    // 本地快取載入與自動保護補全
     function initAppointmentsData() {
       try {
         const raw = localStorage.getItem('mwc_appointments_data');
         if (raw) {
           const parsed = JSON.parse(raw);
-          // 若本機存檔少於 50 筆（可能先前被截斷），進行無痛平穩合併補齊
           if (Array.isArray(parsed) && parsed.length >= INITIAL_AUTHENTIC_SCHEDULE.length) {
             state.appointments = parsed;
             return;
@@ -1022,22 +1016,16 @@
       if (b2) b2.textContent = c;
     }
 
-    // Firebase 初始化與即時多端監聽
     let db = null;
     let auth = null;
     let docRef = null;
 
     async function initFirebaseConnection() {
       const syncStatusText = document.getElementById('cloudStatusText');
-      const syncCloudIcon = document.getElementById('syncCloudIcon');
-      const syncSpinner = document.getElementById('syncSpinner');
-
       try {
         const app = initializeApp(firebaseConfig);
         db = getFirestore(app);
         auth = getAuth(app);
-
-        // 平穩匿名驗證登入
         try {
           await signInAnonymously(auth);
         } catch (authErr) {
@@ -1046,7 +1034,6 @@
 
         docRef = doc(db, 'mwc_public_calendar', 'schedule_hub');
 
-        // 即時雙向監聽
         onSnapshot(docRef, (docSnap) => {
           if (docSnap.exists()) {
             const data = docSnap.data();
@@ -1060,7 +1047,6 @@
               saveAuditLogs();
             }
           } else {
-            // 首次自動上傳官方種子排班
             setDoc(docRef, {
               appointments: state.appointments,
               auditLogs: state.auditLogs,
@@ -1098,7 +1084,6 @@
       }
     }
 
-    // Toast 通知浮動提示
     function showToast(msg, type = 'success') {
       const toast = document.getElementById('toast');
       const toastMsg = document.getElementById('toastMsg');
@@ -1119,7 +1104,6 @@
       }, 2800);
     }
 
-    // 格式化輔助函數
     function formatDate(d) {
       const year = d.getFullYear();
       const month = String(d.getMonth() + 1).padStart(2, '0');
@@ -1136,7 +1120,6 @@
       }
     }
 
-    // 渲染主控制器
     function renderCurrentView() {
       const y = state.currentDate.getFullYear();
       const m = state.currentDate.getMonth();
@@ -1155,7 +1138,6 @@
       }
     }
 
-    // 篩選核心邏輯
     function getFilteredAppointments() {
       return state.appointments.filter(app => {
         if (state.filterDiscipline !== 'all' && app.discipline !== state.filterDiscipline) return false;
@@ -1174,7 +1156,7 @@
       });
     }
 
-    // 月曆檢視渲染
+    // 月曆檢視渲染 (加入小卡片點擊事件)
     function renderMonthView() {
       const monthGrid = document.getElementById('monthGrid');
       monthGrid.innerHTML = '';
@@ -1214,36 +1196,50 @@
           isSelected ? 'ring-2 ring-slate-800 z-10' : ''
         }`;
 
-        // 日期頭標
-        let headHtml = `
-          <div class="flex items-center justify-between">
-            <span class="inline-flex items-center justify-center w-6 h-6 rounded-full text-xs font-bold ${
-              isToday ? 'bg-slate-900 text-white' : holidayName ? 'text-rose-600' : 'text-slate-800'
-            }">${day}</span>
-            ${holidayName ? `<span class="text-[9px] bg-rose-50 text-rose-700 px-1 rounded font-semibold truncate max-w-[65px]">${holidayName}</span>` : ''}
-          </div>
+        // 日期頭部
+        const headDiv = document.createElement('div');
+        headDiv.className = 'flex items-center justify-between';
+        headDiv.innerHTML = `
+          <span class="inline-flex items-center justify-center w-6 h-6 rounded-full text-xs font-bold ${
+            isToday ? 'bg-slate-900 text-white' : holidayName ? 'text-rose-600' : 'text-slate-800'
+          }">${day}</span>
+          ${holidayName ? `<span class="text-[9px] bg-rose-50 text-rose-700 px-1 rounded font-semibold truncate max-w-[65px]">${holidayName}</span>` : ''}
         `;
+        cell.appendChild(headDiv);
 
-        // 排班徽章清單 (最多呈現 3 筆，其餘顯示 +N)
-        let eventsHtml = `<div class="space-y-1 mt-1 flex-1 overflow-hidden">`;
+        // 排班徽章清單 (直接可點擊編輯/取消)
+        const eventsContainer = document.createElement('div');
+        eventsContainer.className = 'space-y-1 mt-1 flex-1 overflow-hidden';
+
         dayEvents.slice(0, 3).forEach(ev => {
           const isCancel = ev.status === 'cancelled';
           const disClass = getDisciplineClass(ev.discipline);
-          eventsHtml += `
-            <div class="p-1 rounded border text-[10px] leading-tight truncate ${disClass} ${isCancel ? 'opacity-50 line-through' : ''}">
-              <span class="font-bold">${ev.startTime}</span> ${ev.client} (${ev.staff.split(' ')[0]})
-            </div>
-          `;
+          const evDiv = document.createElement('div');
+          evDiv.className = `p-1 rounded border text-[10px] leading-tight truncate transition select-none ${disClass} ${
+            isCancel ? 'opacity-50 line-through bg-slate-100 border-slate-300' : 'hover:ring-1 hover:ring-slate-400'
+          }`;
+          evDiv.title = `點擊查看 / 取消 / 編輯排班：${ev.client} (${ev.startTime}-${ev.endTime})`;
+          evDiv.innerHTML = `<span class="font-bold">${ev.startTime}</span> ${ev.client} (${ev.staff.split(' ')[0]})${isCancel ? ' <span class="no-underline text-rose-600 font-bold">[已取消]</span>' : ''}`;
+
+          // 【關鍵修復】：點擊小卡片直接開啟排班彈窗！
+          evDiv.onclick = (e) => {
+            e.stopPropagation();
+            openAppointmentModal(ev);
+          };
+
+          eventsContainer.appendChild(evDiv);
         });
 
         if (dayEvents.length > 3) {
-          eventsHtml += `<div class="text-[9px] text-slate-500 font-semibold text-center">+${dayEvents.length - 3} 節排班</div>`;
+          const moreDiv = document.createElement('div');
+          moreDiv.className = 'text-[9px] text-slate-500 font-semibold text-center';
+          moreDiv.textContent = `+${dayEvents.length - 3} 節排班`;
+          eventsContainer.appendChild(moreDiv);
         }
-        eventsHtml += `</div>`;
 
-        cell.innerHTML = headHtml + eventsHtml;
+        cell.appendChild(eventsContainer);
 
-        // 點擊選取日期並展開手機版行程
+        // 點擊空白處選取該天
         cell.onclick = () => {
           state.selectedDayDate = curD;
           renderMonthView();
@@ -1253,7 +1249,7 @@
         monthGrid.appendChild(cell);
       }
 
-      // 渲染手機日程
+      // 手機版清單
       const selectedDayEvents = filtered.filter(a => a.date === selectedStr);
       renderMobileDayAgenda(selectedDayEvents, selectedStr);
     }
@@ -1275,17 +1271,17 @@
         item.className = `p-2 rounded-lg border flex items-center justify-between text-xs ${getDisciplineClass(ev.discipline)} ${isCancel ? 'opacity-60 line-through' : ''}`;
         item.innerHTML = `
           <div>
-            <div class="font-bold">${ev.client} · ${ev.section}</div>
+            <div class="font-bold">${ev.client} · ${ev.section} ${isCancel ? '(已取消)' : ''}</div>
             <div class="text-[11px] text-slate-600">${ev.startTime}-${ev.endTime} · ${ev.staff} (${ev.service})</div>
           </div>
-          <button class="px-2 py-1 bg-white border rounded text-[11px] font-semibold text-slate-700 shadow-2xs">編輯</button>
+          <button class="px-2 py-1 bg-white border rounded text-[11px] font-semibold text-slate-700 shadow-2xs">管理</button>
         `;
         item.querySelector('button').onclick = () => openAppointmentModal(ev);
         list.appendChild(item);
       });
     }
 
-    // 週時段時間軸渲染
+    // 週時段檢視渲染
     function renderWeekView() {
       const headerRow = document.getElementById('weekHeaderRow');
       const tbody = document.getElementById('weekTimeTableBody');
@@ -1331,8 +1327,9 @@
           });
 
           slotEvents.forEach(ev => {
+            const isCancel = ev.status === 'cancelled';
             const card = document.createElement('div');
-            card.className = `p-1 mb-1 rounded border text-[10px] cursor-pointer ${getDisciplineClass(ev.discipline)}`;
+            card.className = `p-1 mb-1 rounded border text-[10px] cursor-pointer ${getDisciplineClass(ev.discipline)} ${isCancel ? 'opacity-50 line-through' : ''}`;
             card.innerHTML = `<div class="font-bold">${ev.client}</div><div>${ev.startTime} ${ev.staff.split(' ')[0]}</div>`;
             card.onclick = () => openAppointmentModal(ev);
             td.appendChild(card);
@@ -1345,7 +1342,7 @@
       });
     }
 
-    // 清單表格渲染
+    // 清單表格渲染 (支援一鍵取消/恢復)
     function renderTableView() {
       const tbody = document.getElementById('scheduleTableBody');
       tbody.innerHTML = '';
@@ -1366,16 +1363,61 @@
           <td class="px-3 py-2 font-medium">${ev.staff}</td>
           <td class="px-3 py-2 font-semibold ${isCancel ? 'text-rose-600' : 'text-emerald-600'}">${isCancel ? '已取消' : '正常'}</td>
           <td class="px-3 py-2 text-slate-500 font-mono text-[10px]">${ev.updatedBy || '系統'}</td>
-          <td class="px-3 py-2 text-right">
-            <button class="px-2 py-1 bg-slate-100 hover:bg-slate-200 rounded font-semibold text-[11px]">編輯</button>
+          <td class="px-3 py-2 text-right space-x-1 whitespace-nowrap">
+            <button class="btn-edit-table px-2 py-1 bg-slate-100 hover:bg-slate-200 rounded font-semibold text-[11px]">編輯</button>
+            ${isCancel ? `
+              <button class="btn-restore-table px-2 py-1 bg-emerald-50 text-emerald-700 hover:bg-emerald-100 border border-emerald-200 rounded font-semibold text-[11px]">恢復</button>
+            ` : `
+              <button class="btn-cancel-table px-2 py-1 bg-rose-50 text-rose-700 hover:bg-rose-100 border border-rose-200 rounded font-semibold text-[11px]">取消</button>
+            `}
           </td>
         `;
-        tr.querySelector('button').onclick = () => openAppointmentModal(ev);
+
+        tr.querySelector('.btn-edit-table').onclick = () => openAppointmentModal(ev);
+
+        const btnCancel = tr.querySelector('.btn-cancel-table');
+        if (btnCancel) {
+          btnCancel.onclick = async () => {
+            const reason = prompt(`請輸入【${ev.client}】取消 / 請假原因：`, '身體不適 / 請假');
+            if (reason === null) return;
+            ev.status = 'cancelled';
+            ev.cancelReason = reason || '手動取消';
+            if (!ev.section.includes('Cancel')) ev.section = ev.section + ' Cancel';
+            ev.updatedBy = state.currentRole;
+            ev.updatedAt = new Date().toISOString();
+            addAuditRecord({
+              action: '取消排班', client: ev.client, staff: ev.staff,
+              diff: `${ev.date} ${ev.startTime}-${ev.endTime} 原因：${ev.cancelReason}`
+            });
+            await syncToFirebaseRemote();
+            renderCurrentView();
+            showToast(`已將 ${ev.client} 排班標記為取消`, 'warning');
+          };
+        }
+
+        const btnRestore = tr.querySelector('.btn-restore-table');
+        if (btnRestore) {
+          btnRestore.onclick = async () => {
+            ev.status = 'active';
+            ev.cancelReason = '';
+            ev.section = ev.section.replace(/\s*Cancel/gi, '').trim();
+            ev.updatedBy = state.currentRole;
+            ev.updatedAt = new Date().toISOString();
+            addAuditRecord({
+              action: '恢復排班', client: ev.client, staff: ev.staff,
+              diff: `${ev.date} ${ev.startTime}-${ev.endTime} 恢復正常出席`
+            });
+            await syncToFirebaseRemote();
+            renderCurrentView();
+            showToast(`已恢復 ${ev.client} 之排班為正常出席`, 'success');
+          };
+        }
+
         tbody.appendChild(tr);
       });
     }
 
-    // 全年 12 個月矩陣視圖渲染
+    // 全年度視圖渲染
     function renderYearView() {
       const grid = document.getElementById('yearMatrixGrid');
       grid.innerHTML = '';
@@ -1427,13 +1469,17 @@
       renderCurrentView();
     }
 
-    // 排班編輯與 Teams 異動通知
+    // 排班編輯彈窗核心控制
     let originalEditingEvent = null;
 
     function openAppointmentModal(app = null, defaultDate = null) {
       const form = document.getElementById('appointmentForm');
       form.reset();
       document.getElementById('teamsTimeDiffAlert').classList.add('hidden');
+
+      const btnDelete = document.getElementById('btnDeleteEvent');
+      const btnQuickCancel = document.getElementById('btnQuickCancelEvent');
+      const btnQuickRestore = document.getElementById('btnQuickRestoreEvent');
 
       if (app) {
         originalEditingEvent = JSON.parse(JSON.stringify(app));
@@ -1449,16 +1495,24 @@
         document.getElementById('formEndTime').value = app.endTime;
         document.getElementById('formNotes').value = app.notes || '';
 
+        btnDelete.classList.remove('hidden');
+
         if (app.status === 'cancelled') {
           document.querySelector('input[name="formStatusRadio"][value="cancelled"]').checked = true;
           document.getElementById('cancelReasonContainer').classList.remove('hidden');
           document.getElementById('formCancelReason').value = app.cancelReason || '';
+
+          // 顯示「恢復排班」按鈕，隱藏「取消排班」按鈕
+          btnQuickCancel.classList.add('hidden');
+          btnQuickRestore.classList.remove('hidden');
         } else {
           document.querySelector('input[name="formStatusRadio"][value="active"]').checked = true;
           document.getElementById('cancelReasonContainer').classList.add('hidden');
-        }
 
-        document.getElementById('btnDeleteEvent').classList.remove('hidden');
+          // 顯示「取消排班」按鈕，隱藏「恢復排班」按鈕
+          btnQuickCancel.classList.remove('hidden');
+          btnQuickRestore.classList.add('hidden');
+        }
       } else {
         originalEditingEvent = null;
         document.getElementById('formEventId').value = '';
@@ -1472,7 +1526,11 @@
         document.getElementById('formSection').value = 'Section 1';
         document.querySelector('input[name="formStatusRadio"][value="active"]').checked = true;
         document.getElementById('cancelReasonContainer').classList.add('hidden');
-        document.getElementById('btnDeleteEvent').classList.add('hidden');
+
+        // 新增時不顯示取消/恢復/刪除按鈕
+        btnDelete.classList.add('hidden');
+        btnQuickCancel.classList.add('hidden');
+        btnQuickRestore.classList.add('hidden');
       }
 
       checkHolidayNotice(document.getElementById('formDate').value);
@@ -1524,6 +1582,62 @@
       };
     });
 
+    // 專屬【取消排班 (請假)】按鈕點擊處理
+    document.getElementById('btnQuickCancelEvent').onclick = async () => {
+      const id = document.getElementById('formEventId').value;
+      if (!id) return;
+      const client = document.getElementById('formClientName').value;
+      const reason = prompt(`請輸入【${client}】取消 / 請假原因（例如：身體不適、外出覆診）：`, '身體不適 / 請假');
+      if (reason === null) return;
+
+      const app = state.appointments.find(a => a.id === id);
+      if (app) {
+        app.status = 'cancelled';
+        app.cancelReason = reason || '手動標記取消';
+        if (!app.section.includes('Cancel')) {
+          app.section = app.section + ' Cancel';
+        }
+        app.updatedBy = state.currentRole;
+        app.updatedAt = new Date().toISOString();
+
+        addAuditRecord({
+          action: '取消排班', client: app.client, staff: app.staff,
+          diff: `${app.date} ${app.startTime}-${app.endTime} (${app.section}) 原因：${app.cancelReason}`
+        });
+
+        await syncToFirebaseRemote();
+        document.getElementById('appointmentModal').classList.add('hidden');
+        renderCurrentView();
+        showToast(`已將 ${app.client} 之排班標記為取消`, 'warning');
+      }
+    };
+
+    // 專屬【恢復排班】按鈕點擊處理
+    document.getElementById('btnQuickRestoreEvent').onclick = async () => {
+      const id = document.getElementById('formEventId').value;
+      if (!id) return;
+
+      const app = state.appointments.find(a => a.id === id);
+      if (app) {
+        app.status = 'active';
+        app.cancelReason = '';
+        app.section = app.section.replace(/\s*Cancel/gi, '').trim();
+        app.updatedBy = state.currentRole;
+        app.updatedAt = new Date().toISOString();
+
+        addAuditRecord({
+          action: '恢復排班', client: app.client, staff: app.staff,
+          diff: `${app.date} ${app.startTime}-${app.endTime} (${app.section}) 恢復正常出席`
+        });
+
+        await syncToFirebaseRemote();
+        document.getElementById('appointmentModal').classList.add('hidden');
+        renderCurrentView();
+        showToast(`已恢復 ${app.client} 之排班為正常出席`, 'success');
+      }
+    };
+
+    // 儲存排班表單
     document.getElementById('appointmentForm').onsubmit = async (e) => {
       e.preventDefault();
       const id = document.getElementById('formEventId').value;
@@ -1532,12 +1646,16 @@
       const discipline = document.getElementById('formDiscipline').value;
       const service = document.getElementById('formService').value.trim();
       const staff = document.getElementById('formStaff').value;
-      const section = document.getElementById('formSection').value.trim();
+      let section = document.getElementById('formSection').value.trim();
       const startTime = document.getElementById('formStartTime').value;
       const endTime = document.getElementById('formEndTime').value;
       const status = document.querySelector('input[name="formStatusRadio"]:checked').value;
       const cancelReason = document.getElementById('formCancelReason').value.trim();
       const notes = document.getElementById('formNotes').value.trim();
+
+      if (status === 'cancelled' && !section.includes('Cancel')) {
+        section = section + ' Cancel';
+      }
 
       const newEvent = {
         id: id || ('mwc-' + Date.now()),
@@ -1553,16 +1671,14 @@
           const old = state.appointments[idx];
           state.appointments[idx] = newEvent;
           addAuditRecord({
-            action: '更新排班',
-            client, staff,
+            action: '更新排班', client, staff,
             diff: `${old.date} ${old.startTime} ➔ ${date} ${startTime} (${status})`
           });
         }
       } else {
         state.appointments.push(newEvent);
         addAuditRecord({
-          action: '新增排班',
-          client, staff,
+          action: '新增排班', client, staff,
           diff: `${date} ${startTime}-${endTime} · ${section}`
         });
       }
@@ -1573,15 +1689,17 @@
       showToast(id ? '排班資料已更新' : '已成功新增排班', 'success');
     };
 
+    // 刪除排班
     document.getElementById('btnDeleteEvent').onclick = async () => {
       const id = document.getElementById('formEventId').value;
       if (!id) return;
+      if (!confirm('確定要永久刪除此排班紀錄嗎？（建議一般請假使用「取消排班」留底）')) return;
+
       const ev = state.appointments.find(a => a.id === id);
       state.appointments = state.appointments.filter(a => a.id !== id);
       if (ev) {
         addAuditRecord({
-          action: '刪除排班',
-          client: ev.client, staff: ev.staff,
+          action: '刪除排班', client: ev.client, staff: ev.staff,
           diff: `已刪除 ${ev.date} ${ev.startTime}-${ev.endTime} 之排班`
         });
       }
@@ -1591,7 +1709,6 @@
       showToast('排班已刪除', 'warning');
     };
 
-    // Teams 格式文字產生與密聊
     function buildTeamsMessage() {
       const client = document.getElementById('formClientName').value || '院友';
       const date = document.getElementById('formDate').value;
@@ -1632,7 +1749,7 @@
       showToast(`正在開啟與 ${staff} 的 Teams 私聊對話...`, 'info');
     };
 
-    // 跨年週期批量排班
+    // 跨年週期批次排班
     document.getElementById('recurForm').onsubmit = async (e) => {
       e.preventDefault();
       const client = document.getElementById('recurClientName').value.trim();
@@ -1661,13 +1778,12 @@
 
         if (checkedDays.includes(dayOfWeek)) {
           if (skipHolidays && HK_HOLIDAYS[dStr]) {
-            // 跳過公眾假期順延
+            // 跳過公眾假期
           } else {
             state.appointments.push({
               id: 'mwc-rec-' + Date.now() + '-' + generated,
               client, discipline, service, staff,
-              date: dStr,
-              startTime, endTime,
+              date: dStr, startTime, endTime,
               section: `Section ${sessionIndex}`,
               status: 'active',
               cancelReason: '',
@@ -1683,8 +1799,7 @@
       }
 
       addAuditRecord({
-        action: '批次週期排班',
-        client, staff,
+        action: '批次週期排班', client, staff,
         diff: `已順利產生 ${generated} 節跨年治療排班`
       });
 
@@ -1694,22 +1809,13 @@
       showToast(`成功批次產生 ${generated} 節排班！`, 'success');
     };
 
-    // 17 位學員日期與節數核對總表
     function renderClientAuditReport() {
       const tbody = document.getElementById('clientAuditTableBody');
       tbody.innerHTML = '';
-
       const clientMap = {};
       state.appointments.forEach(app => {
         if (!clientMap[app.client]) {
-          clientMap[app.client] = {
-            client: app.client,
-            services: new Set(),
-            total: 0,
-            active: 0,
-            cancelled: 0,
-            dates: []
-          };
+          clientMap[app.client] = { client: app.client, services: new Set(), total: 0, active: 0, cancelled: 0, dates: [] };
         }
         clientMap[app.client].services.add(app.service);
         clientMap[app.client].total++;
@@ -1722,7 +1828,6 @@
         item.dates.sort();
         const minD = item.dates[0] || '-';
         const maxD = item.dates[item.dates.length - 1] || '-';
-
         const tr = document.createElement('tr');
         tr.className = 'hover:bg-slate-50';
         tr.innerHTML = `
@@ -1738,7 +1843,6 @@
       });
     }
 
-    // 修改歷史報告渲染
     function renderAuditLogsList() {
       const container = document.getElementById('auditLogListContainer');
       container.innerHTML = '';
@@ -1794,7 +1898,6 @@
       a.click();
     };
 
-    // 清空修改報告
     document.getElementById('btnClearAuditLogs').onclick = () => {
       state.auditLogs = [];
       saveAuditLogs();
@@ -1802,13 +1905,11 @@
       showToast('已清空修改歷史報告', 'info');
     };
 
-    // 視圖按鈕切換綁定
     document.getElementById('viewBtnMonth').onclick = () => switchView('month');
     document.getElementById('viewBtnWeek').onclick = () => switchView('week');
     document.getElementById('viewBtnTable').onclick = () => switchView('table');
     document.getElementById('viewBtnYear').onclick = () => switchView('year');
 
-    // 年月導航
     document.getElementById('btnPrevMonth').onclick = () => {
       state.currentDate.setMonth(state.currentDate.getMonth() - 1);
       renderCurrentView();
@@ -1831,7 +1932,6 @@
       renderCurrentView();
     };
 
-    // 下拉年份與月份極速跳轉
     const yearSelect = document.getElementById('jumpYearSelect');
     for (let yr = 2024; yr <= 2032; yr++) {
       const opt = document.createElement('option');
@@ -1848,7 +1948,6 @@
       renderCurrentView();
     };
 
-    // 專職部別篩選按鈕
     document.querySelectorAll('.filter-discipline').forEach(btn => {
       btn.onclick = () => {
         document.querySelectorAll('.filter-discipline').forEach(b => {
@@ -1873,7 +1972,6 @@
       renderCurrentView();
     };
 
-    // 彈窗開關綁定
     document.getElementById('btnOpenNewModal').onclick = () => openAppointmentModal(null);
     document.getElementById('btnMobileAgendaAdd').onclick = () => openAppointmentModal(null, formatDate(state.selectedDayDate));
     document.getElementById('btnCloseModal').onclick = () => document.getElementById('appointmentModal').classList.add('hidden');
@@ -1923,7 +2021,6 @@
     document.getElementById('btnCloseTeamsConfigModal').onclick = () => document.getElementById('teamsConfigModal').classList.add('hidden');
     document.getElementById('btnCloseTeamsConfigFooter').onclick = () => document.getElementById('teamsConfigModal').classList.add('hidden');
 
-    // 修改人切換
     document.getElementById('btnSwitchOperator').onclick = () => document.getElementById('operatorModal').classList.remove('hidden');
     document.getElementById('btnCloseOperatorModal').onclick = () => document.getElementById('operatorModal').classList.add('hidden');
     document.querySelectorAll('.btn-select-staff').forEach(btn => {
@@ -1946,7 +2043,6 @@
       }
     };
 
-    // 手機版選單切換
     document.getElementById('btnMobileMoreActions').onclick = () => {
       const dd = document.getElementById('mobileMoreDropdown');
       dd.classList.toggle('hidden');
@@ -1954,7 +2050,7 @@
 
     document.getElementById('btnPrintTable').onclick = () => window.print();
 
-    // 系統啟動生命週期
+    // 系統初始化
     initAppointmentsData();
     loadAuditLogs();
     renderCurrentView();
