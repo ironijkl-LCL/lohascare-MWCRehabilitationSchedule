@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-  <title>MWC 復康治療公家排班日曆 (OneDrive 同步版)</title>
+  <title>MWC 復康治療公家排班日曆 (Firebase 即時雲端版)</title>
 
   <!-- Tailwind CSS CDN -->
   <script src="https://cdn.tailwindcss.com"></script>
@@ -18,7 +18,7 @@
           },
           colors: {
             brand: { 50: '#f0f9ff', 100: '#e0f2fe', 500: '#0ea5e9', 600: '#0284c7', 700: '#0369a1' },
-            onedrive: { 50: '#eff6ff', 100: '#dbeafe', 500: '#0078d4', 600: '#0067b8', 700: '#004e8c' }
+            firebase: { 50: '#fffbeb', 100: '#fef3c7', 500: '#f59e0b', 600: '#d97706', 700: '#b45309' }
           }
         }
       }
@@ -63,18 +63,18 @@
   <!-- Minimalist Sticky Header -->
   <header class="bg-white/95 backdrop-blur-md border-b border-slate-200 sticky top-0 z-30 no-print transition-all">
     <div class="max-w-7xl mx-auto px-3 sm:px-6 h-14 flex items-center justify-between gap-2">
-      <!-- Brand & Link Access Status -->
+      <!-- Brand & Cloud Status -->
       <div class="flex items-center space-x-2 sm:space-x-3 min-w-0">
-        <div class="w-8 h-8 rounded-lg bg-onedrive-600 text-white flex items-center justify-center font-bold text-sm shadow-sm flex-shrink-0">
-          <i class="fa-solid fa-cloud text-xs"></i>
+        <div class="w-8 h-8 rounded-lg bg-amber-500 text-white flex items-center justify-center font-bold text-sm shadow-sm flex-shrink-0">
+          <i class="fa-solid fa-fire text-base"></i>
         </div>
         <div class="min-w-0">
           <div class="flex items-center space-x-1.5 sm:space-x-2">
             <h1 class="font-bold text-slate-900 text-xs sm:text-base tracking-tight truncate">MWC 復康排班日曆</h1>
-            <!-- OneDrive Sync Status Pill -->
-            <button id="btnOneDriveStatus" title="點擊檢視 OneDrive 同步設定" class="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-semibold bg-onedrive-50 text-onedrive-700 border border-onedrive-200 hover:bg-onedrive-100 transition">
-              <span id="oneDriveStatusDot" class="w-1.5 h-1.5 rounded-full bg-onedrive-500 mr-1 animate-pulse"></span>
-              <span id="oneDriveStatusText">OneDrive 本地模式</span>
+            <!-- Firebase Live Cloud Status Pill -->
+            <button id="btnOpenFirebaseModal" title="點擊檢視 Firebase 雲端即時連線設定" class="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-semibold bg-amber-50 text-amber-800 border border-amber-200 hover:bg-amber-100 transition">
+              <span id="cloudStatusDot" class="w-2 h-2 rounded-full bg-slate-400 mr-1.5"></span>
+              <span id="cloudStatusText">未連線 Firebase</span>
             </button>
           </div>
         </div>
@@ -82,7 +82,7 @@
 
       <!-- Action Cluster -->
       <div class="flex items-center space-x-1.5 sm:space-x-2 flex-shrink-0">
-        <!-- Current Operator Pill -->
+        <!-- Current Operator Badge -->
         <button id="btnSwitchOperator" title="點擊切換修改者身份" class="inline-flex items-center space-x-1 px-2 py-1.5 rounded-lg border border-slate-200 bg-slate-50 hover:bg-slate-100 text-slate-700 text-xs font-medium transition">
           <i class="fa-solid fa-id-badge text-slate-500 text-xs"></i>
           <span class="hidden md:inline text-slate-500">修改人:</span>
@@ -90,20 +90,15 @@
           <i class="fa-solid fa-angle-down text-[9px] text-slate-400"></i>
         </button>
 
-        <!-- Desktop Quick Actions -->
+        <!-- Desktop Action Buttons -->
         <div class="hidden lg:flex items-center space-x-1.5">
-          <!-- Student Audit Button (Directly answers the prompt) -->
+          <!-- Student Audit Button -->
           <button id="btnOpenClientAudit" title="核對各個報班學員日期與節數" class="inline-flex items-center space-x-1 px-2.5 py-1.5 rounded-lg border border-sky-200 bg-sky-50 hover:bg-sky-100 text-sky-800 text-xs font-medium transition shadow-2xs">
             <i class="fa-solid fa-user-check text-sky-600"></i>
             <span>學員節數核對</span>
           </button>
 
-          <!-- OneDrive Sync Hub Trigger -->
-          <button id="btnOpenOneDriveModal" title="設定 OneDrive 共用資料夾同步" class="inline-flex items-center space-x-1 px-2.5 py-1.5 rounded-lg border border-onedrive-200 bg-onedrive-50 hover:bg-onedrive-100 text-onedrive-800 text-xs font-medium transition shadow-2xs">
-            <i class="fa-brands fa-microsoft text-onedrive-600"></i>
-            <span>OneDrive 同步中心</span>
-          </button>
-
+          <!-- Audit Trail Report -->
           <button id="btnOpenAuditModal" title="查閱完整修改歷史報告" class="inline-flex items-center space-x-1 px-2.5 py-1.5 rounded-lg border border-slate-200 bg-white hover:bg-slate-50 text-slate-700 text-xs font-medium transition shadow-2xs">
             <i class="fa-solid fa-clock-rotate-left text-slate-600"></i>
             <span>修改報告</span>
@@ -116,13 +111,13 @@
           <button id="btnMobileMoreActions" class="p-2 rounded-lg border border-slate-200 bg-white hover:bg-slate-50 text-slate-700 text-xs transition">
             <i class="fa-solid fa-ellipsis-vertical text-slate-600"></i>
           </button>
-          <div id="mobileMoreDropdown" class="hidden absolute right-0 mt-1.5 w-48 bg-white border border-slate-200 rounded-xl shadow-xl py-1.5 z-50 text-xs divide-y divide-slate-100">
+          <div id="mobileMoreDropdown" class="hidden absolute right-0 mt-1.5 w-52 bg-white border border-slate-200 rounded-xl shadow-xl py-1.5 z-50 text-xs divide-y divide-slate-100">
             <div class="py-1">
-              <button id="btnMobileClientAudit" class="w-full text-left px-3 py-2 text-sky-800 hover:bg-sky-50 flex items-center space-x-2">
-                <i class="fa-solid fa-user-check text-sky-600 w-4"></i><span>學員節數核對表</span>
+              <button id="btnMobileFirebase" class="w-full text-left px-3 py-2 text-amber-800 hover:bg-amber-50 flex items-center space-x-2">
+                <i class="fa-solid fa-fire text-amber-600 w-4"></i><span>Firebase 雲端連線設定</span>
               </button>
-              <button id="btnMobileOneDrive" class="w-full text-left px-3 py-2 text-onedrive-800 hover:bg-onedrive-50 flex items-center space-x-2">
-                <i class="fa-brands fa-microsoft text-onedrive-600 w-4"></i><span>OneDrive 同步中心</span>
+              <button id="btnMobileClientAudit" class="w-full text-left px-3 py-2 text-sky-800 hover:bg-sky-50 flex items-center space-x-2">
+                <i class="fa-solid fa-user-check text-sky-600 w-4"></i><span>學員節數核對總表</span>
               </button>
               <button id="btnMobileAudit" class="w-full text-left px-3 py-2 text-slate-700 hover:bg-slate-50 flex items-center justify-between">
                 <div class="flex items-center space-x-2"><i class="fa-solid fa-clock-rotate-left text-slate-600 w-4"></i><span>修改歷史報告</span></div>
@@ -132,7 +127,7 @@
           </div>
         </div>
 
-        <!-- New Appointment CTA -->
+        <!-- New Appointment Trigger -->
         <button id="btnOpenNewModal" class="inline-flex items-center space-x-1 px-2.5 sm:px-3 py-1.5 rounded-lg bg-slate-900 hover:bg-slate-800 text-white text-xs font-medium transition shadow-sm">
           <i class="fa-solid fa-plus text-xs"></i>
           <span>預約</span>
@@ -168,7 +163,7 @@
 
           <div class="flex items-center space-x-1.5 pl-0.5">
             <h2 id="currentPeriodLabel" class="text-xs sm:text-base font-bold text-slate-900 tracking-tight whitespace-nowrap">2026年 10月</h2>
-            <button id="btnJumpToOrigin" class="text-[10px] sm:text-[11px] font-medium text-slate-600 hover:text-slate-900 bg-slate-100 px-1.5 sm:px-2 py-0.5 rounded transition whitespace-nowrap">開班起點 (10/02)</button>
+            <button id="btnJumpToOrigin" class="text-[10px] sm:text-[11px] font-medium text-slate-600 hover:text-slate-900 bg-slate-100 px-1.5 sm:px-2 py-0.5 rounded transition whitespace-nowrap">首日 (10/02)</button>
             <button id="btnJumpToToday" class="text-[10px] sm:text-[11px] font-medium text-slate-600 hover:text-slate-900 bg-slate-100 px-1.5 sm:px-2 py-0.5 rounded transition whitespace-nowrap">今天</button>
           </div>
         </div>
@@ -315,6 +310,78 @@
     </div>
   </main>
 
+  <!-- MODAL: FIREBASE CLOUD REAL-TIME CONFIGURATION -->
+  <div id="firebaseModal" class="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/40 backdrop-blur-xs hidden p-4">
+    <div class="bg-white rounded-xl shadow-xl max-w-lg w-full overflow-hidden border border-slate-200 flex flex-col max-h-[90vh]">
+      <div class="px-5 py-3.5 bg-gradient-to-r from-amber-500 to-amber-600 text-white flex items-center justify-between">
+        <div class="flex items-center space-x-2">
+          <i class="fa-solid fa-fire text-white text-base"></i>
+          <div>
+            <h3 class="text-sm font-bold">Firebase 雲端即時連線設定</h3>
+            <p class="text-[10px] text-amber-100">所有人即時見到最新排班、即時修改、跨裝置毫秒級同步</p>
+          </div>
+        </div>
+        <button id="btnCloseFirebaseModal" class="text-amber-100 hover:text-white transition"><i class="fa-solid fa-xmark text-sm"></i></button>
+      </div>
+
+      <div class="p-5 space-y-4 overflow-y-auto text-xs flex-1">
+        <div id="firebaseAuthAlert" class="hidden p-3 bg-rose-50 border border-rose-200 rounded-lg text-rose-950 space-y-1.5">
+          <div class="font-bold flex items-center text-rose-700">
+            <i class="fa-solid fa-triangle-exclamation mr-1.5"></i>偵測到 Authentication 尚未啟用 (auth/configuration-not-found)
+          </div>
+          <p class="text-[11px] leading-relaxed text-rose-800">
+            此錯誤是因為 Firebase 專案尚未開啟<strong>「匿名登入 (Anonymous)」</strong>功能。只需 2 個步驟即可開通：
+          </p>
+          <ol class="list-decimal list-inside text-[11px] space-y-1 text-rose-900 font-medium pl-1">
+            <li>開啟 <a href="https://console.firebase.google.com/project/mwcrehabilitationschedule/authentication" target="_blank" class="text-indigo-600 underline font-bold">Firebase Authentication 控制台</a> ➔ 點擊「開始使用」。</li>
+            <li>在「登入方法 (Sign-in method)」中找到「<strong>匿名 (Anonymous)</strong>」，點進去將其勾選<strong>啟用</strong>並儲存。</li>
+          </ol>
+        </div>
+
+        <div class="p-3 bg-amber-50 border border-amber-200 rounded-lg space-y-1.5 text-amber-950">
+          <div class="font-bold flex items-center">
+            <i class="fa-solid fa-circle-info text-amber-600 mr-1.5"></i>如何填寫下方設定？
+          </div>
+          <p class="text-[11px] leading-relaxed">
+            回到你在 Firebase 控制台的專案 <strong>MWCRehabilitationSchedule</strong>，在「+ 新增應用程式」產生的 <code class="bg-white px-1 py-0.5 rounded border font-mono">firebaseConfig</code>，複製並直接貼在下方文字方塊中，點擊「儲存並連線」即可！
+          </p>
+        </div>
+
+        <div>
+          <label class="block font-semibold text-slate-800 mb-1">Firebase 設定代碼 (firebaseConfig JSON 或 Object)：</label>
+          <textarea id="firebaseConfigInput" rows="7" placeholder='{
+  "apiKey": "AIzaSy...",
+  "authDomain": "mwcrehabilitationschedule.firebaseapp.com",
+  "projectId": "mwcrehabilitationschedule",
+  "storageBucket": "...",
+  "messagingSenderId": "...",
+  "appId": "..."
+}' class="w-full font-mono text-[11px] p-2.5 border border-slate-300 rounded-lg focus:outline-none focus:ring-1 focus:ring-amber-500 bg-slate-50"></textarea>
+        </div>
+
+        <div class="flex items-center space-x-2">
+          <button id="btnSaveFirebaseConfig" class="px-4 py-2 bg-amber-600 hover:bg-amber-700 text-white rounded-lg font-semibold transition flex items-center space-x-1.5 shadow-2xs">
+            <i class="fa-solid fa-plug text-xs"></i>
+            <span>儲存並啟用即時同步</span>
+          </button>
+          <button id="btnPushInitialData" class="px-3 py-2 bg-white hover:bg-slate-50 border border-slate-300 text-slate-700 rounded-lg font-medium transition flex items-center space-x-1">
+            <i class="fa-solid fa-cloud-arrow-up text-xs text-sky-600"></i>
+            <span>上傳初始 104+ 節排班到雲端</span>
+          </button>
+        </div>
+
+        <div class="pt-2 border-t border-slate-100 text-[11px] text-slate-500 space-y-1">
+          <p>・<strong>離線備份防護</strong>：若尚未填入 Firebase，系統會安全運作於本機快取模式，絕不遺失資料。</p>
+          <p>・<strong>共享連結給同事</strong>：連線成功後，把此網頁傳給任何同事，大家看到的均為同一個雲端資料庫。</p>
+        </div>
+      </div>
+
+      <div class="p-3 bg-slate-50 border-t border-slate-200 flex justify-end">
+        <button id="btnCloseFirebaseModalFooter" class="px-4 py-1.5 bg-slate-900 hover:bg-slate-800 text-white rounded-lg text-xs font-medium transition">關閉</button>
+      </div>
+    </div>
+  </div>
+
   <!-- MODAL: CLIENT SESSION AUDIT & VERIFICATION -->
   <div id="clientAuditModal" class="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/40 backdrop-blur-xs hidden p-4">
     <div class="bg-white rounded-xl shadow-xl max-w-4xl w-full overflow-hidden border border-slate-200 flex flex-col max-h-[90vh]">
@@ -370,79 +437,6 @@
       <div class="p-3 bg-slate-50 border-t border-slate-200 flex items-center justify-between text-xs">
         <span class="text-[11px] text-slate-500">* 資料直接對齊自 MWC_復康排班表_2026-10-07.csv</span>
         <button id="btnCloseClientAuditFooter" class="px-4 py-1.5 bg-slate-900 hover:bg-slate-800 text-white rounded-lg text-xs font-medium transition">關閉</button>
-      </div>
-    </div>
-  </div>
-
-  <!-- MODAL: ONEDRIVE SYNC & COLLABORATION CENTER -->
-  <div id="oneDriveModal" class="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/40 backdrop-blur-xs hidden p-4">
-    <div class="bg-white rounded-xl shadow-xl max-w-lg w-full overflow-hidden border border-slate-200 flex flex-col max-h-[88vh]">
-      <div class="px-5 py-3.5 bg-onedrive-700 text-white flex items-center justify-between">
-        <div class="flex items-center space-x-2">
-          <i class="fa-solid fa-cloud-arrow-up text-onedrive-200 text-base"></i>
-          <div>
-            <h3 class="text-sm font-bold">OneDrive 同步與資料一致性中心</h3>
-            <p class="text-[10px] text-onedrive-100">無外網權限下，確保各同事排班資料 100% 同步一致</p>
-          </div>
-        </div>
-        <button id="btnCloseOneDriveModal" class="text-onedrive-200 hover:text-white transition"><i class="fa-solid fa-xmark text-sm"></i></button>
-      </div>
-
-      <div class="p-5 space-y-4 overflow-y-auto text-xs flex-1">
-        <!-- Solution 1: Direct File System Access API -->
-        <div class="p-3.5 rounded-lg border border-onedrive-200 bg-onedrive-50/50 space-y-2">
-          <div class="flex items-center justify-between">
-            <span class="font-bold text-onedrive-900 flex items-center">
-              <i class="fa-solid fa-folder-open text-onedrive-600 mr-1.5"></i>方案 A：直連 OneDrive 同步檔案 (最推薦)
-            </span>
-            <span class="text-[9px] bg-onedrive-200 text-onedrive-800 px-1.5 py-0.5 rounded font-mono font-bold">零外部權限</span>
-          </div>
-          <p class="text-slate-600 text-[11px] leading-relaxed">
-            在電腦將本日曆與 <code class="font-mono bg-white px-1 py-0.5 rounded border">mwc_schedule.json</code> 存入已共用的 OneDrive 資料夾。點選「連接檔案」，日後每次儲存均會自動覆蓋該同步檔，OneDrive 數秒內自動將更新推送到全體同事電腦！
-          </p>
-          <div class="flex items-center space-x-2 pt-1">
-            <button id="btnConnectOneDriveFile" class="px-3 py-1.5 bg-onedrive-600 hover:bg-onedrive-700 text-white rounded-lg font-medium transition flex items-center space-x-1 shadow-2xs">
-              <i class="fa-solid fa-link text-xs"></i>
-              <span>選取 OneDrive 檔案直連</span>
-            </button>
-            <span id="oneDriveDirectFileName" class="text-[11px] text-slate-500 italic truncate max-w-[160px]">尚未選取檔案</span>
-          </div>
-        </div>
-
-        <!-- Solution 2: Drag & Drop CSV / JSON Sync -->
-        <div class="p-3.5 rounded-lg border border-slate-200 bg-white space-y-2">
-          <span class="font-bold text-slate-800 flex items-center">
-            <i class="fa-solid fa-file-import text-emerald-600 mr-1.5"></i>方案 B：載入 / 匯出 OneDrive CSV (Excel 共同編輯模式)
-          </span>
-          <p class="text-slate-600 text-[11px] leading-relaxed">
-            若習慣在 OneDrive 共同編輯 Excel / CSV，您可以直接將 OneDrive 中的 CSV 拖曳至此處即刻載入，或在修改後點擊「匯出並存回 OneDrive」。
-          </p>
-          <div class="flex items-center space-x-2 pt-1">
-            <label class="px-3 py-1.5 bg-white hover:bg-slate-50 border border-slate-300 text-slate-700 rounded-lg font-medium transition cursor-pointer flex items-center space-x-1">
-              <i class="fa-solid fa-upload text-xs text-sky-600"></i>
-              <span>載入 OneDrive CSV / JSON</span>
-              <input type="file" id="importOneDriveFileInput" accept=".csv,.json" class="hidden">
-            </label>
-            <button id="btnDownloadUpdatedSchedule" class="px-3 py-1.5 bg-white hover:bg-slate-50 border border-slate-300 text-slate-700 rounded-lg font-medium transition flex items-center space-x-1">
-              <i class="fa-solid fa-download text-xs text-emerald-600"></i>
-              <span>下載覆蓋檔存回 OneDrive</span>
-            </button>
-          </div>
-        </div>
-
-        <!-- Security & Consistency Tips -->
-        <div class="bg-amber-50 border border-amber-200 rounded-lg p-3 text-[11px] text-amber-900 space-y-1">
-          <div class="font-bold flex items-center">
-            <i class="fa-solid fa-shield-halved mr-1 text-amber-600"></i>
-            <span>如何保證同事看到的資料完全一致？</span>
-          </div>
-          <p>1. 請同事們打開「同一個 OneDrive 共用連結」或本地同步資料夾中的日曆檔。</p>
-          <p>2. 任何一位同事編輯排班後，系統會將操作者簽署於修改報告中，防止衝突與責任混淆。</p>
-        </div>
-      </div>
-
-      <div class="p-3 bg-slate-50 border-t border-slate-200 flex justify-end">
-        <button id="btnCloseOneDriveModalFooter" class="px-4 py-1.5 bg-slate-900 hover:bg-slate-800 text-white rounded-lg text-xs font-medium transition">完成</button>
       </div>
     </div>
   </div>
@@ -576,14 +570,14 @@
     </div>
   </div>
 
-  <!-- MODAL: OPERATOR IDENTITY MODAL -->
+  <!-- MODAL: OPERATOR IDENTITY -->
   <div id="operatorModal" class="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/40 backdrop-blur-xs hidden p-4">
     <div class="bg-white rounded-xl shadow-xl max-w-sm w-full p-5 space-y-4 border border-slate-200">
       <div class="flex items-center space-x-2.5 text-slate-900">
         <div class="w-8 h-8 rounded-full bg-slate-100 text-slate-700 flex items-center justify-center"><i class="fa-solid fa-user-pen text-sm"></i></div>
         <div>
           <h4 class="text-sm font-bold">登記修改者身份</h4>
-          <p class="text-[11px] text-slate-500">在修改報告與 OneDrive 同步檔中署名</p>
+          <p class="text-[11px] text-slate-500">在修改報告與雲端同步中署名</p>
         </div>
       </div>
       <div class="space-y-3 text-xs">
@@ -605,7 +599,7 @@
     </div>
   </div>
 
-  <!-- AUDIT LOG MODAL -->
+  <!-- MODAL: AUDIT LOG -->
   <div id="auditModal" class="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/40 backdrop-blur-xs hidden p-4">
     <div class="bg-white rounded-xl shadow-xl max-w-3xl w-full overflow-hidden border border-slate-200 flex flex-col max-h-[85vh]">
       <div class="px-5 py-3.5 bg-slate-900 text-white flex items-center justify-between">
@@ -639,6 +633,10 @@
   <div id="toastContainer" class="fixed bottom-4 right-4 z-50 flex flex-col space-y-2 pointer-events-none"></div>
 
   <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+    import { getAuth, signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+    import { getFirestore, doc, setDoc, deleteDoc, onSnapshot, collection } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
     // Official Hong Kong Public Holidays Database
     const HK_PUBLIC_HOLIDAYS = {
       "2026-01-01": "一月一日", "2026-02-17": "農曆年初一", "2026-02-18": "農曆年初二", "2026-02-19": "農曆年初三",
@@ -655,52 +653,35 @@
 
     // Comprehensive authentic schedule from MWC_復康排班表_2026-10-07.csv
     const INITIAL_AUTHENTIC_SCHEDULE = [
-      // 2026-10-02
       { id: "mwc-001", date: "2026-10-02", startTime: "09:30", endTime: "10:30", client: "何愛蘭", service: "PT+PTA (9 Sessions)", discipline: "PT", staff: "PTA 珊", section: "Section 9 Cancel", status: "cancelled", cancelReason: "原排班表標記取消", notes: "防跌高危院友", lastModifiedBy: "系統匯入" },
       { id: "mwc-002", date: "2026-10-02", startTime: "09:30", endTime: "10:15", client: "全興棠", service: "OTA (8 Sessions)", discipline: "OT", staff: "OTA Rebecca", section: "Section 9", status: "active", cancelReason: "", notes: "患肢活動度訓練", lastModifiedBy: "系統匯入" },
       { id: "mwc-003", date: "2026-10-02", startTime: "13:30", endTime: "14:15", client: "羅屏蘇", service: "ST (10 Sessions)", discipline: "ST", staff: "ST Kelvin", section: "Section 9", status: "active", cancelReason: "", notes: "吞嚥肌力訓練", lastModifiedBy: "系統匯入" },
       { id: "mwc-004", date: "2026-10-02", startTime: "15:30", endTime: "16:15", client: "黃婉霞", service: "ST (10 Sessions)", discipline: "ST", staff: "ST Kelvin", section: "Section 6", status: "active", cancelReason: "", notes: "言語清晰度鍛鍊", lastModifiedBy: "系統匯入" },
       { id: "mwc-005", date: "2026-10-02", startTime: "14:00", endTime: "15:00", client: "鄧源", service: "PTA (8 Sessions)", discipline: "PT", staff: "PTA 珊", section: "Section 5", status: "active", cancelReason: "", notes: "步態與耐力訓練", lastModifiedBy: "系統匯入" },
-
-      // 2026-10-05
       { id: "mwc-006", date: "2026-10-05", startTime: "09:30", endTime: "10:30", client: "石家璐", service: "PTA (8 Sessions)", discipline: "PT", staff: "PTA 珊", section: "Section 7", status: "active", cancelReason: "", notes: "雙下肢伸展與支撐", lastModifiedBy: "系統匯入" },
       { id: "mwc-007", date: "2026-10-05", startTime: "15:00", endTime: "16:00", client: "陳碧玉", service: "PTA (8 Sessions)", discipline: "PT", staff: "PTA 珊", section: "Section 7", status: "active", cancelReason: "", notes: "膝關節活動度訓練", lastModifiedBy: "系統匯入" },
       { id: "mwc-008", date: "2026-10-05", startTime: "16:00", endTime: "17:00", client: "連楚珠", service: "PTA (8 Sessions)", discipline: "PT", staff: "PTA 珊", section: "Section 7", status: "active", cancelReason: "", notes: "本體感覺練習", lastModifiedBy: "系統匯入" },
       { id: "mwc-009", date: "2026-10-05", startTime: "13:30", endTime: "14:30", client: "鄧源", service: "PTA (8 Sessions)", discipline: "PT", staff: "PTA 珊", section: "Section 6", status: "active", cancelReason: "", notes: "坐立平衡加強", lastModifiedBy: "系統匯入" },
-
-      // 2026-10-06
       { id: "mwc-010", date: "2026-10-06", startTime: "14:00", endTime: "14:45", client: "陳迎華", service: "ST (10 Sessions)", discipline: "ST", staff: "ST Tammy", section: "Section 2", status: "active", cancelReason: "", notes: "發音溝通圖卡練習", lastModifiedBy: "系統匯入" },
       { id: "mwc-011", date: "2026-10-06", startTime: "14:30", endTime: "15:30", client: "羅屏蘇", service: "OTA (8 Sessions)", discipline: "OT", staff: "OTA Rebecca", section: "Section 8", status: "active", cancelReason: "", notes: "上肢協調訓練", lastModifiedBy: "系統匯入" },
-
-      // 2026-10-07
       { id: "mwc-012", date: "2026-10-07", startTime: "09:45", endTime: "10:45", client: "繆馬松", service: "PTA (8 Sessions)", discipline: "PT", staff: "PTA B哥", section: "Section 8 Cancel", status: "cancelled", cancelReason: "原排班表標記取消", notes: "請假暫停", lastModifiedBy: "系統匯入" },
       { id: "mwc-013", date: "2026-10-07", startTime: "12:00", endTime: "13:00", client: "羅漢星", service: "PTA (8 Sessions)", discipline: "PT", staff: "PTA B哥", section: "Section 6 Cancel", status: "cancelled", cancelReason: "原排班表標記取消", notes: "院友覆診", lastModifiedBy: "系統匯入" },
       { id: "mwc-014", date: "2026-10-07", startTime: "13:30", endTime: "14:15", client: "羅屏蘇", service: "ST (10 Sessions)", discipline: "ST", staff: "ST Kelvin", section: "Section 10 Cancel", status: "cancelled", cancelReason: "原排班表標記取消", notes: "時段調整", lastModifiedBy: "系統匯入" },
       { id: "mwc-015", date: "2026-10-07", startTime: "09:30", endTime: "10:30", client: "曾昭群", service: "PT+PTA (9 Sessions)", discipline: "PT", staff: "PT Sing", section: "Section 1", status: "active", cancelReason: "", notes: "初次排班評估", lastModifiedBy: "系統匯入" },
       { id: "mwc-016", date: "2026-10-07", startTime: "16:30", endTime: "17:30", client: "關黃兆平", service: "PT+PTA (9 Sessions)", discipline: "PT", staff: "PTA B哥", section: "Section 2 Cancel", status: "cancelled", cancelReason: "原排班表標記取消", notes: "改期", lastModifiedBy: "系統匯入" },
       { id: "mwc-017", date: "2026-10-07", startTime: "09:30", endTime: "10:30", client: "吳淑媛", service: "OT+OTA (7 Sessions)", discipline: "OT", staff: "OT Ken", section: "Section 1", status: "active", cancelReason: "", notes: "日常生活自理評估", lastModifiedBy: "系統匯入" },
-
-      // 2026-10-08
       { id: "mwc-018", date: "2026-10-08", startTime: "14:30", endTime: "15:15", client: "周錦全", service: "ST (10 Sessions)", discipline: "ST", staff: "ST Tammy", section: "Section 3", status: "active", cancelReason: "", notes: "口腔感覺刺激", lastModifiedBy: "系統匯入" },
       { id: "mwc-019", date: "2026-10-08", startTime: "16:00", endTime: "17:00", client: "吳燦燊", service: "PTA (8 Sessions)", discipline: "PT", staff: "PTA 珊", section: "Section 4", status: "active", cancelReason: "", notes: "助行器步態練習", lastModifiedBy: "系統匯入" },
       { id: "mwc-020", date: "2026-10-08", startTime: "09:45", endTime: "10:45", client: "張明清", service: "PT+PTA (9 Sessions)", discipline: "PT", staff: "PTA 珊", section: "Section 1", status: "active", cancelReason: "", notes: "上肢主動關節運動", lastModifiedBy: "系統匯入" },
-
-      // 2026-10-09
       { id: "mwc-021", date: "2026-10-09", startTime: "15:30", endTime: "16:15", client: "黃婉霞", service: "ST (10 Sessions)", discipline: "ST", staff: "ST Kelvin", section: "Section 7 Cancel", status: "cancelled", cancelReason: "原排班表標記取消", notes: "家屬探訪請假", lastModifiedBy: "系統匯入" },
       { id: "mwc-022", date: "2026-10-09", startTime: "14:00", endTime: "15:00", client: "鄧源", service: "PTA (8 Sessions)", discipline: "PT", staff: "PTA 珊", section: "Section 7", status: "active", cancelReason: "", notes: "下肢肌力增強", lastModifiedBy: "系統匯入" },
       { id: "mwc-023", date: "2026-10-09", startTime: "13:30", endTime: "14:15", client: "羅屏蘇", service: "ST (10 Sessions)", discipline: "ST", staff: "ST Kelvin", section: "Section 10 Cancel", status: "cancelled", cancelReason: "原排班表標記取消", notes: "請假", lastModifiedBy: "系統匯入" },
       { id: "mwc-024", date: "2026-10-09", startTime: "09:30", endTime: "10:30", client: "何愛蘭", service: "PT+PTA (9 Sessions)", discipline: "PT", staff: "PTA 珊", section: "Section 9", status: "active", cancelReason: "", notes: "輪椅轉移位訓練", lastModifiedBy: "系統匯入" },
-
-      // 2026-10-10
       { id: "mwc-025", date: "2026-10-10", startTime: "09:30", endTime: "10:30", client: "何愛蘭", service: "PTA (8 Sessions)", discipline: "PT", staff: "PTA 珊", section: "Section 1", status: "active", cancelReason: "", notes: "核心肌群與骨盆穩定", lastModifiedBy: "系統匯入" },
-
-      // 2026-10-12
       { id: "mwc-026", date: "2026-10-12", startTime: "09:30", endTime: "10:30", client: "石家璐", service: "PTA (8 Sessions)", discipline: "PT", staff: "PTA 珊", section: "Section 8", status: "active", cancelReason: "", notes: "階梯上下步態訓練", lastModifiedBy: "系統匯入" },
       { id: "mwc-027", date: "2026-10-12", startTime: "15:00", endTime: "16:00", client: "陳碧玉", service: "PTA (8 Sessions)", discipline: "PT", staff: "PTA 珊", section: "Section 8", status: "active", cancelReason: "", notes: "平衡槓步行訓練", lastModifiedBy: "系統匯入" },
       { id: "mwc-028", date: "2026-10-12", startTime: "16:00", endTime: "17:00", client: "連楚珠", service: "PTA (8 Sessions)", discipline: "PT", staff: "PTA 珊", section: "Section 8", status: "active", cancelReason: "", notes: "下肢阻力帶運動", lastModifiedBy: "系統匯入" },
       { id: "mwc-029", date: "2026-10-12", startTime: "13:30", endTime: "14:30", client: "鄧源", service: "PTA (8 Sessions)", discipline: "PT", staff: "PTA 珊", section: "Section 8", status: "active", cancelReason: "", notes: "結案前功能維持", lastModifiedBy: "系統匯入" },
-
-      // 2026-10-13 to 2026-12-24 Continuity
       { id: "mwc-030", date: "2026-10-13", startTime: "14:00", endTime: "14:45", client: "陳迎華", service: "ST (10 Sessions)", discipline: "ST", staff: "ST Tammy", section: "Section 3", status: "active", cancelReason: "", notes: "口腔動作練習", lastModifiedBy: "系統匯入" },
       { id: "mwc-031", date: "2026-10-13", startTime: "14:30", endTime: "15:30", client: "羅屏蘇", service: "OTA (8 Sessions)", discipline: "OT", staff: "OTA Rebecca", section: "Section 1", status: "active", cancelReason: "", notes: "精細動作與握力", lastModifiedBy: "系統匯入" },
       { id: "mwc-032", date: "2026-10-14", startTime: "09:45", endTime: "10:45", client: "繆馬松", service: "PTA (8 Sessions)", discipline: "PT", staff: "PTA B哥", section: "Section 8", status: "active", cancelReason: "", notes: "下肢牽引運動", lastModifiedBy: "系統匯入" },
@@ -790,12 +771,16 @@
       searchQuery: '',
       appointments: [],
       auditLogs: [],
-      oneDriveFileHandle: null // Web File System Access handle
+      firebaseApp: null,
+      firestoreDb: null,
+      firebaseAuth: null,
+      isCloudConnected: false,
+      unsubscribeFirestore: null
     };
 
     function loadScheduleData() {
       try {
-        const stored = localStorage.getItem('mwc_onedrive_synced_schedule');
+        const stored = localStorage.getItem('mwc_cloud_synced_schedule');
         if (stored) {
           const parsed = JSON.parse(stored);
           if (Array.isArray(parsed) && parsed.length > 0) return parsed;
@@ -805,37 +790,6 @@
     }
 
     state.appointments = loadScheduleData();
-
-    function saveScheduleData(arr, notifyOneDrive = true) {
-      state.appointments = arr;
-      localStorage.setItem('mwc_onedrive_synced_schedule', JSON.stringify(arr));
-      if (notifyOneDrive && state.oneDriveFileHandle) {
-        writeDirectToOneDriveFile(arr);
-      }
-    }
-
-    function addAuditLogRecord(record) {
-      const stored = localStorage.getItem('mwc_audit_logs');
-      let logs = stored ? JSON.parse(stored) : [];
-      const entry = {
-        id: 'audit-' + Date.now(),
-        timestamp: new Date().toLocaleString('zh-HK', { hour12: false }),
-        operator: state.currentOperator,
-        ...record
-      };
-      logs.unshift(entry);
-      if (logs.length > 200) logs.length = 200;
-      localStorage.setItem('mwc_audit_logs', JSON.stringify(logs));
-      state.auditLogs = logs;
-      updateAuditBadge();
-    }
-
-    function updateAuditBadge() {
-      const stored = localStorage.getItem('mwc_audit_logs');
-      const count = stored ? JSON.parse(stored).length : 0;
-      document.getElementById('auditCountBadge').textContent = count;
-      document.getElementById('auditCountBadgeMobile').textContent = count;
-    }
 
     function showToast(message, type = 'info') {
       const container = document.getElementById('toastContainer');
@@ -856,120 +810,163 @@
       }, 3500);
     }
 
-    async function writeDirectToOneDriveFile(dataArray) {
-      if (!state.oneDriveFileHandle) return;
-      try {
-        const writable = await state.oneDriveFileHandle.createWritable();
-        await writable.write(JSON.stringify(dataArray, null, 2));
-        await writable.close();
-        showToast('已即時同步寫入 OneDrive 共用資料夾檔案', 'success');
-        updateOneDriveBadge(true, state.oneDriveFileHandle.name);
-      } catch (err) {
-        console.warn('寫入 OneDrive 失敗:', err);
-        showToast('無法自動寫入 OneDrive，請重新連接檔案', 'warning');
-      }
-    }
-
-    function updateOneDriveBadge(isConnected, fileName = '') {
-      const dot = document.getElementById('oneDriveStatusDot');
-      const text = document.getElementById('oneDriveStatusText');
+    function updateCloudBadge(isConnected) {
+      const dot = document.getElementById('cloudStatusDot');
+      const text = document.getElementById('cloudStatusText');
+      state.isCloudConnected = isConnected;
       if (isConnected) {
-        dot.className = 'w-1.5 h-1.5 rounded-full bg-emerald-500 mr-1 animate-pulse';
-        text.textContent = `已連線: ${fileName}`;
+        dot.className = 'w-2 h-2 rounded-full bg-emerald-500 mr-1.5 animate-pulse';
+        text.textContent = 'Firebase 雲端即時同步中 (mwcrehabilitationschedule)';
       } else {
-        dot.className = 'w-1.5 h-1.5 rounded-full bg-onedrive-500 mr-1 animate-pulse';
-        text.textContent = 'OneDrive 本地模式';
+        dot.className = 'w-2 h-2 rounded-full bg-amber-400 mr-1.5';
+        text.textContent = '離線本地模式';
       }
     }
 
-    document.getElementById('btnConnectOneDriveFile').addEventListener('click', async () => {
-      if (!window.showOpenFilePicker) {
-        showToast('您的瀏覽器不支援本機檔案直接寫入，建議使用 Microsoft Edge 或 Google Chrome', 'warning');
+    // User's official Firebase project configuration
+    const BUILTIN_FIREBASE_CONFIG = {
+      apiKey: "AIzaSyAYTwILwufhGi2SUazXmxAD2t06xwy56eg",
+      authDomain: "mwcrehabilitationschedule.firebaseapp.com",
+      projectId: "mwcrehabilitationschedule",
+      storageBucket: "mwcrehabilitationschedule.firebasestorage.app",
+      messagingSenderId: "987435169756",
+      appId: "1:987435169756:web:bd489e8b97ff5159660119",
+      measurementId: "G-9MZLFBFJB0"
+    };
+
+    async function initFirebaseServices(configObj) {
+      if (!configObj || !configObj.projectId) return;
+      try {
+        if (state.unsubscribeFirestore) state.unsubscribeFirestore();
+        state.firebaseApp = initializeApp(configObj);
+        state.firestoreDb = getFirestore(state.firebaseApp);
+        state.firebaseAuth = getAuth(state.firebaseApp);
+
+        // 嘗試匿名身分驗證，若未在 Console 啟用「匿名登入」則平穩降級，不阻斷 Firestore 連線
+        try {
+          await signInAnonymously(state.firebaseAuth);
+          const alertBox = document.getElementById('firebaseAuthAlert');
+          if (alertBox) alertBox.classList.add('hidden');
+        } catch (authErr) {
+          console.warn('Firebase Auth 匿名驗證提示:', authErr.code, authErr.message);
+          if (authErr.code === 'auth/configuration-not-found' || authErr.code === 'auth/admin-restricted-operation') {
+            const alertBox = document.getElementById('firebaseAuthAlert');
+            if (alertBox) alertBox.classList.remove('hidden');
+            showToast('提示：請至 Firebase 控制台啟用「匿名登入」功能', 'warning');
+          }
+        }
+
+        // Listen to Appointments Collection in Real-Time
+        const colRef = collection(state.firestoreDb, 'artifacts', 'mwc-calendar-app', 'public', 'data', 'appointments');
+        state.unsubscribeFirestore = onSnapshot(colRef, async (snapshot) => {
+          updateCloudBadge(true);
+          if (!snapshot.empty) {
+            const cloudItems = [];
+            snapshot.forEach(docSnap => cloudItems.push(docSnap.data()));
+            state.appointments = cloudItems;
+            localStorage.setItem('mwc_cloud_synced_schedule', JSON.stringify(cloudItems));
+            renderCurrentView();
+          } else {
+            // If the cloud collection is empty on first run, auto-seed the authentic 104+ sessions
+            console.log("Firebase 雲端排班集合為空，正在自動注入初始 104+ 節排班...");
+            for (const item of INITIAL_AUTHENTIC_SCHEDULE) {
+              const dRef = doc(state.firestoreDb, 'artifacts', 'mwc-calendar-app', 'public', 'data', 'appointments', item.id);
+              await setDoc(dRef, item);
+            }
+            showToast('已自動上傳初始 104+ 節排班至 Firebase 雲端！', 'success');
+          }
+        }, (err) => {
+          console.warn('Firestore Snapshot Error:', err);
+          updateCloudBadge(false);
+          if (err.code === 'permission-denied') {
+            showToast('Firestore 讀寫權限不足，請檢查規則或開通匿名登入', 'danger');
+          } else {
+            showToast('Firebase 連線失敗，請檢查網路或 Firestore 權限', 'warning');
+          }
+        });
+
+      } catch (err) {
+        console.error('Firebase Init Error:', err);
+        updateCloudBadge(false);
+        showToast('Firebase 連線失敗，請檢查網路或 Firestore 權限', 'warning');
+      }
+    }
+
+    async function persistAppointmentRemote(appointmentData, isDelete = false) {
+      // 1. Always update local copy
+      if (isDelete) {
+        state.appointments = state.appointments.filter(a => a.id !== appointmentData.id);
+      } else {
+        const idx = state.appointments.findIndex(a => a.id === appointmentData.id);
+        if (idx >= 0) state.appointments[idx] = appointmentData;
+        else state.appointments.push(appointmentData);
+      }
+      localStorage.setItem('mwc_cloud_synced_schedule', JSON.stringify(state.appointments));
+
+      // 2. Push to Firestore if connected
+      if (state.isCloudConnected && state.firestoreDb) {
+        try {
+          const docRef = doc(state.firestoreDb, 'artifacts', 'mwc-calendar-app', 'public', 'data', 'appointments', appointmentData.id);
+          if (isDelete) {
+            await deleteDoc(docRef);
+          } else {
+            await setDoc(docRef, appointmentData);
+          }
+        } catch (e) {
+          console.warn('雲端推播暫時失敗，已保留本地副本:', e);
+        }
+      }
+    }
+
+    // Modal Firebase Trigger
+    document.getElementById('btnOpenFirebaseModal').onclick = () => document.getElementById('firebaseModal').classList.remove('hidden');
+    document.getElementById('btnMobileFirebase').onclick = () => {
+      document.getElementById('mobileMoreDropdown').classList.add('hidden');
+      document.getElementById('firebaseModal').classList.remove('hidden');
+    };
+    document.getElementById('btnCloseFirebaseModal').onclick = () => document.getElementById('firebaseModal').classList.add('hidden');
+    document.getElementById('btnCloseFirebaseModalFooter').onclick = () => document.getElementById('firebaseModal').classList.add('hidden');
+
+    document.getElementById('btnSaveFirebaseConfig').onclick = () => {
+      const raw = document.getElementById('firebaseConfigInput').value.trim();
+      if (!raw) return;
+      try {
+        let clean = raw.replace(/^(const|var|let)\s+firebaseConfig\s*=\s*/, '').replace(/;\s*$/, '');
+        const cfg = JSON.parse(clean);
+        localStorage.setItem('mwc_firebase_config_custom', JSON.stringify(cfg));
+        initFirebaseServices(cfg);
+        document.getElementById('firebaseModal').classList.add('hidden');
+      } catch (e) {
+        showToast('無法解析設定格式，請確認是否為有效 JSON', 'danger');
+      }
+    };
+
+    document.getElementById('btnPushInitialData').onclick = async () => {
+      if (!state.isCloudConnected || !state.firestoreDb) {
+        showToast('請先連線 Firebase 才能上傳！', 'warning');
         return;
       }
+      showToast('正在上傳 104+ 節排班至雲端...', 'info');
       try {
-        const [handle] = await window.showOpenFilePicker({
-          types: [{ description: 'OneDrive 排班同步檔', accept: { 'application/json': ['.json'] } }]
-        });
-        if (handle) {
-          state.oneDriveFileHandle = handle;
-          document.getElementById('oneDriveDirectFileName').textContent = handle.name;
-          const file = await handle.getFile();
-          const content = await file.text();
-          if (content.trim()) {
-            const parsed = JSON.parse(content);
-            if (Array.isArray(parsed) && parsed.length > 0) {
-              saveScheduleData(parsed, false);
-              renderCurrentView();
-              showToast(`成功連接並載入 OneDrive 檔案：${handle.name} (${parsed.length} 節)`, 'success');
-            }
-          }
-          updateOneDriveBadge(true, handle.name);
+        for (const item of INITIAL_AUTHENTIC_SCHEDULE) {
+          const dRef = doc(state.firestoreDb, 'artifacts', 'mwc-calendar-app', 'public', 'data', 'appointments', item.id);
+          await setDoc(dRef, item);
         }
-      } catch (e) {
-        console.info('使用者取消選取檔案');
+        showToast('全部排班已成功上傳至 Firebase 雲端！', 'success');
+      } catch (err) {
+        showToast('上傳過程發生錯誤，請檢查權限設定', 'danger');
       }
-    });
+    };
 
-    document.getElementById('importOneDriveFileInput').addEventListener('change', (e) => {
-      const file = e.target.files[0];
-      if (!file) return;
-      const reader = new FileReader();
-      reader.onload = (evt) => {
-        try {
-          const raw = evt.target.result;
-          let parsedData = [];
-          if (file.name.endsWith('.json')) {
-            parsedData = JSON.parse(raw);
-          } else {
-            // Parse CSV
-            const lines = raw.split(/\r?\n/).filter(l => l.trim().length > 0);
-            for (let i = 1; i < lines.length; i++) {
-              const cols = lines[i].split(',').map(s => s.replace(/^"(.*)"$/, '$1').trim());
-              if (cols.length >= 7) {
-                parsedData.push({
-                  id: 'mwc-csv-' + i,
-                  date: cols[0],
-                  startTime: cols[1],
-                  endTime: cols[2],
-                  client: cols[3],
-                  service: cols[4] || '',
-                  discipline: cols[5] || 'PT',
-                  staff: cols[6] || 'PTA 珊',
-                  section: cols[7] || 'Section 1',
-                  status: (cols[8] && cols[8].includes('取消')) ? 'cancelled' : 'active',
-                  cancelReason: cols[9] || '',
-                  notes: cols[10] || '',
-                  lastModifiedBy: 'OneDrive CSV 匯入'
-                });
-              }
-            }
-          }
-          if (parsedData.length > 0) {
-            saveScheduleData(parsedData, true);
-            renderCurrentView();
-            showToast(`成功從 OneDrive 匯入 ${parsedData.length} 筆排班資料！`, 'success');
-            document.getElementById('oneDriveModal').classList.add('hidden');
-          }
-        } catch (err) {
-          showToast('無法解析檔案，請確認是否為有效 CSV/JSON', 'danger');
-        }
-      };
-      reader.readAsText(file);
-      e.target.value = '';
-    });
-
-    document.getElementById('btnDownloadUpdatedSchedule').addEventListener('click', () => {
-      const blob = new Blob([JSON.stringify(state.appointments, null, 2)], { type: 'application/json' });
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = `mwc_schedule.json`;
-      document.body.appendChild(a);
-      a.click();
-      document.body.removeChild(a);
-      showToast('已下載同步檔，請放入 OneDrive 共用資料夾替換原檔', 'success');
-    });
+    // Auto-load Firebase with built-in or custom config
+    try {
+      const savedCfg = localStorage.getItem('mwc_firebase_config_custom');
+      const activeConfig = savedCfg ? JSON.parse(savedCfg) : BUILTIN_FIREBASE_CONFIG;
+      document.getElementById('firebaseConfigInput').value = JSON.stringify(activeConfig, null, 2);
+      initFirebaseServices(activeConfig);
+    } catch(e) {
+      initFirebaseServices(BUILTIN_FIREBASE_CONFIG);
+    }
 
     function renderClientAuditTable() {
       const tbody = document.getElementById('clientAuditTableBody');
@@ -1012,7 +1009,6 @@
           return `<span class="inline-block px-1.5 py-0.5 rounded text-[10px] font-mono mr-1 mb-1 ${isCan ? 'bg-rose-100 text-rose-700 line-through' : 'bg-slate-100 text-slate-800'}" title="${r.date} ${r.startTime}">${r.date.slice(5)} (${tag})</span>`;
         }).join('');
 
-        // Anomaly Checks
         let statusBadge = '<span class="px-2 py-0.5 bg-emerald-50 text-emerald-700 rounded text-[11px] font-semibold border border-emerald-200">正常無誤</span>';
         if (c.client === '羅屏蘇') {
           statusBadge = '<span class="px-2 py-0.5 bg-amber-50 text-amber-700 rounded text-[11px] font-bold border border-amber-300">已修正 10/16 ST 重複</span>';
@@ -1049,14 +1045,28 @@
     document.getElementById('btnCloseClientAuditModal').onclick = () => document.getElementById('clientAuditModal').classList.add('hidden');
     document.getElementById('btnCloseClientAuditFooter').onclick = () => document.getElementById('clientAuditModal').classList.add('hidden');
 
-    document.getElementById('btnOpenOneDriveModal').onclick = () => document.getElementById('oneDriveModal').classList.remove('hidden');
-    document.getElementById('btnMobileOneDrive').onclick = () => {
-      document.getElementById('mobileMoreDropdown').classList.add('hidden');
-      document.getElementById('oneDriveModal').classList.remove('hidden');
-    };
-    document.getElementById('btnOneDriveStatus').onclick = () => document.getElementById('oneDriveModal').classList.remove('hidden');
-    document.getElementById('btnCloseOneDriveModal').onclick = () => document.getElementById('oneDriveModal').classList.add('hidden');
-    document.getElementById('btnCloseOneDriveModalFooter').onclick = () => document.getElementById('oneDriveModal').classList.add('hidden');
+    // Audit logs tracking
+    function addAuditLogRecord(record) {
+      const stored = localStorage.getItem('mwc_audit_logs');
+      let logs = stored ? JSON.parse(stored) : [];
+      const entry = {
+        id: 'audit-' + Date.now(),
+        timestamp: new Date().toLocaleString('zh-HK', { hour12: false }),
+        operator: state.currentOperator,
+        ...record
+      };
+      logs.unshift(entry);
+      if (logs.length > 200) logs.length = 200;
+      localStorage.setItem('mwc_audit_logs', JSON.stringify(logs));
+      updateAuditBadge();
+    }
+
+    function updateAuditBadge() {
+      const stored = localStorage.getItem('mwc_audit_logs');
+      const count = stored ? JSON.parse(stored).length : 0;
+      document.getElementById('auditCountBadge').textContent = count;
+      document.getElementById('auditCountBadgeMobile').textContent = count;
+    }
 
     function formatDate(d) {
       const year = d.getFullYear();
@@ -1094,7 +1104,6 @@
       const prevDaysCount = new Date(year, month, 0).getDate();
       const filteredList = filterAppointments(state.appointments);
 
-      // Trailing days
       for (let i = firstDay - 1; i >= 0; i--) {
         const d = prevDaysCount - i;
         const cell = document.createElement('div');
@@ -1103,7 +1112,6 @@
         monthGrid.appendChild(cell);
       }
 
-      // Current days
       for (let day = 1; day <= daysInMonth; day++) {
         const dObj = new Date(year, month, day);
         const dateStr = formatDate(dObj);
@@ -1116,7 +1124,7 @@
         const cell = document.createElement('div');
         cell.className = `min-h-[75px] sm:min-h-[110px] p-1 sm:p-1.5 bg-white flex flex-col justify-between transition hover:bg-slate-50/90 cursor-pointer ${
           holiday.isHoliday ? 'bg-rose-50/30 ring-1 ring-rose-100' : ''
-        } ${isToday ? 'ring-2 ring-slate-900 z-10' : ''} ${isSelectedDay ? 'ring-2 ring-onedrive-500 bg-onedrive-50/30' : ''}`;
+        } ${isToday ? 'ring-2 ring-slate-900 z-10' : ''} ${isSelectedDay ? 'ring-2 ring-amber-500 bg-amber-50/30' : ''}`;
 
         const header = document.createElement('div');
         header.className = 'flex items-start justify-between mb-1';
@@ -1184,7 +1192,6 @@
         monthGrid.appendChild(cell);
       }
 
-      // Next month padding
       const totalCells = firstDay + daysInMonth;
       const remaining = totalCells % 7 === 0 ? 0 : 7 - (totalCells % 7);
       for (let nextDay = 1; nextDay <= remaining; nextDay++) {
@@ -1578,7 +1585,7 @@
       });
     });
 
-    appointmentForm.addEventListener('submit', (e) => {
+    appointmentForm.addEventListener('submit', async (e) => {
       e.preventDefault();
       const id = document.getElementById('formEventId').value || ('mwc-' + Date.now());
       const client = document.getElementById('formClientName').value.trim();
@@ -1599,27 +1606,25 @@
         notes, lastModifiedBy: state.currentOperator
       };
 
-      const idx = state.appointments.findIndex(a => a.id === id);
-      if (idx >= 0) {
-        state.appointments[idx] = item;
-        addAuditLogRecord({ client, actionLabel: '更新排班', diff: `${date} ${startTime}-${endTime} (${section})` });
-      } else {
-        state.appointments.push(item);
-        addAuditLogRecord({ client, actionLabel: '新增排班', diff: `${date} ${startTime}-${endTime} (${discipline})` });
-      }
+      const isUpdate = state.appointments.some(a => a.id === id);
+      addAuditLogRecord({
+        client,
+        actionLabel: isUpdate ? '更新排班' : '新增排班',
+        diff: `${date} ${startTime}-${endTime} (${section})`
+      });
 
-      saveScheduleData(state.appointments, true);
+      await persistAppointmentRemote(item, false);
       appointmentModal.classList.add('hidden');
       renderCurrentView();
       showToast(`已儲存排班：${client} (${section})`, 'success');
     });
 
-    document.getElementById('btnDeleteEvent').onclick = () => {
+    document.getElementById('btnDeleteEvent').onclick = async () => {
       const id = document.getElementById('formEventId').value;
       if (!id) return;
-      state.appointments = state.appointments.filter(a => a.id !== id);
-      addAuditLogRecord({ client: document.getElementById('formClientName').value, actionLabel: '刪除排班', diff: '移除排班記錄' });
-      saveScheduleData(state.appointments, true);
+      const clientName = document.getElementById('formClientName').value;
+      addAuditLogRecord({ client: clientName, actionLabel: '刪除排班', diff: '移除排班記錄' });
+      await persistAppointmentRemote({ id }, true);
       appointmentModal.classList.add('hidden');
       renderCurrentView();
       showToast('已刪除該排班記錄', 'info');
