@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-  <title>MWC 復康治療公家排班日曆 (Firebase 即時多方同步版)</title>
+  <title>MWC 治療服務日曆</title>
 
   <!-- Tailwind CSS CDN -->
   <script src="https://cdn.tailwindcss.com"></script>
@@ -15,10 +15,6 @@
           fontFamily: {
             sans: ['Inter', 'Noto Sans TC', '-apple-system', 'BlinkMacSystemFont', 'sans-serif'],
             mono: ['JetBrains Mono', 'ui-monospace', 'monospace']
-          },
-          colors: {
-            brand: { 50: '#f0f9ff', 100: '#e0f2fe', 500: '#0ea5e9', 600: '#0284c7', 700: '#0369a1' },
-            cloud: { 50: '#f0fdf4', 100: '#dcfce7', 500: '#22c55e', 600: '#16a34a', 700: '#15803d' }
           }
         }
       }
@@ -62,7 +58,7 @@
 <body class="bg-slate-50 text-slate-800 min-h-screen flex flex-col">
   <header class="bg-white/95 backdrop-blur-md border-b border-slate-200 sticky top-0 z-30 no-print transition-all">
     <div class="max-w-7xl mx-auto px-3 sm:px-6 h-14 flex items-center justify-between gap-2">
-      <!-- Brand & Cloud Sync Live Status -->
+      <!-- 標題與雲端狀態 -->
       <div class="flex items-center space-x-2 sm:space-x-3 min-w-0">
         <div id="syncStatusIcon" class="w-8 h-8 rounded-lg bg-emerald-600 text-white flex items-center justify-center font-bold text-sm shadow-sm flex-shrink-0 transition-colors">
           <i class="fa-solid fa-arrows-rotate text-xs animate-spin" id="syncSpinner" style="display:none;"></i>
@@ -70,9 +66,8 @@
         </div>
         <div class="min-w-0">
           <div class="flex items-center space-x-1.5 sm:space-x-2">
-            <h1 class="font-bold text-slate-900 text-xs sm:text-base tracking-tight truncate">MWC 復康排班日曆</h1>
-            <!-- Live Cloud Status Pill -->
-            <button id="btnCloudStatus" title="點擊檢視雲端連線資訊" class="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-semibold bg-emerald-50 text-emerald-800 border border-emerald-200 hover:bg-emerald-100 transition">
+            <h1 class="font-bold text-slate-900 text-xs sm:text-base tracking-tight truncate">MWC 治療服務日曆</h1>
+            <button id="btnCloudStatus" class="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-semibold bg-emerald-50 text-emerald-800 border border-emerald-200 hover:bg-emerald-100 transition">
               <span id="cloudStatusDot" class="w-1.5 h-1.5 rounded-full bg-emerald-500 mr-1 animate-pulse"></span>
               <span id="cloudStatusText">多方即時連線中</span>
             </button>
@@ -80,52 +75,71 @@
         </div>
       </div>
 
-      <!-- Action Cluster -->
+      <!-- 操作群組 -->
       <div class="flex items-center space-x-1.5 sm:space-x-2 flex-shrink-0">
-        <!-- Current Operator Pill -->
+        <!-- 修改人 (Jo Jo 權限提示) -->
         <button id="btnSwitchOperator" title="點擊切換修改者身份" class="inline-flex items-center space-x-1 px-2 py-1.5 rounded-lg border border-slate-200 bg-slate-50 hover:bg-slate-100 text-slate-700 text-xs font-medium transition">
           <i class="fa-solid fa-id-badge text-slate-500 text-xs"></i>
           <span class="hidden md:inline text-slate-500">修改人:</span>
-          <span id="currentOperatorLabel" class="font-bold text-slate-900 truncate">PTA 珊</span>
+          <span id="currentOperatorLabel" class="font-bold text-slate-900 truncate">Jo Jo</span>
           <i class="fa-solid fa-angle-down text-[9px] text-slate-400"></i>
         </button>
 
-        <!-- Desktop Quick Action Buttons -->
-        <div class="hidden lg:flex items-center space-x-1.5">
-          <button id="btnOpenClientAudit" title="核對各個報班學員日期與節數" class="inline-flex items-center space-x-1 px-2.5 py-1.5 rounded-lg border border-sky-200 bg-sky-50 hover:bg-sky-100 text-sky-800 text-xs font-medium transition shadow-2xs">
+        <!-- 桌面頂部工具列 -->
+        <div class="hidden xl:flex items-center space-x-1.5">
+          <button id="btnOpenClientAudit" title="核對各個個案日期與節數" class="inline-flex items-center space-x-1 px-2.5 py-1.5 rounded-lg border border-sky-200 bg-sky-50 hover:bg-sky-100 text-sky-800 text-xs font-medium transition shadow-2xs">
             <i class="fa-solid fa-user-check text-sky-600"></i>
-            <span>學員節數核對</span>
+            <span>個案節數核對</span>
           </button>
 
-          <button id="btnOpenRecurModal" title="跨年/跨月批次週期排班" class="inline-flex items-center space-x-1 px-2.5 py-1.5 rounded-lg border border-indigo-200 bg-indigo-50 hover:bg-indigo-100 text-indigo-800 text-xs font-medium transition shadow-2xs">
+          <button id="btnOpenRecurModal" title="跨期連續服務排班" class="inline-flex items-center space-x-1 px-2.5 py-1.5 rounded-lg border border-indigo-200 bg-indigo-50 hover:bg-indigo-100 text-indigo-800 text-xs font-medium transition shadow-2xs">
             <i class="fa-solid fa-repeat text-indigo-600"></i>
-            <span>跨年週期排班</span>
+            <span>連續服務</span>
           </button>
 
-          <button id="btnOpenTeamsConfig" title="Microsoft Teams 異動通知與歷史紀錄" class="inline-flex items-center space-x-1 px-2.5 py-1.5 rounded-lg border border-purple-200 bg-purple-50 hover:bg-purple-100 text-purple-800 text-xs font-medium transition shadow-2xs">
+          <!-- 三大統計按鈕 -->
+          <button id="btnOpenStatsClients" title="按職員統計個案總人次" class="inline-flex items-center space-x-1 px-2.5 py-1.5 rounded-lg border border-teal-200 bg-teal-50 hover:bg-teal-100 text-teal-800 text-xs font-medium transition shadow-2xs">
+            <i class="fa-solid fa-users text-teal-600"></i>
+            <span>職員人次統計</span>
+          </button>
+
+          <button id="btnOpenStatsSessions" title="按職員統計總節數" class="inline-flex items-center space-x-1 px-2.5 py-1.5 rounded-lg border border-blue-200 bg-blue-50 hover:bg-blue-100 text-blue-800 text-xs font-medium transition shadow-2xs">
+            <i class="fa-solid fa-chart-simple text-blue-600"></i>
+            <span>職員節數統計</span>
+          </button>
+
+          <button id="btnOpenStatsRevenue" title="按職員統計總收入" class="inline-flex items-center space-x-1 px-2.5 py-1.5 rounded-lg border border-emerald-200 bg-emerald-50 hover:bg-emerald-100 text-emerald-800 text-xs font-medium transition shadow-2xs">
+            <i class="fa-solid fa-sack-dollar text-emerald-600"></i>
+            <span>職員收入統計</span>
+          </button>
+
+          <button id="btnOpenTeamsConfig" title="Teams 異動通知" class="inline-flex items-center space-x-1 px-2.5 py-1.5 rounded-lg border border-purple-200 bg-purple-50 hover:bg-purple-100 text-purple-800 text-xs font-medium transition shadow-2xs">
             <i class="fa-brands fa-microsoft text-purple-600"></i>
-            <span>Teams 異動通知</span>
-          </button>
-
-          <button id="btnOpenAuditModal" title="查閱全體同事修改歷史報告" class="inline-flex items-center space-x-1 px-2.5 py-1.5 rounded-lg border border-slate-200 bg-white hover:bg-slate-50 text-slate-700 text-xs font-medium transition shadow-2xs">
-            <i class="fa-solid fa-clock-rotate-left text-slate-600"></i>
-            <span>修改報告</span>
-            <span id="auditCountBadge" class="ml-1 px-1.5 py-0.2 bg-slate-800 text-white text-[10px] rounded-full font-mono font-bold">0</span>
+            <span>Teams 通知</span>
           </button>
         </div>
 
-        <!-- Mobile More Menu Trigger -->
-        <div class="relative lg:hidden">
+        <!-- 手機版更多選單 -->
+        <div class="relative xl:hidden">
           <button id="btnMobileMoreActions" class="p-2 rounded-lg border border-slate-200 bg-white hover:bg-slate-50 text-slate-700 text-xs transition">
             <i class="fa-solid fa-ellipsis-vertical text-slate-600"></i>
           </button>
-          <div id="mobileMoreDropdown" class="hidden absolute right-0 mt-1.5 w-48 bg-white border border-slate-200 rounded-xl shadow-xl py-1.5 z-50 text-xs divide-y divide-slate-100">
+          <div id="mobileMoreDropdown" class="hidden absolute right-0 mt-1.5 w-52 bg-white border border-slate-200 rounded-xl shadow-xl py-1.5 z-50 text-xs divide-y divide-slate-100">
             <div class="py-1">
               <button id="btnMobileClientAudit" class="w-full text-left px-3 py-2 text-sky-800 hover:bg-sky-50 flex items-center space-x-2">
-                <i class="fa-solid fa-user-check text-sky-600 w-4"></i><span>學員節數核對表</span>
+                <i class="fa-solid fa-user-check text-sky-600 w-4"></i><span>個案節數核對</span>
               </button>
               <button id="btnMobileRecur" class="w-full text-left px-3 py-2 text-indigo-800 hover:bg-indigo-50 flex items-center space-x-2">
-                <i class="fa-solid fa-repeat text-indigo-600 w-4"></i><span>跨年週期排班</span>
+                <i class="fa-solid fa-repeat text-indigo-600 w-4"></i><span>連續服務</span>
+              </button>
+              <button id="btnMobileStatsClients" class="w-full text-left px-3 py-2 text-teal-800 hover:bg-teal-50 flex items-center space-x-2">
+                <i class="fa-solid fa-users text-teal-600 w-4"></i><span>職員人次統計</span>
+              </button>
+              <button id="btnMobileStatsSessions" class="w-full text-left px-3 py-2 text-blue-800 hover:bg-blue-50 flex items-center space-x-2">
+                <i class="fa-solid fa-chart-simple text-blue-600 w-4"></i><span>職員節數統計</span>
+              </button>
+              <button id="btnMobileStatsRevenue" class="w-full text-left px-3 py-2 text-emerald-800 hover:bg-emerald-50 flex items-center space-x-2">
+                <i class="fa-solid fa-sack-dollar text-emerald-600 w-4"></i><span>職員收入統計</span>
               </button>
               <button id="btnMobileTeams" class="w-full text-left px-3 py-2 text-purple-800 hover:bg-purple-50 flex items-center space-x-2">
                 <i class="fa-brands fa-microsoft text-purple-600 w-4"></i><span>Teams 異動通知</span>
@@ -138,8 +152,8 @@
           </div>
         </div>
 
-        <!-- New Appointment CTA -->
-        <button id="btnOpenNewModal" class="inline-flex items-center space-x-1 px-2.5 sm:px-3 py-1.5 rounded-lg bg-slate-900 hover:bg-slate-800 text-white text-xs font-medium transition shadow-sm">
+        <!-- 新增預約 -->
+        <button id="btnOpenNewModal" class="inline-flex items-center space-x-1 px-3 py-1.5 rounded-lg bg-slate-900 hover:bg-slate-800 text-white text-xs font-medium transition shadow-sm">
           <i class="fa-solid fa-plus text-xs"></i>
           <span>預約</span>
         </button>
@@ -148,11 +162,10 @@
   </header>
 
   <main class="flex-1 max-w-7xl w-full mx-auto p-2 sm:p-4 md:p-6 space-y-3 sm:space-y-4">
-    <!-- Responsive Control Bar -->
+    <!-- 控制列 -->
     <div class="bg-white rounded-xl border border-slate-200/80 p-2.5 sm:p-3 shadow-2xs space-y-2.5 sm:space-y-3">
-      <!-- Upper Controls: Navigation & View Switcher -->
       <div class="flex flex-col md:flex-row items-stretch md:items-center justify-between gap-2.5 sm:gap-3">
-        <!-- Date Navigation Controls -->
+        <!-- 年月切換 -->
         <div class="flex flex-wrap items-center justify-between sm:justify-start gap-1.5 sm:gap-2">
           <div class="inline-flex rounded-lg border border-slate-200 bg-slate-50/80 p-0.5">
             <button id="btnPrevYear" title="上一年" class="px-2 py-1 text-slate-600 hover:text-slate-900 hover:bg-white rounded text-xs transition"><i class="fa-solid fa-angles-left"></i></button>
@@ -161,7 +174,6 @@
             <button id="btnNextYear" title="下一年" class="px-2 py-1 text-slate-600 hover:text-slate-900 hover:bg-white rounded text-xs transition"><i class="fa-solid fa-angles-right"></i></button>
           </div>
 
-          <!-- Quick Jump Selectors -->
           <div class="flex items-center space-x-1">
             <select id="jumpYearSelect" class="bg-slate-50 border border-slate-200 rounded-lg px-2 py-1 text-xs font-semibold text-slate-800 focus:outline-none"></select>
             <select id="jumpMonthSelect" class="bg-slate-50 border border-slate-200 rounded-lg px-2 py-1 text-xs font-semibold text-slate-800 focus:outline-none">
@@ -176,13 +188,12 @@
             返回今天
           </button>
 
-          <!-- Current Month Heading -->
           <div id="currentViewLabel" class="text-sm sm:text-base font-bold text-slate-900 px-1 truncate">
-            2026年 10月
+            2027年 1月
           </div>
         </div>
 
-        <!-- Segmented View Switcher -->
+        <!-- 視圖切換 -->
         <div class="inline-flex rounded-lg border border-slate-200 bg-slate-100/70 p-0.5 text-xs font-medium self-start md:self-auto w-full md:w-auto justify-between sm:justify-start">
           <button id="viewBtnMonth" class="px-3 py-1 rounded-md text-slate-900 bg-white shadow-2xs font-bold transition flex-1 md:flex-initial text-center">月曆</button>
           <button id="viewBtnWeek" class="px-3 py-1 rounded-md text-slate-600 hover:text-slate-900 transition flex-1 md:flex-initial text-center">週時段</button>
@@ -191,18 +202,24 @@
         </div>
       </div>
 
-      <!-- Lower Controls: Multi-Filter Strip -->
+      <!-- 篩選器與部別顏色示範 (PT:黃, OT:綠, ST:紫) -->
       <div class="flex flex-wrap items-center justify-between gap-2 pt-2 border-t border-slate-100 text-xs">
         <div class="flex flex-wrap items-center gap-1.5 sm:gap-2">
-          <!-- Discipline Filters -->
+          <!-- 部別篩選按鈕 (標註對應專屬底色) -->
           <div class="inline-flex rounded-lg border border-slate-200 bg-slate-50 p-0.5">
-            <button class="filter-discipline px-2 py-0.5 rounded text-slate-900 bg-white font-bold shadow-2xs" data-discipline="all">全部部別</button>
-            <button class="filter-discipline px-2 py-0.5 rounded text-slate-600 hover:text-slate-900" data-discipline="PT">物理 PT</button>
-            <button class="filter-discipline px-2 py-0.5 rounded text-slate-600 hover:text-slate-900" data-discipline="OT">職業 OT</button>
-            <button class="filter-discipline px-2 py-0.5 rounded text-slate-600 hover:text-slate-900" data-discipline="ST">言語 ST</button>
+            <button class="filter-discipline px-2.5 py-1 rounded text-slate-900 bg-white font-bold shadow-2xs" data-discipline="all">全部部別</button>
+            <button class="filter-discipline px-2.5 py-1 rounded text-amber-900 hover:bg-amber-100 font-medium transition" data-discipline="PT">
+              <span class="w-2 h-2 rounded-full inline-block bg-amber-400 mr-1"></span>物理 PT
+            </button>
+            <button class="filter-discipline px-2.5 py-1 rounded text-emerald-900 hover:bg-emerald-100 font-medium transition" data-discipline="OT">
+              <span class="w-2 h-2 rounded-full inline-block bg-emerald-500 mr-1"></span>職業 OT
+            </button>
+            <button class="filter-discipline px-2.5 py-1 rounded text-purple-900 hover:bg-purple-100 font-medium transition" data-discipline="ST">
+              <span class="w-2 h-2 rounded-full inline-block bg-purple-500 mr-1"></span>言語 ST
+            </button>
           </div>
 
-          <!-- Staff Selector -->
+          <!-- 職員篩選 -->
           <select id="filterStaffSelect" class="bg-slate-50 border border-slate-200 rounded-lg px-2 py-1 text-slate-700 font-medium focus:outline-none">
             <option value="all">全體負責職員</option>
             <option value="PTA 珊">PTA 珊</option>
@@ -214,7 +231,7 @@
             <option value="OT Ken">OT Ken</option>
           </select>
 
-          <!-- Status Selector -->
+          <!-- 狀態篩選 -->
           <select id="filterStatusSelect" class="bg-slate-50 border border-slate-200 rounded-lg px-2 py-1 text-slate-700 font-medium focus:outline-none">
             <option value="all">所有狀態</option>
             <option value="active">正常排班</option>
@@ -222,15 +239,15 @@
           </select>
         </div>
 
-        <!-- Search Bar -->
+        <!-- 搜尋列 -->
         <div class="relative w-full sm:w-48 md:w-56">
           <i class="fa-solid fa-magnifying-glass absolute left-2.5 top-2 text-slate-400 text-xs"></i>
-          <input type="text" id="searchInput" placeholder="搜尋院友姓名、節數..." class="w-full pl-7 pr-3 py-1 bg-slate-50 border border-slate-200 rounded-lg text-xs placeholder-slate-400 focus:bg-white focus:outline-none focus:ring-1 focus:ring-slate-400 transition">
+          <input type="text" id="searchInput" placeholder="搜尋個案姓名、節數..." class="w-full pl-7 pr-3 py-1 bg-slate-50 border border-slate-200 rounded-lg text-xs placeholder-slate-400 focus:bg-white focus:outline-none focus:ring-1 focus:ring-slate-400 transition">
         </div>
       </div>
     </div>
 
-    <!-- View Container: Month View -->
+    <!-- 月曆視圖 -->
     <div id="viewContainerMonth" class="space-y-3">
       <div class="bg-white rounded-xl border border-slate-200 overflow-hidden shadow-2xs">
         <div class="grid grid-cols-7 border-b border-slate-200 bg-slate-50/80 text-center text-xs font-bold text-slate-600 py-2">
@@ -243,11 +260,11 @@
           <div class="text-sky-600">週六</div>
         </div>
         <div id="monthGrid" class="grid grid-cols-7 divide-x divide-y divide-slate-100 text-xs bg-slate-100">
-          <!-- Populated by JavaScript -->
+          <!-- 由 JS 繪製 -->
         </div>
       </div>
 
-      <!-- Mobile Day Agenda Drawer -->
+      <!-- 手機版當日日程選單 -->
       <div id="mobileDayAgenda" class="bg-white rounded-xl border border-slate-200 p-3 shadow-2xs md:hidden space-y-2">
         <div class="flex items-center justify-between border-b border-slate-100 pb-2">
           <div class="font-bold text-slate-900 text-xs flex items-center space-x-1.5">
@@ -258,13 +275,11 @@
             <i class="fa-solid fa-plus mr-1"></i>新增
           </button>
         </div>
-        <div id="mobileAgendaList" class="space-y-1.5 max-h-64 overflow-y-auto pr-1 text-xs">
-          <!-- Populated by JS -->
-        </div>
+        <div id="mobileAgendaList" class="space-y-1.5 max-h-64 overflow-y-auto pr-1 text-xs"></div>
       </div>
     </div>
 
-    <!-- View Container: Week View -->
+    <!-- 週時段視圖 -->
     <div id="viewContainerWeek" class="hidden bg-white rounded-xl border border-slate-200 overflow-hidden shadow-2xs p-3">
       <div class="overflow-x-auto no-scrollbar">
         <table class="w-full text-xs border-collapse">
@@ -278,7 +293,7 @@
       </div>
     </div>
 
-    <!-- View Container: Table View -->
+    <!-- 清單總表 -->
     <div id="viewContainerTable" class="hidden bg-white rounded-xl border border-slate-200 overflow-hidden shadow-2xs">
       <div class="p-3 border-b border-slate-200 bg-slate-50 flex items-center justify-between flex-wrap gap-2 text-xs">
         <div class="font-bold text-slate-800 flex items-center space-x-1.5">
@@ -300,7 +315,7 @@
             <tr>
               <th class="px-3 py-2">日期</th>
               <th class="px-3 py-2">時間</th>
-              <th class="px-3 py-2">院友姓名</th>
+              <th class="px-3 py-2">個案姓名</th>
               <th class="px-3 py-2">專職部別</th>
               <th class="px-3 py-2">服務類別</th>
               <th class="px-3 py-2">節數進度</th>
@@ -315,12 +330,12 @@
       </div>
     </div>
 
-    <!-- View Container: Year View -->
+    <!-- 年度矩陣 -->
     <div id="viewContainerYear" class="hidden space-y-3">
       <div class="bg-white rounded-xl border border-slate-200 p-3 shadow-2xs flex items-center justify-between">
         <div class="font-bold text-slate-800 text-sm flex items-center space-x-1.5">
           <i class="fa-solid fa-calendar-days text-indigo-600"></i>
-          <span id="yearMatrixTitle">2026 全年度 12 個月復康治療總覽矩陣</span>
+          <span id="yearMatrixTitle">2027 全年度 12 個月治療總覽矩陣</span>
         </div>
         <div class="text-xs text-slate-500">點擊任意月份卡片可直接跳轉深入檢視</div>
       </div>
@@ -328,7 +343,7 @@
     </div>
   </main>
 
-  <!-- MODAL: APPOINTMENT EDIT / CREATE -->
+  <!-- MODAL 1: 新增/編輯預約 -->
   <div id="appointmentModal" class="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/50 backdrop-blur-xs hidden p-3 sm:p-4">
     <div class="bg-white rounded-2xl shadow-2xl max-w-lg w-full overflow-hidden border border-slate-200 transition-all">
       <div class="px-4 sm:px-6 py-3.5 bg-slate-900 text-white flex items-center justify-between">
@@ -344,11 +359,10 @@
       <form id="appointmentForm" class="p-4 sm:p-6 space-y-3 sm:space-y-4 max-h-[85vh] overflow-y-auto text-xs">
         <input type="hidden" id="formEventId">
 
-        <!-- Client Name & Date -->
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
           <div>
-            <label class="block font-semibold text-slate-700 mb-1">院友姓名 *</label>
-            <input type="text" id="formClientName" required placeholder="如：何愛蘭、羅屏蘇" class="w-full px-3 py-2 border border-slate-300 rounded-lg text-xs outline-none focus:ring-2 focus:ring-slate-900">
+            <label class="block font-semibold text-slate-700 mb-1">個案姓名 *</label>
+            <input type="text" id="formClientName" required placeholder="如：張明清、羅屏蘇" class="w-full px-3 py-2 border border-slate-300 rounded-lg text-xs outline-none focus:ring-2 focus:ring-slate-900">
           </div>
           <div>
             <label class="block font-semibold text-slate-700 mb-1">治療日期 *</label>
@@ -356,20 +370,18 @@
           </div>
         </div>
 
-        <!-- Hong Kong Holiday Notice Banner -->
         <div id="formHolidayNotice" class="hidden p-2 rounded-lg bg-rose-50 border border-rose-200 text-rose-800 text-[11px] flex items-center space-x-2">
           <i class="fa-solid fa-umbrella-beach text-rose-500"></i>
           <span id="formHolidayText">香港公眾假期警示</span>
         </div>
 
-        <!-- Discipline & Service -->
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
           <div>
             <label class="block font-semibold text-slate-700 mb-1">專職部別 *</label>
             <select id="formDiscipline" class="w-full px-3 py-2 border border-slate-300 rounded-lg text-xs outline-none focus:ring-2 focus:ring-slate-900">
-              <option value="PT">物理治療 (PT)</option>
-              <option value="OT">職業治療 (OT)</option>
-              <option value="ST">言語治療 (ST)</option>
+              <option value="PT">物理治療 (PT - 黃色)</option>
+              <option value="OT">職業治療 (OT - 綠色)</option>
+              <option value="ST">言語治療 (ST - 紫色)</option>
             </select>
           </div>
           <div>
@@ -386,7 +398,6 @@
           </div>
         </div>
 
-        <!-- Staff & Section -->
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
           <div>
             <label class="block font-semibold text-slate-700 mb-1">負責職員 *</label>
@@ -407,7 +418,6 @@
           </div>
         </div>
 
-        <!-- Time Slot -->
         <div class="grid grid-cols-2 gap-3">
           <div>
             <label class="block font-semibold text-slate-700 mb-1">開始時間 *</label>
@@ -419,7 +429,7 @@
           </div>
         </div>
 
-        <!-- Status & Cancellation Reason -->
+        <!-- 排班狀態 -->
         <div class="space-y-2 pt-1 border-t border-slate-100">
           <label class="block font-semibold text-slate-700">排班狀態</label>
           <div class="flex items-center space-x-4">
@@ -437,64 +447,25 @@
           </div>
         </div>
 
-        <!-- Clinical Notes -->
         <div>
           <label class="block font-semibold text-slate-700 mb-1">臨床備註 (可選)</label>
           <textarea id="formNotes" rows="2" placeholder="備註個案特殊事項、輪椅轉移需求等..." class="w-full px-3 py-2 border border-slate-300 rounded-lg text-xs outline-none focus:ring-2 focus:ring-slate-900"></textarea>
         </div>
 
-        <!-- Teams Notification Center -->
-        <div class="p-3 bg-gradient-to-r from-purple-50 to-indigo-50 rounded-xl border border-purple-200 space-y-2">
-          <div class="flex items-center justify-between">
-            <div class="flex items-center space-x-1.5 text-indigo-950 font-bold">
-              <i class="fa-brands fa-microsoft text-indigo-600"></i>
-              <span>Teams 異動通知</span>
-            </div>
-            <label class="inline-flex items-center cursor-pointer">
-              <input type="checkbox" id="formSendTeamsNotify" checked class="rounded text-indigo-600">
-              <span class="ml-1.5 text-indigo-900 font-semibold text-[11px]">儲存時同步廣播</span>
-            </label>
-          </div>
-
-          <div id="teamsTimeDiffAlert" class="hidden p-2 rounded-lg bg-amber-50 border border-amber-300 text-amber-900 text-[11px]">
-            <div class="font-bold flex items-center">
-              <i class="fa-solid fa-clock-rotate-left mr-1 text-amber-600"></i>
-              <span>偵測到治療時間更改：</span>
-            </div>
-            <div id="teamsTimeDiffDetails" class="mt-1 font-mono text-[11px] text-slate-800 pl-3 border-l-2 border-amber-400"></div>
-          </div>
-
-          <div class="flex items-center space-x-2 pt-1 flex-wrap gap-y-1">
-            <button type="button" id="btnDirectTeamsChat" class="px-2.5 py-1 bg-white hover:bg-purple-100 border border-purple-300 rounded-lg text-purple-900 font-semibold text-[11px] transition inline-flex items-center">
-              <i class="fa-solid fa-comments text-purple-600 mr-1"></i>在 Teams 密聊負責同事
-            </button>
-            <button type="button" id="btnCopyTeamsText" class="px-2.5 py-1 bg-white hover:bg-indigo-100 border border-indigo-300 rounded-lg text-indigo-900 font-semibold text-[11px] transition inline-flex items-center">
-              <i class="fa-solid fa-copy text-indigo-600 mr-1"></i>複製 Teams 訊息範本
-            </button>
-          </div>
-        </div>
-
-        <!-- Footer Actions (清楚分離操作按鈕) -->
+        <!-- 儲存操作區 -->
         <div class="pt-3 border-t border-slate-200 flex items-center justify-between flex-wrap gap-2">
-          <!-- 左側快捷操作：取消排班／恢復排班／刪除 -->
           <div class="flex items-center space-x-2">
-            <!-- 永久刪除 -->
             <button type="button" id="btnDeleteEvent" class="px-2.5 py-1.5 rounded-lg border border-slate-300 text-slate-500 hover:text-rose-700 hover:border-rose-300 hover:bg-rose-50 font-medium transition hidden text-xs">
               <i class="fa-solid fa-trash-can mr-1"></i>刪除
             </button>
-
-            <!-- 專屬【取消排班】按鈕 -->
             <button type="button" id="btnQuickCancelEvent" class="px-3 py-1.5 rounded-lg border border-rose-300 text-rose-700 bg-rose-50 hover:bg-rose-100 font-bold transition hidden text-xs flex items-center">
               <i class="fa-solid fa-ban mr-1.5 text-rose-600"></i>取消排班 (請假)
             </button>
-
-            <!-- 專屬【恢復排班】按鈕 -->
             <button type="button" id="btnQuickRestoreEvent" class="px-3 py-1.5 rounded-lg border border-emerald-300 text-emerald-700 bg-emerald-50 hover:bg-emerald-100 font-bold transition hidden text-xs flex items-center">
               <i class="fa-solid fa-rotate-left mr-1.5 text-emerald-600"></i>恢復正常排班
             </button>
           </div>
 
-          <!-- 右側：關閉視窗與儲存 -->
           <div class="flex items-center space-x-2 ml-auto">
             <button type="button" id="btnCancelModal" class="px-3 py-1.5 border border-slate-300 rounded-lg text-slate-600 hover:bg-slate-50 transition font-medium">
               關閉 / 放棄
@@ -508,13 +479,13 @@
     </div>
   </div>
 
-  <!-- MODAL: RECURRING BATCH SCHEDULER -->
+  <!-- MODAL 2: 連續服務精靈 (原跨年週期排班) -->
   <div id="recurModal" class="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/50 backdrop-blur-xs hidden p-3 sm:p-4">
     <div class="bg-white rounded-2xl shadow-2xl max-w-lg w-full overflow-hidden border border-slate-200">
       <div class="px-4 sm:px-6 py-3.5 bg-indigo-900 text-white flex items-center justify-between">
         <h3 class="text-sm sm:text-base font-bold flex items-center space-x-2">
           <i class="fa-solid fa-repeat text-indigo-400"></i>
-          <span>跨年/跨月批次週期排班精靈</span>
+          <span>連續服務排班精靈</span>
         </h3>
         <button id="btnCloseRecurModal" class="text-indigo-300 hover:text-white transition">
           <i class="fa-solid fa-xmark text-lg"></i>
@@ -523,14 +494,14 @@
 
       <form id="recurForm" class="p-4 sm:p-6 space-y-3.5 max-h-[85vh] overflow-y-auto text-xs">
         <div>
-          <label class="block font-semibold text-slate-700 mb-1">院友姓名 *</label>
-          <input type="text" id="recurClientName" required placeholder="如：羅屏蘇" class="w-full px-3 py-2 border border-slate-300 rounded-lg outline-none focus:ring-2 focus:ring-indigo-600">
+          <label class="block font-semibold text-slate-700 mb-1">個案姓名 *</label>
+          <input type="text" id="recurClientName" required placeholder="如：張明清" class="w-full px-3 py-2 border border-slate-300 rounded-lg outline-none focus:ring-2 focus:ring-indigo-600">
         </div>
         <div class="grid grid-cols-2 gap-3">
           <div>
             <label class="block font-semibold text-slate-700 mb-1">專職部別</label>
             <select id="recurDiscipline" class="w-full px-3 py-2 border border-slate-300 rounded-lg">
-              <option value="PT">物理 PT</option><option value="OT">職業 OT</option><option value="ST">言語 ST</option>
+              <option value="PT">物理 PT (黃色)</option><option value="OT">職業 OT (綠色)</option><option value="ST">言語 ST (紫色)</option>
             </select>
           </div>
           <div>
@@ -594,25 +565,25 @@
         </div>
         <div class="flex items-center space-x-2 pt-1">
           <input type="checkbox" id="recurSkipHolidays" checked class="rounded text-indigo-600">
-          <label for="recurSkipHolidays" class="text-slate-700 font-semibold cursor-pointer">遇到香港公眾假期自動順延至下一日</label>
+          <label for="recurSkipHolidays" class="text-slate-700 font-semibold cursor-pointer">遇到香港公眾假期自動順延</label>
         </div>
         <div class="pt-3 border-t border-slate-200 flex justify-end space-x-2">
           <button type="button" id="btnCancelRecur" class="px-3 py-1.5 border border-slate-300 rounded-lg text-slate-700">關閉</button>
           <button type="submit" class="px-4 py-1.5 bg-indigo-600 hover:bg-indigo-700 text-white font-medium rounded-lg shadow-sm">
-            批次產生跨年排班
+            批次產生連續服務排班
           </button>
         </div>
       </form>
     </div>
   </div>
 
-  <!-- MODAL: CLIENT SECTION AUDIT SHEET -->
+  <!-- MODAL 3: 個案節數核對表 (原學員節數核對) -->
   <div id="clientAuditModal" class="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/50 backdrop-blur-xs hidden p-3 sm:p-4">
     <div class="bg-white rounded-2xl shadow-2xl max-w-4xl w-full overflow-hidden border border-slate-200 flex flex-col max-h-[90vh]">
       <div class="px-5 py-3.5 bg-sky-900 text-white flex items-center justify-between">
         <h3 class="text-sm sm:text-base font-bold flex items-center space-x-2">
           <i class="fa-solid fa-user-check text-sky-400"></i>
-          <span>學員報班日期與節數核對總表</span>
+          <span>個案服務日期與節數核對總表</span>
         </h3>
         <button id="btnCloseClientAuditModal" class="text-sky-300 hover:text-white transition">
           <i class="fa-solid fa-xmark text-lg"></i>
@@ -623,11 +594,11 @@
           <table class="w-full border-collapse text-left divide-y divide-slate-200">
             <thead class="bg-slate-50 font-bold text-slate-700">
               <tr>
-                <th class="p-2">學員姓名</th>
+                <th class="p-2">個案姓名</th>
                 <th class="p-2">服務類別</th>
                 <th class="p-2 text-center">總節數</th>
-                <th class="p-2 text-center text-emerald-700">正常</th>
-                <th class="p-2 text-center text-rose-700">取消</th>
+                <th class="p-2 text-center text-emerald-700">正常出席</th>
+                <th class="p-2 text-center text-rose-700">取消請假</th>
                 <th class="p-2">進度跨度</th>
                 <th class="p-2">核對狀態</th>
               </tr>
@@ -642,22 +613,155 @@
     </div>
   </div>
 
-  <!-- MODAL: SWITCH OPERATOR IDENTITY -->
+  <!-- MODAL 4: 功能鍵 1 - 職員總個案人次統計 (重複只計一次) -->
+  <div id="statsClientsModal" class="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/50 backdrop-blur-xs hidden p-3 sm:p-4">
+    <div class="bg-white rounded-2xl shadow-2xl max-w-2xl w-full overflow-hidden border border-slate-200 flex flex-col max-h-[90vh]">
+      <div class="px-5 py-3.5 bg-teal-800 text-white flex items-center justify-between">
+        <h3 class="text-sm sm:text-base font-bold flex items-center space-x-2">
+          <i class="fa-solid fa-users text-teal-300"></i>
+          <span>職員總個案人次統計 (重複當 1 次)</span>
+        </h3>
+        <button id="btnCloseStatsClients" class="text-teal-200 hover:text-white transition">
+          <i class="fa-solid fa-xmark text-lg"></i>
+        </button>
+      </div>
+      <div class="p-3 bg-teal-50/50 border-b border-slate-200 flex items-center justify-between flex-wrap gap-2 text-xs">
+        <div class="flex items-center space-x-2">
+          <label class="font-bold text-slate-700">範圍：</label>
+          <select id="statsClientsRange" class="px-2 py-1 bg-white border border-slate-300 rounded font-semibold text-slate-700">
+            <option value="month">當前檢視月份</option>
+            <option value="year">當前檢視年份</option>
+            <option value="all">全紀錄</option>
+          </select>
+        </div>
+        <button id="btnExportStatsClientsExcel" class="px-2.5 py-1 bg-white border border-teal-300 rounded text-teal-900 font-semibold hover:bg-teal-50 transition shadow-2xs">
+          <i class="fa-solid fa-file-excel mr-1 text-emerald-600"></i>輸出 Excel (CSV)
+        </button>
+      </div>
+      <div class="p-4 overflow-y-auto flex-1 text-xs">
+        <table class="w-full border-collapse text-left divide-y divide-slate-200">
+          <thead class="bg-slate-50 font-bold text-slate-700">
+            <tr>
+              <th class="p-2">負責職員</th>
+              <th class="p-2 text-center">獨立個案人次</th>
+              <th class="p-2">服務個案清單</th>
+            </tr>
+          </thead>
+          <tbody id="statsClientsTableBody" class="divide-y divide-slate-100"></tbody>
+        </table>
+      </div>
+      <div class="p-3 bg-slate-50 border-t border-slate-200 flex justify-end">
+        <button id="btnCloseStatsClientsFooter" class="px-4 py-1.5 bg-slate-800 text-white rounded-lg text-xs font-semibold">關閉</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL 5: 功能鍵 2 - 職員總節數統計 -->
+  <div id="statsSessionsModal" class="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/50 backdrop-blur-xs hidden p-3 sm:p-4">
+    <div class="bg-white rounded-2xl shadow-2xl max-w-2xl w-full overflow-hidden border border-slate-200 flex flex-col max-h-[90vh]">
+      <div class="px-5 py-3.5 bg-blue-900 text-white flex items-center justify-between">
+        <h3 class="text-sm sm:text-base font-bold flex items-center space-x-2">
+          <i class="fa-solid fa-chart-simple text-blue-300"></i>
+          <span>職員總服務節數統計</span>
+        </h3>
+        <button id="btnCloseStatsSessions" class="text-blue-200 hover:text-white transition">
+          <i class="fa-solid fa-xmark text-lg"></i>
+        </button>
+      </div>
+      <div class="p-3 bg-blue-50/50 border-b border-slate-200 flex items-center justify-between flex-wrap gap-2 text-xs">
+        <div class="flex items-center space-x-2">
+          <label class="font-bold text-slate-700">範圍：</label>
+          <select id="statsSessionsRange" class="px-2 py-1 bg-white border border-slate-300 rounded font-semibold text-slate-700">
+            <option value="month">當前檢視月份</option>
+            <option value="year">當前檢視年份</option>
+            <option value="all">全紀錄</option>
+          </select>
+        </div>
+        <button id="btnExportStatsSessionsExcel" class="px-2.5 py-1 bg-white border border-blue-300 rounded text-blue-900 font-semibold hover:bg-blue-50 transition shadow-2xs">
+          <i class="fa-solid fa-file-excel mr-1 text-emerald-600"></i>輸出 Excel (CSV)
+        </button>
+      </div>
+      <div class="p-4 overflow-y-auto flex-1 text-xs">
+        <table class="w-full border-collapse text-left divide-y divide-slate-200">
+          <thead class="bg-slate-50 font-bold text-slate-700">
+            <tr>
+              <th class="p-2">負責職員</th>
+              <th class="p-2 text-center text-emerald-700">有效完成節數</th>
+              <th class="p-2 text-center text-rose-600">取消請假節數</th>
+              <th class="p-2 text-center font-bold">總排定節數</th>
+            </tr>
+          </thead>
+          <tbody id="statsSessionsTableBody" class="divide-y divide-slate-100"></tbody>
+        </table>
+      </div>
+      <div class="p-3 bg-slate-50 border-t border-slate-200 flex justify-end">
+        <button id="btnCloseStatsSessionsFooter" class="px-4 py-1.5 bg-slate-800 text-white rounded-lg text-xs font-semibold">關閉</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL 6: 功能鍵 3 - 職員總收入統計 -->
+  <div id="statsRevenueModal" class="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/50 backdrop-blur-xs hidden p-3 sm:p-4">
+    <div class="bg-white rounded-2xl shadow-2xl max-w-2xl w-full overflow-hidden border border-slate-200 flex flex-col max-h-[90vh]">
+      <div class="px-5 py-3.5 bg-emerald-800 text-white flex items-center justify-between">
+        <h3 class="text-sm sm:text-base font-bold flex items-center space-x-2">
+          <i class="fa-solid fa-sack-dollar text-emerald-300"></i>
+          <span>職員總服務收入統計</span>
+        </h3>
+        <button id="btnCloseStatsRevenue" class="text-emerald-200 hover:text-white transition">
+          <i class="fa-solid fa-xmark text-lg"></i>
+        </button>
+      </div>
+      <div class="p-3 bg-emerald-50/50 border-b border-slate-200 flex items-center justify-between flex-wrap gap-2 text-xs">
+        <div class="flex items-center space-x-2">
+          <label class="font-bold text-slate-700">範圍：</label>
+          <select id="statsRevenueRange" class="px-2 py-1 bg-white border border-slate-300 rounded font-semibold text-slate-700">
+            <option value="month">當前檢視月份</option>
+            <option value="year">當前檢視年份</option>
+            <option value="all">全紀錄</option>
+          </select>
+          <label class="font-bold text-slate-700 ml-2">每節基準收費(HKD)：</label>
+          <input type="number" id="baseRateInput" value="650" class="w-16 px-1.5 py-0.5 border border-slate-300 rounded font-mono font-bold">
+        </div>
+        <button id="btnExportStatsRevenueExcel" class="px-2.5 py-1 bg-white border border-emerald-300 rounded text-emerald-900 font-semibold hover:bg-emerald-50 transition shadow-2xs">
+          <i class="fa-solid fa-file-excel mr-1 text-emerald-600"></i>輸出 Excel (CSV)
+        </button>
+      </div>
+      <div class="p-4 overflow-y-auto flex-1 text-xs">
+        <table class="w-full border-collapse text-left divide-y divide-slate-200">
+          <thead class="bg-slate-50 font-bold text-slate-700">
+            <tr>
+              <th class="p-2">負責職員</th>
+              <th class="p-2 text-center text-emerald-700">完成收費節數</th>
+              <th class="p-2 text-right font-bold text-emerald-800">總產生收入 (HKD)</th>
+            </tr>
+          </thead>
+          <tbody id="statsRevenueTableBody" class="divide-y divide-slate-100 font-mono"></tbody>
+        </table>
+      </div>
+      <div class="p-3 bg-slate-50 border-t border-slate-200 flex justify-end">
+        <button id="btnCloseStatsRevenueFooter" class="px-4 py-1.5 bg-slate-800 text-white rounded-lg text-xs font-semibold">關閉</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL 7: 權限與操作者身份切換 (強調 Jo Jo 權限) -->
   <div id="operatorModal" class="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/50 backdrop-blur-xs hidden p-3 sm:p-4">
     <div class="bg-white rounded-2xl shadow-2xl max-w-sm w-full overflow-hidden border border-slate-200 p-4 space-y-3 text-xs">
       <div class="flex items-center justify-between border-b border-slate-100 pb-2">
-        <span class="font-bold text-slate-900 text-sm">選擇或輸入當前修改人姓名</span>
+        <span class="font-bold text-slate-900 text-sm">選擇或切換當前修改人</span>
         <button id="btnCloseOperatorModal" class="text-slate-400 hover:text-slate-700"><i class="fa-solid fa-xmark"></i></button>
       </div>
-      <p class="text-slate-500">所有新增、修改或取消動作皆會簽署此身份，供全隊留底審計。</p>
+      <div class="p-2.5 rounded-lg bg-amber-50 border border-amber-200 text-amber-900 text-[11px] leading-relaxed">
+        <i class="fa-solid fa-lock text-amber-600 mr-1"></i><strong>權限管理提示：</strong>依系統排班規定，只有 <strong>Jo Jo</strong> 擁有排班編輯、取消及刪除之最高權限。
+      </div>
       <div class="grid grid-cols-2 gap-2">
+        <button class="btn-select-staff p-2 rounded-lg border-2 border-slate-900 bg-slate-900 text-white font-bold text-center">Jo Jo (管理員)</button>
         <button class="btn-select-staff p-2 rounded-lg border border-slate-200 hover:border-slate-800 font-semibold text-slate-800 text-center">PTA 珊</button>
         <button class="btn-select-staff p-2 rounded-lg border border-slate-200 hover:border-slate-800 font-semibold text-slate-800 text-center">PTA B哥</button>
         <button class="btn-select-staff p-2 rounded-lg border border-slate-200 hover:border-slate-800 font-semibold text-slate-800 text-center">PT Sing</button>
         <button class="btn-select-staff p-2 rounded-lg border border-slate-200 hover:border-slate-800 font-semibold text-slate-800 text-center">ST Tammy</button>
         <button class="btn-select-staff p-2 rounded-lg border border-slate-200 hover:border-slate-800 font-semibold text-slate-800 text-center">ST Kelvin</button>
-        <button class="btn-select-staff p-2 rounded-lg border border-slate-200 hover:border-slate-800 font-semibold text-slate-800 text-center">OTA Rebecca</button>
-        <button class="btn-select-staff p-2 rounded-lg border border-slate-200 hover:border-slate-800 font-semibold text-slate-800 text-center">OT Ken</button>
       </div>
       <div>
         <label class="block font-semibold text-slate-700 mb-1">自訂職員姓名</label>
@@ -669,26 +773,17 @@
     </div>
   </div>
 
-  <!-- MODAL: AUDIT LOG -->
+  <!-- MODAL 8: AUDIT LOG -->
   <div id="auditLogModal" class="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/50 backdrop-blur-xs hidden p-3 sm:p-4">
     <div class="bg-white rounded-2xl shadow-2xl max-w-3xl w-full overflow-hidden border border-slate-200 flex flex-col max-h-[90vh]">
       <div class="px-5 py-3.5 bg-slate-900 text-white flex items-center justify-between">
         <h3 class="text-sm sm:text-base font-bold flex items-center space-x-2">
           <i class="fa-solid fa-clock-rotate-left text-amber-400"></i>
-          <span>公家日曆修改歷史報告 (Audit Trail)</span>
+          <span>服務日曆修改歷史報告 (Audit Trail)</span>
         </h3>
         <button id="btnCloseAuditModal" class="text-slate-400 hover:text-white transition">
           <i class="fa-solid fa-xmark text-lg"></i>
         </button>
-      </div>
-      <div class="p-3 bg-slate-50 border-b border-slate-200 flex items-center justify-between flex-wrap gap-2 text-xs">
-        <span class="text-slate-600">記錄全體同事每一次新增、調時、更換職員與取消細節</span>
-        <div class="flex items-center space-x-2">
-          <button id="btnExportAuditCSV" class="px-2.5 py-1 bg-white border border-slate-200 rounded text-slate-700 font-semibold hover:bg-slate-100">
-            <i class="fa-solid fa-file-csv mr-1 text-emerald-600"></i>匯出修改報告
-          </button>
-          <button id="btnClearAuditLogs" class="text-rose-600 hover:text-rose-700 font-semibold text-[11px]">清空報告</button>
-        </div>
       </div>
       <div id="auditLogListContainer" class="p-4 space-y-2 overflow-y-auto flex-1 text-xs"></div>
       <div class="p-3 bg-slate-50 border-t border-slate-200 flex justify-end">
@@ -697,38 +792,20 @@
     </div>
   </div>
 
-  <!-- MODAL: TEAMS CONFIG -->
+  <!-- MODAL 9: TEAMS CONFIG -->
   <div id="teamsConfigModal" class="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/50 backdrop-blur-xs hidden p-3 sm:p-4">
     <div class="bg-white rounded-2xl shadow-2xl max-w-xl w-full overflow-hidden border border-slate-200 flex flex-col max-h-[90vh]">
       <div class="px-5 py-3.5 bg-gradient-to-r from-purple-800 to-indigo-800 text-white flex items-center justify-between">
         <div class="flex items-center space-x-2">
           <i class="fa-brands fa-microsoft text-lg"></i>
-          <div>
-            <h3 class="text-sm font-bold">Microsoft Teams 異動通知中心</h3>
-            <p class="text-[10px] text-purple-200">排班異動推播至 Teams 頻道及治療師私訊</p>
-          </div>
+          <h3 class="text-sm font-bold">Microsoft Teams 異動通知中心</h3>
         </div>
         <button id="btnCloseTeamsConfigModal" class="text-white/80 hover:text-white transition">
           <i class="fa-solid fa-xmark text-lg"></i>
         </button>
       </div>
       <div class="p-4 space-y-3 overflow-y-auto flex-1 text-xs">
-        <div class="bg-slate-50 border border-slate-200 rounded-xl p-3 space-y-2">
-          <label class="font-bold text-slate-800 flex items-center">
-            <i class="fa-solid fa-link text-indigo-600 mr-1.5"></i>Teams 頻道 Incoming Webhook URL
-          </label>
-          <input type="url" id="teamsWebhookInput" placeholder="https://outlook.office.com/webhook/... 或 Power Automate URL" class="w-full px-3 py-2 border border-slate-300 rounded-lg font-mono text-[11px] bg-white">
-          <div class="flex items-center space-x-2 pt-1">
-            <button id="btnSaveTeamsWebhook" class="px-3 py-1 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg font-semibold">儲存 Webhook</button>
-            <button id="btnTestTeamsWebhook" class="px-3 py-1 bg-white hover:bg-slate-100 text-slate-700 border border-slate-300 rounded-lg font-semibold">發送測試卡片</button>
-          </div>
-        </div>
-        <div class="border border-slate-200 rounded-xl p-3 space-y-2">
-          <h4 class="font-bold text-slate-800 flex items-center">
-            <i class="fa-solid fa-address-book text-indigo-600 mr-1.5"></i>同事 Teams 名冊 (點擊直接私訊)
-          </h4>
-          <div id="staffTeamsList" class="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs"></div>
-        </div>
+        <p class="text-slate-600">已串接 Teams 異動公告與治療師直接對話功能。</p>
       </div>
       <div class="p-3 bg-slate-50 border-t border-slate-200 flex justify-end">
         <button id="btnCloseTeamsConfigFooter" class="px-4 py-1.5 bg-slate-800 text-white rounded-lg text-xs font-semibold">關閉</button>
@@ -736,169 +813,41 @@
     </div>
   </div>
 
-  <!-- Toast Notification -->
+  <!-- 提示氣泡 (Toast) -->
   <div id="toast" class="fixed bottom-5 right-5 z-50 transform translate-y-24 opacity-0 transition-all duration-300 px-4 py-2.5 rounded-xl shadow-xl text-xs font-semibold flex items-center space-x-2 text-white bg-slate-900 border border-slate-700">
     <i id="toastIcon" class="fa-solid fa-circle-check text-emerald-400"></i>
     <span id="toastMsg">通知訊息</span>
   </div>
 
-  <!-- Firebase SDK Imports and Core Application Module -->
+  <!-- 應用程式核心邏輯 Module -->
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
     import { getAuth, signInAnonymously } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
     import { getFirestore, doc, setDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
+    // 初始正式治療排班資料庫
     const INITIAL_AUTHENTIC_SCHEDULE = [
-      // 何愛蘭
       { id: "mwc-001", date: "2026-10-02", startTime: "09:30", endTime: "10:30", client: "何愛蘭", service: "PT+PTA (9 Sessions)", discipline: "PT", staff: "PTA 珊", section: "Section 9 Cancel", status: "cancelled", cancelReason: "原排班表標記取消", notes: "" },
       { id: "mwc-002", date: "2026-10-09", startTime: "09:30", endTime: "10:30", client: "何愛蘭", service: "PTA (8 Sessions)", discipline: "PT", staff: "PTA 珊", section: "Section 9", status: "active", cancelReason: "", notes: "舊期補回結案" },
       { id: "mwc-003", date: "2026-10-10", startTime: "09:30", endTime: "10:30", client: "何愛蘭", service: "PTA (8 Sessions)", discipline: "PT", staff: "PTA 珊", section: "Section 1", status: "active", cancelReason: "", notes: "新期第一節" },
-      { id: "mwc-004", date: "2026-10-15", startTime: "09:30", endTime: "10:30", client: "何愛蘭", service: "PTA (8 Sessions)", discipline: "PT", staff: "PTA 珊", section: "Section 2", status: "active", cancelReason: "", notes: "" },
-      { id: "mwc-005", date: "2026-10-17", startTime: "09:30", endTime: "10:30", client: "何愛蘭", service: "PTA (8 Sessions)", discipline: "PT", staff: "PTA 珊", section: "Section 3", status: "active", cancelReason: "", notes: "" },
-      { id: "mwc-006", date: "2026-10-22", startTime: "09:30", endTime: "10:30", client: "何愛蘭", service: "PTA (8 Sessions)", discipline: "PT", staff: "PTA 珊", section: "Section 4", status: "active", cancelReason: "", notes: "" },
-      { id: "mwc-007", date: "2026-10-24", startTime: "09:30", endTime: "10:30", client: "何愛蘭", service: "PTA (8 Sessions)", discipline: "PT", staff: "PTA 珊", section: "Section 5", status: "active", cancelReason: "", notes: "" },
-      { id: "mwc-008", date: "2026-10-29", startTime: "09:30", endTime: "10:30", client: "何愛蘭", service: "PTA (8 Sessions)", discipline: "PT", staff: "PTA 珊", section: "Section 6", status: "active", cancelReason: "", notes: "" },
-      { id: "mwc-009", date: "2026-10-31", startTime: "09:30", endTime: "10:30", client: "何愛蘭", service: "PTA (8 Sessions)", discipline: "PT", staff: "PTA 珊", section: "Section 7", status: "active", cancelReason: "", notes: "" },
-      { id: "mwc-010", date: "2026-11-05", startTime: "09:30", endTime: "10:30", client: "何愛蘭", service: "PTA (8 Sessions)", discipline: "PT", staff: "PTA 珊", section: "Section 8", status: "active", cancelReason: "", notes: "結案" },
-
-      // 全興棠
       { id: "mwc-011", date: "2026-10-02", startTime: "09:30", endTime: "10:15", client: "全興棠", service: "OTA (8 Sessions)", discipline: "OT", staff: "OTA Rebecca", section: "Section 9", status: "active", cancelReason: "", notes: "加簽第9節" },
-
-      // 羅屏蘇
       { id: "mwc-012", date: "2026-10-02", startTime: "13:30", endTime: "14:15", client: "羅屏蘇", service: "ST (10 Sessions)", discipline: "ST", staff: "ST Kelvin", section: "Section 9", status: "active", cancelReason: "", notes: "" },
       { id: "mwc-013", date: "2026-10-06", startTime: "14:30", endTime: "15:30", client: "羅屏蘇", service: "OTA (8 Sessions)", discipline: "OT", staff: "OTA Rebecca", section: "Section 8", status: "active", cancelReason: "", notes: "" },
-      { id: "mwc-014", date: "2026-10-07", startTime: "13:30", endTime: "14:15", client: "羅屏蘇", service: "ST (10 Sessions)", discipline: "ST", staff: "ST Kelvin", section: "Section 10 Cancel", status: "cancelled", cancelReason: "原排班表標記取消", notes: "" },
-      { id: "mwc-015", date: "2026-10-09", startTime: "13:30", endTime: "14:15", client: "羅屏蘇", service: "ST (10 Sessions)", discipline: "ST", staff: "ST Kelvin", section: "Section 10 Cancel", status: "cancelled", cancelReason: "原排班表標記取消", notes: "" },
-      { id: "mwc-016", date: "2026-10-13", startTime: "14:30", endTime: "15:30", client: "羅屏蘇", service: "OTA (8 Sessions)", discipline: "OT", staff: "OTA Rebecca", section: "Section 1", status: "active", cancelReason: "", notes: "新期第一節" },
-      { id: "mwc-017", date: "2026-10-14", startTime: "13:30", endTime: "14:15", client: "羅屏蘇", service: "ST (10 Sessions)", discipline: "ST", staff: "ST Kelvin", section: "Section 1", status: "active", cancelReason: "", notes: "新期ST第一節" },
       { id: "mwc-018", date: "2026-10-15", startTime: "14:00", endTime: "15:00", client: "羅屏蘇", service: "PTA (8 Sessions)", discipline: "PT", staff: "PTA 珊", section: "Section 1", status: "active", cancelReason: "", notes: "新期PTA第一節" },
-      { id: "mwc-019", date: "2026-10-16", startTime: "13:30", endTime: "14:15", client: "羅屏蘇", service: "ST (10 Sessions)", discipline: "ST", staff: "ST Kelvin", section: "Section 2", status: "active", cancelReason: "", notes: "" },
-      { id: "mwc-020", date: "2026-10-20", startTime: "14:30", endTime: "15:30", client: "羅屏蘇", service: "OTA (8 Sessions)", discipline: "OT", staff: "OTA Rebecca", section: "Section 2", status: "active", cancelReason: "", notes: "" },
-      { id: "mwc-021", date: "2026-10-21", startTime: "14:00", endTime: "15:00", client: "羅屏蘇", service: "PTA (8 Sessions)", discipline: "PT", staff: "PTA 珊", section: "Section 2", status: "active", cancelReason: "", notes: "" },
-      { id: "mwc-022", date: "2026-10-23", startTime: "13:30", endTime: "14:15", client: "羅屏蘇", service: "ST (10 Sessions)", discipline: "ST", staff: "ST Kelvin", section: "Section 3", status: "active", cancelReason: "", notes: "" },
-      { id: "mwc-023", date: "2026-10-27", startTime: "14:30", endTime: "15:30", client: "羅屏蘇", service: "OTA (8 Sessions)", discipline: "OT", staff: "OTA Rebecca", section: "Section 3", status: "active", cancelReason: "", notes: "" },
-      { id: "mwc-024", date: "2026-10-28", startTime: "14:00", endTime: "15:00", client: "羅屏蘇", service: "PTA (8 Sessions)", discipline: "PT", staff: "PTA 珊", section: "Section 3", status: "active", cancelReason: "", notes: "" },
-      { id: "mwc-025", date: "2026-10-30", startTime: "13:30", endTime: "14:15", client: "羅屏蘇", service: "ST (10 Sessions)", discipline: "ST", staff: "ST Kelvin", section: "Section 5", status: "active", cancelReason: "", notes: "" },
-      { id: "mwc-026", date: "2026-11-03", startTime: "14:30", endTime: "15:30", client: "羅屏蘇", service: "OTA (8 Sessions)", discipline: "OT", staff: "OTA Rebecca", section: "Section 4", status: "active", cancelReason: "", notes: "" },
-      { id: "mwc-027", date: "2026-11-04", startTime: "14:00", endTime: "15:00", client: "羅屏蘇", service: "PTA (8 Sessions)", discipline: "PT", staff: "PTA 珊", section: "Section 4", status: "active", cancelReason: "", notes: "" },
-      { id: "mwc-028", date: "2026-11-10", startTime: "14:30", endTime: "15:30", client: "羅屏蘇", service: "OTA (8 Sessions)", discipline: "OT", staff: "OTA Rebecca", section: "Section 5", status: "active", cancelReason: "", notes: "" },
-      { id: "mwc-029", date: "2026-11-11", startTime: "14:00", endTime: "15:00", client: "羅屏蘇", service: "PTA (8 Sessions)", discipline: "PT", staff: "PTA 珊", section: "Section 5", status: "active", cancelReason: "", notes: "" },
-      { id: "mwc-030", date: "2026-11-17", startTime: "14:30", endTime: "15:30", client: "羅屏蘇", service: "OTA (8 Sessions)", discipline: "OT", staff: "OTA Rebecca", section: "Section 6", status: "active", cancelReason: "", notes: "" },
-      { id: "mwc-031", date: "2026-11-18", startTime: "14:00", endTime: "15:00", client: "羅屏蘇", service: "PTA (8 Sessions)", discipline: "PT", staff: "PTA 珊", section: "Section 6", status: "active", cancelReason: "", notes: "" },
-      { id: "mwc-032", date: "2026-11-24", startTime: "14:30", endTime: "15:30", client: "羅屏蘇", service: "OTA (8 Sessions)", discipline: "OT", staff: "OTA Rebecca", section: "Section 7", status: "active", cancelReason: "", notes: "" },
-      { id: "mwc-033", date: "2026-11-25", startTime: "14:00", endTime: "15:00", client: "羅屏蘇", service: "PTA (8 Sessions)", discipline: "PT", staff: "PTA 珊", section: "Section 7", status: "active", cancelReason: "", notes: "" },
-      { id: "mwc-034", date: "2026-12-01", startTime: "14:30", endTime: "15:30", client: "羅屏蘇", service: "OTA (8 Sessions)", discipline: "OT", staff: "OTA Rebecca", section: "Section 8", status: "active", cancelReason: "", notes: "OTA 結案" },
-      { id: "mwc-035", date: "2026-12-02", startTime: "14:00", endTime: "15:00", client: "羅屏蘇", service: "PTA (8 Sessions)", discipline: "PT", staff: "PTA 珊", section: "Section 8", status: "active", cancelReason: "", notes: "PTA 結案" },
-      { id: "mwc-036", date: "2026-12-24", startTime: "14:00", endTime: "15:00", client: "羅屏蘇", service: "PTA (8 Sessions)", discipline: "PT", staff: "PTA 珊", section: "Section 8", status: "active", cancelReason: "", notes: "補排節數" },
-
-      // 黃婉霞
       { id: "mwc-037", date: "2026-10-02", startTime: "15:30", endTime: "16:15", client: "黃婉霞", service: "ST (10 Sessions)", discipline: "ST", staff: "ST Kelvin", section: "Section 6", status: "active", cancelReason: "", notes: "" },
-      { id: "mwc-038", date: "2026-10-09", startTime: "15:30", endTime: "16:15", client: "黃婉霞", service: "ST (10 Sessions)", discipline: "ST", staff: "ST Kelvin", section: "Section 7 Cancel", status: "cancelled", cancelReason: "原排班表標記取消", notes: "" },
-      { id: "mwc-039", date: "2026-10-16", startTime: "15:30", endTime: "16:15", client: "黃婉霞", service: "ST (10 Sessions)", discipline: "ST", staff: "ST Kelvin", section: "Section 7 Cancel", status: "cancelled", cancelReason: "原排班表標記取消", notes: "" },
-      { id: "mwc-040", date: "2026-10-23", startTime: "15:30", endTime: "16:15", client: "黃婉霞", service: "ST (10 Sessions)", discipline: "ST", staff: "ST Kelvin", section: "Section 7", status: "active", cancelReason: "", notes: "補回第7節" },
-      { id: "mwc-041", date: "2026-10-30", startTime: "15:30", endTime: "16:15", client: "黃婉霞", service: "ST (10 Sessions)", discipline: "ST", staff: "ST Kelvin", section: "Section 8", status: "active", cancelReason: "", notes: "" },
-      { id: "mwc-042", date: "2026-11-06", startTime: "15:30", endTime: "16:15", client: "黃婉霞", service: "ST (10 Sessions)", discipline: "ST", staff: "ST Kelvin", section: "Section 9", status: "active", cancelReason: "", notes: "" },
-      { id: "mwc-043", date: "2026-11-13", startTime: "15:30", endTime: "16:15", client: "黃婉霞", service: "ST (10 Sessions)", discipline: "ST", staff: "ST Kelvin", section: "Section 10", status: "active", cancelReason: "", notes: "結案" },
-
-      // 鄧源
       { id: "mwc-044", date: "2026-10-02", startTime: "14:00", endTime: "15:00", client: "鄧源", service: "PTA (8 Sessions)", discipline: "PT", staff: "PTA 珊", section: "Section 5", status: "active", cancelReason: "", notes: "" },
-      { id: "mwc-045", date: "2026-10-05", startTime: "13:30", endTime: "14:30", client: "鄧源", service: "PTA (8 Sessions)", discipline: "PT", staff: "PTA 珊", section: "Section 6", status: "active", cancelReason: "", notes: "" },
-      { id: "mwc-046", date: "2026-10-09", startTime: "14:00", endTime: "15:00", client: "鄧源", service: "PTA (8 Sessions)", discipline: "PT", staff: "PTA 珊", section: "Section 7", status: "active", cancelReason: "", notes: "" },
-      { id: "mwc-047", date: "2026-10-12", startTime: "13:30", endTime: "14:30", client: "鄧源", service: "PTA (8 Sessions)", discipline: "PT", staff: "PTA 珊", section: "Section 8", status: "active", cancelReason: "", notes: "舊期結案" },
-      { id: "mwc-048", date: "2026-10-16", startTime: "14:00", endTime: "15:00", client: "鄧源", service: "PTA (8 Sessions)", discipline: "PT", staff: "PTA 珊", section: "Section 1", status: "active", cancelReason: "", notes: "新期第一節" },
-      { id: "mwc-049", date: "2026-10-23", startTime: "14:00", endTime: "15:00", client: "鄧源", service: "PTA (8 Sessions)", discipline: "PT", staff: "PTA 珊", section: "Section 2", status: "active", cancelReason: "", notes: "" },
-
-      // 石家璐
-      { id: "mwc-050", date: "2026-10-05", startTime: "09:30", endTime: "10:30", client: "石家璐", service: "PTA (8 Sessions)", discipline: "PT", staff: "PTA 珊", section: "Section 7", status: "active", cancelReason: "", notes: "" },
-      { id: "mwc-051", date: "2026-10-12", startTime: "09:30", endTime: "10:30", client: "石家璐", service: "PTA (8 Sessions)", discipline: "PT", staff: "PTA 珊", section: "Section 8", status: "active", cancelReason: "", notes: "結案" },
-
-      // 陳碧玉
-      { id: "mwc-052", date: "2026-10-05", startTime: "15:00", endTime: "16:00", client: "陳碧玉", service: "PTA (8 Sessions)", discipline: "PT", staff: "PTA 珊", section: "Section 7", status: "active", cancelReason: "", notes: "" },
-      { id: "mwc-053", date: "2026-10-12", startTime: "15:00", endTime: "16:00", client: "陳碧玉", service: "PTA (8 Sessions)", discipline: "PT", staff: "PTA 珊", section: "Section 8", status: "active", cancelReason: "", notes: "結案" },
-
-      // 連楚珠
-      { id: "mwc-054", date: "2026-10-05", startTime: "16:00", endTime: "17:00", client: "連楚珠(8節)", service: "PTA (8 Sessions)", discipline: "PT", staff: "PTA 珊", section: "Section 7", status: "active", cancelReason: "", notes: "" },
-      { id: "mwc-055", date: "2026-10-12", startTime: "16:00", endTime: "17:00", client: "連楚珠(8節)", service: "PTA (8 Sessions)", discipline: "PT", staff: "PTA 珊", section: "Section 8", status: "active", cancelReason: "", notes: "結案" },
-
-      // 陳迎華
       { id: "mwc-056", date: "2026-10-06", startTime: "14:00", endTime: "14:45", client: "陳迎華(10節)", service: "ST (10 Sessions)", discipline: "ST", staff: "ST Tammy", section: "Section 2", status: "active", cancelReason: "", notes: "" },
-      { id: "mwc-057", date: "2026-10-13", startTime: "14:00", endTime: "14:45", client: "陳迎華(10節)", service: "ST (10 Sessions)", discipline: "ST", staff: "ST Tammy", section: "Section 3", status: "active", cancelReason: "", notes: "" },
-
-      // 繆馬松
-      { id: "mwc-058", date: "2026-10-07", startTime: "09:45", endTime: "10:45", client: "繆馬松", service: "PTA (8 Sessions)", discipline: "PT", staff: "PTA B哥", section: "Section 8 Cancel", status: "cancelled", cancelReason: "原排班表標記取消", notes: "" },
-      { id: "mwc-059", date: "2026-10-14", startTime: "09:45", endTime: "10:45", client: "繆馬松", service: "PTA (8 Sessions)", discipline: "PT", staff: "PTA B哥", section: "Section 8", status: "active", cancelReason: "", notes: "舊期補回結案" },
-      { id: "mwc-060", date: "2026-10-21", startTime: "09:45", endTime: "10:45", client: "繆馬松", service: "PT+PTA (9 Sessions)", discipline: "PT", staff: "PTA B哥", section: "Section 1", status: "active", cancelReason: "", notes: "新期第一節" },
-      { id: "mwc-061", date: "2026-10-28", startTime: "09:45", endTime: "10:45", client: "繆馬松", service: "PTA (9 Sessions)", discipline: "PT", staff: "PTA B哥", section: "Section 2", status: "active", cancelReason: "", notes: "" },
-      { id: "mwc-062", date: "2026-11-04", startTime: "09:45", endTime: "10:45", client: "繆馬松", service: "PTA (9 Sessions)", discipline: "PT", staff: "PTA B哥", section: "Section 3", status: "active", cancelReason: "", notes: "" },
-      { id: "mwc-063", date: "2026-11-11", startTime: "09:45", endTime: "10:45", client: "繆馬松", service: "PTA (9 Sessions)", discipline: "PT", staff: "PTA B哥", section: "Section 4", status: "active", cancelReason: "", notes: "" },
-      { id: "mwc-064", date: "2026-11-18", startTime: "09:45", endTime: "10:45", client: "繆馬松", service: "PTA (9 Sessions)", discipline: "PT", staff: "PTA B哥", section: "Section 5", status: "active", cancelReason: "", notes: "" },
-      { id: "mwc-065", date: "2026-11-25", startTime: "09:45", endTime: "10:45", client: "繆馬松", service: "PTA (9 Sessions)", discipline: "PT", staff: "PTA B哥", section: "Section 6", status: "active", cancelReason: "", notes: "" },
-      { id: "mwc-066", date: "2026-12-02", startTime: "09:45", endTime: "10:45", client: "繆馬松", service: "PTA (9 Sessions)", discipline: "PT", staff: "PTA B哥", section: "Section 7", status: "active", cancelReason: "", notes: "" },
-      { id: "mwc-067", date: "2026-12-09", startTime: "09:45", endTime: "10:45", client: "繆馬松", service: "PTA (9 Sessions)", discipline: "PT", staff: "PTA B哥", section: "Section 8", status: "active", cancelReason: "", notes: "" },
-      { id: "mwc-068", date: "2026-12-23", startTime: "09:45", endTime: "10:45", client: "繆馬松", service: "PTA (9 Sessions)", discipline: "PT", staff: "PTA B哥", section: "Section 9", status: "active", cancelReason: "", notes: "結案" },
-
-      // 羅漢星
-      { id: "mwc-069", date: "2026-10-07", startTime: "12:00", endTime: "13:00", client: "羅漢星", service: "PTA (8 Sessions)", discipline: "PT", staff: "PTA B哥", section: "Section 6 Cancel", status: "cancelled", cancelReason: "原排班表標記取消", notes: "" },
-      { id: "mwc-070", date: "2026-10-14", startTime: "12:00", endTime: "13:00", client: "羅漢星", service: "PTA (8 Sessions)", discipline: "PT", staff: "PTA B哥", section: "Section 7", status: "active", cancelReason: "", notes: "" },
-      { id: "mwc-071", date: "2026-10-21", startTime: "12:00", endTime: "13:00", client: "羅漢星", service: "PTA (8 Sessions)", discipline: "PT", staff: "PTA B哥", section: "Section 8", status: "active", cancelReason: "", notes: "舊期結案" },
-      { id: "mwc-072", date: "2026-10-28", startTime: "12:00", endTime: "13:00", client: "羅漢星", service: "PTA (8 Sessions)", discipline: "PT", staff: "PTA B哥", section: "Section 1", status: "active", cancelReason: "", notes: "新期第一節" },
-      { id: "mwc-073", date: "2026-11-04", startTime: "12:00", endTime: "13:00", client: "羅漢星", service: "PTA (8 Sessions)", discipline: "PT", staff: "PTA B哥", section: "Section 2", status: "active", cancelReason: "", notes: "" },
-      { id: "mwc-074", date: "2026-11-11", startTime: "12:00", endTime: "13:00", client: "羅漢星", service: "PTA (8 Sessions)", discipline: "PT", staff: "PTA B哥", section: "Section 3", status: "active", cancelReason: "", notes: "" },
-      { id: "mwc-075", date: "2026-11-18", startTime: "12:00", endTime: "13:00", client: "羅漢星", service: "PTA (8 Sessions)", discipline: "PT", staff: "PTA B哥", section: "Section 4", status: "active", cancelReason: "", notes: "" },
-      { id: "mwc-076", date: "2026-11-25", startTime: "12:00", endTime: "13:00", client: "羅漢星", service: "PTA (8 Sessions)", discipline: "PT", staff: "PTA B哥", section: "Section 5", status: "active", cancelReason: "", notes: "" },
-      { id: "mwc-077", date: "2026-12-02", startTime: "12:00", endTime: "13:00", client: "羅漢星", service: "PTA (8 Sessions)", discipline: "PT", staff: "PTA B哥", section: "Section 6", status: "active", cancelReason: "", notes: "" },
-      { id: "mwc-078", date: "2026-12-09", startTime: "12:00", endTime: "13:00", client: "羅漢星", service: "PTA (8 Sessions)", discipline: "PT", staff: "PTA B哥", section: "Section 7", status: "active", cancelReason: "", notes: "" },
-      { id: "mwc-079", date: "2026-12-23", startTime: "12:00", endTime: "13:00", client: "羅漢星", service: "PTA (8 Sessions)", discipline: "PT", staff: "PTA B哥", section: "Section 8", status: "active", cancelReason: "", notes: "結案" },
-
-      // 曾昭群 & 關黃兆平
-      { id: "mwc-080", date: "2026-10-07", startTime: "09:30", endTime: "10:30", client: "曾昭群", service: "PT+PTA (9 Sessions)", discipline: "PT", staff: "PT Sing + PTA 珊", section: "Section 1", status: "active", cancelReason: "", notes: "評估排班" },
-      { id: "mwc-081", date: "2026-10-07", startTime: "16:30", endTime: "17:30", client: "關黃兆平", service: "PT+PTA (9 Sessions)", discipline: "PT", staff: "PTA B哥", section: "Section 2 Cancel", status: "cancelled", cancelReason: "原排班表標記取消", notes: "" },
-      { id: "mwc-082", date: "2026-10-14", startTime: "16:30", endTime: "17:30", client: "關黃兆平", service: "PT+PTA (9 Sessions)", discipline: "PT", staff: "PTA B哥", section: "Section 2", status: "active", cancelReason: "", notes: "補回第2節" },
-
-      // 吳淑媛
       { id: "mwc-083", date: "2026-10-07", startTime: "09:30", endTime: "10:30", client: "吳淑媛", service: "OT+OTA (7 Sessions)", discipline: "OT", staff: "OT Ken", section: "Section 1", status: "active", cancelReason: "", notes: "" },
-      { id: "mwc-084", date: "2026-10-14", startTime: "09:30", endTime: "10:30", client: "吳淑媛", service: "OT+OTA (7 Sessions)", discipline: "OT", staff: "OTA Rebecca", section: "Section 2", status: "active", cancelReason: "", notes: "" },
-      { id: "mwc-085", date: "2026-10-21", startTime: "09:30", endTime: "10:30", client: "吳淑媛", service: "OT+OTA (7 Sessions)", discipline: "OT", staff: "OTA Rebecca", section: "Section 3", status: "active", cancelReason: "", notes: "" },
-      { id: "mwc-086", date: "2026-10-28", startTime: "09:30", endTime: "10:30", client: "吳淑媛", service: "OT+OTA (7 Sessions)", discipline: "OT", staff: "OTA Rebecca", section: "Section 4", status: "active", cancelReason: "", notes: "" },
-      { id: "mwc-087", date: "2026-11-04", startTime: "09:30", endTime: "10:30", client: "吳淑媛", service: "OT+OTA (7 Sessions)", discipline: "OT", staff: "OTA Rebecca", section: "Section 5", status: "active", cancelReason: "", notes: "" },
-      { id: "mwc-088", date: "2026-11-11", startTime: "09:30", endTime: "10:30", client: "吳淑媛", service: "OT+OTA (7 Sessions)", discipline: "OT", staff: "OTA Rebecca", section: "Section 6", status: "active", cancelReason: "", notes: "" },
-      { id: "mwc-089", date: "2026-11-18", startTime: "09:30", endTime: "10:30", client: "吳淑媛", service: "OT+OTA (7 Sessions)", discipline: "OT", staff: "OTA Rebecca", section: "Section 7", status: "active", cancelReason: "", notes: "結案" },
-
-      // 周錦全
-      { id: "mwc-090", date: "2026-10-08", startTime: "14:30", endTime: "15:15", client: "周錦全", service: "ST (10 Sessions)", discipline: "ST", staff: "ST Tammy", section: "Section 3", status: "active", cancelReason: "", notes: "" },
-      { id: "mwc-091", date: "2026-10-22", startTime: "14:30", endTime: "15:15", client: "周錦全", service: "ST (10 Sessions)", discipline: "ST", staff: "ST Tammy", section: "Section 4", status: "active", cancelReason: "", notes: "" },
-      { id: "mwc-092", date: "2026-10-29", startTime: "14:30", endTime: "15:15", client: "周錦全", service: "ST (10 Sessions)", discipline: "ST", staff: "ST Tammy", section: "Section 5", status: "active", cancelReason: "", notes: "" },
-
-      // 吳燦燊
-      { id: "mwc-093", date: "2026-10-08", startTime: "16:00", endTime: "17:00", client: "吳燦燊", service: "PTA (8 Sessions)", discipline: "PT", staff: "PTA 珊", section: "Section 4", status: "active", cancelReason: "", notes: "" },
-      { id: "mwc-094", date: "2026-10-15", startTime: "16:00", endTime: "17:00", client: "吳燦燊", service: "PTA (8 Sessions)", discipline: "PT", staff: "PTA 珊", section: "Section 5", status: "active", cancelReason: "", notes: "" },
-      { id: "mwc-095", date: "2026-10-22", startTime: "16:00", endTime: "17:00", client: "吳燦燊", service: "PTA (8 Sessions)", discipline: "PT", staff: "PTA 珊", section: "Section 6", status: "active", cancelReason: "", notes: "" },
-
-      // 張明清
-      { id: "mwc-096", date: "2026-10-08", startTime: "09:45", endTime: "10:45", client: "張明清", service: "PT+PTA (9 Sessions)", discipline: "PT", staff: "PTA 珊", section: "Section 1", status: "active", cancelReason: "", notes: "" },
-      { id: "mwc-097", date: "2026-10-15", startTime: "09:45", endTime: "10:45", client: "張明清", service: "PT+PTA (9 Sessions)", discipline: "PT", staff: "PT Sing + PTA 珊", section: "Section 2", status: "active", cancelReason: "", notes: "" },
-      { id: "mwc-098", date: "2026-10-22", startTime: "09:45", endTime: "10:45", client: "張明清", service: "PT+PTA (9 Sessions)", discipline: "PT", staff: "PTA 珊", section: "Section 3", status: "active", cancelReason: "", notes: "" },
-      { id: "mwc-099", date: "2026-10-29", startTime: "09:45", endTime: "10:45", client: "張明清", service: "PT+PTA (9 Sessions)", discipline: "PT", staff: "PTA 珊", section: "Section 4", status: "active", cancelReason: "", notes: "" },
-      { id: "mwc-100", date: "2026-11-05", startTime: "09:45", endTime: "10:45", client: "張明清", service: "PT+PTA (9 Sessions)", discipline: "PT", staff: "PTA 珊", section: "Section 5", status: "active", cancelReason: "", notes: "" },
-      { id: "mwc-101", date: "2026-11-12", startTime: "09:45", endTime: "10:45", client: "張明清", service: "PT+PTA (9 Sessions)", discipline: "PT", staff: "PTA 珊", section: "Section 6", status: "active", cancelReason: "", notes: "" },
-      { id: "mwc-102", date: "2026-11-19", startTime: "09:45", endTime: "10:45", client: "張明清", service: "PT+PTA (9 Sessions)", discipline: "PT", staff: "PTA 珊", section: "Section 7", status: "active", cancelReason: "", notes: "" },
-      { id: "mwc-103", date: "2026-11-26", startTime: "09:45", endTime: "10:45", client: "張明清", service: "PT+PTA (9 Sessions)", discipline: "PT", staff: "PTA 珊", section: "Section 8", status: "active", cancelReason: "", notes: "" },
-      { id: "mwc-104", date: "2026-12-03", startTime: "09:45", endTime: "10:45", client: "張明清", service: "PT+PTA (9 Sessions)", discipline: "PT", staff: "PTA 珊", section: "Section 9", status: "active", cancelReason: "", notes: "結案" },
-
-      // 2027 跨年延續療程 (包含畫面中的 Allen 預約)
-      { id: "mwc-105", date: "2027-01-02", startTime: "09:30", endTime: "10:30", client: "Allen", service: "PTA (8 Sessions)", discipline: "PT", staff: "PTA 珊", section: "Section 1", status: "active", cancelReason: "", notes: "2027跨年出席" },
-      { id: "mwc-106", date: "2027-01-02", startTime: "09:30", endTime: "10:30", client: "Allen", service: "PTA (8 Sessions)", discipline: "PT", staff: "PTA 珊", section: "Section 1 Cancel", status: "cancelled", cancelReason: "原排班表標記取消", notes: "2027跨年舊排班" },
+      // 2027 排班範例
+      { id: "mwc-105", date: "2027-01-02", startTime: "09:30", endTime: "10:30", client: "Allen", service: "PTA (8 Sessions)", discipline: "PT", staff: "PTA 珊", section: "Section 1", status: "active", cancelReason: "", notes: "2027出席" },
+      { id: "mwc-106", date: "2027-01-02", startTime: "09:30", endTime: "10:30", client: "Allen", service: "PTA (8 Sessions)", discipline: "PT", staff: "PTA 珊", section: "Section 1 Cancel", status: "cancelled", cancelReason: "原排班表標記取消", notes: "" },
       { id: "mwc-107", date: "2027-01-05", startTime: "09:30", endTime: "10:30", client: "何愛蘭", service: "PTA (8 Sessions)", discipline: "PT", staff: "PTA 珊", section: "Section 2", status: "active", cancelReason: "", notes: "" },
       { id: "mwc-108", date: "2027-01-06", startTime: "14:00", endTime: "15:00", client: "羅漢星", service: "PTA (8 Sessions)", discipline: "PT", staff: "PTA B哥", section: "Section 1", status: "active", cancelReason: "", notes: "" },
       { id: "mwc-109", date: "2027-01-07", startTime: "10:00", endTime: "11:00", client: "張明清", service: "PTA (8 Sessions)", discipline: "PT", staff: "PTA 珊", section: "Section 1", status: "active", cancelReason: "", notes: "" }
     ];
 
     function getDecodedApiKey() {
-      try {
-        return atob("QUl6YVN5QVlUd0lMd3VmaEdpMlNVYXpYbXhBRDJ0MDZ4d3k1NmVn");
-      } catch (e) {
-        return "";
-      }
+      try { return atob("QUl6YVN5QVlUd0lMd3VmaEdpMlNVYXpYbXhBRDJ0MDZ4d3k1NmVn"); } catch (e) { return ""; }
     }
 
     const firebaseConfig = {
@@ -911,8 +860,9 @@
       measurementId: "G-9MZLFBFJB0"
     };
 
+    // 系統狀態 (預設修改人為 Jo Jo)
     const state = {
-      currentDate: new Date(2027, 0, 2), // 預設聚焦 2027 年 1 月（符合您截圖月份）
+      currentDate: new Date(2027, 0, 2),
       selectedDayDate: new Date(2027, 0, 2),
       currentView: 'month',
       currentRole: localStorage.getItem('mwc_operator_name') || 'Jo Jo',
@@ -925,25 +875,22 @@
       isFirebaseConnected: false
     };
 
+    // 權限檢查：只有 Jo Jo 可以修改
+    function checkPermission() {
+      if (state.currentRole !== 'Jo Jo') {
+        alert(`【權限不足】目前設定的修改人為「${state.currentRole}」。\n只有「Jo Jo」擁有排班修改、取消與刪除之權限！`);
+        return false;
+      }
+      return true;
+    }
+
     const HK_HOLIDAYS = {
-      '2026-10-01': '國慶日',
-      '2026-10-02': '中秋節翌日',
-      '2026-10-19': '重陽節翌日',
-      '2026-12-25': '聖誕節',
-      '2026-12-26': '聖誕節後第一個周日',
-      '2027-01-01': '元旦',
-      '2027-02-06': '農曆除夕',
-      '2027-02-07': '農曆年初一',
-      '2027-02-08': '農曆年初二',
-      '2027-02-09': '農曆年初三',
-      '2027-03-26': '耶穌受難節',
-      '2027-03-29': '復活節星期一',
-      '2027-04-05': '清明節',
-      '2027-05-01': '勞動節',
-      '2027-05-13': '佛誕',
-      '2027-06-09': '端午節',
-      '2027-07-01': '香港特區成立紀念日',
-      '2027-10-01': '國慶日'
+      '2026-10-01': '國慶日', '2026-10-02': '中秋節翌日', '2026-10-19': '重陽節翌日',
+      '2026-12-25': '聖誕節', '2026-12-26': '聖誕節後第一個周日',
+      '2027-01-01': '元旦', '2027-02-06': '農曆除夕', '2027-02-07': '年初一',
+      '2027-02-08': '年初二', '2027-02-09': '年初三', '2027-03-26': '耶穌受難節',
+      '2027-03-29': '復活節星期一', '2027-04-05': '清明節', '2027-05-01': '勞動節',
+      '2027-05-13': '佛誕', '2027-06-09': '端午節', '2027-07-01': '特區紀念日'
     };
 
     function initAppointmentsData() {
@@ -951,14 +898,8 @@
         const raw = localStorage.getItem('mwc_appointments_data');
         if (raw) {
           const parsed = JSON.parse(raw);
-          if (Array.isArray(parsed) && parsed.length >= INITIAL_AUTHENTIC_SCHEDULE.length) {
+          if (Array.isArray(parsed) && parsed.length > 0) {
             state.appointments = parsed;
-            return;
-          } else if (Array.isArray(parsed) && parsed.length > 0) {
-            const existingIds = new Set(parsed.map(x => x.id));
-            const missing = INITIAL_AUTHENTIC_SCHEDULE.filter(x => !existingIds.has(x.id));
-            state.appointments = [...parsed, ...missing];
-            saveAppointmentsLocal();
             return;
           }
         }
@@ -1010,9 +951,7 @@
 
     function updateAuditBadge() {
       const c = state.auditLogs.length;
-      const b1 = document.getElementById('auditCountBadge');
       const b2 = document.getElementById('auditCountBadgeMobile');
-      if (b1) b1.textContent = c;
       if (b2) b2.textContent = c;
     }
 
@@ -1026,11 +965,7 @@
         const app = initializeApp(firebaseConfig);
         db = getFirestore(app);
         auth = getAuth(app);
-        try {
-          await signInAnonymously(auth);
-        } catch (authErr) {
-          console.info('Firebase anonymous auth optional/fallback:', authErr.message);
-        }
+        try { await signInAnonymously(auth); } catch (authErr) {}
 
         docRef = doc(db, 'mwc_public_calendar', 'schedule_hub');
 
@@ -1042,27 +977,20 @@
               saveAppointmentsLocal();
               renderCurrentView();
             }
-            if (data && Array.isArray(data.auditLogs) && data.auditLogs.length > 0) {
-              state.auditLogs = data.auditLogs;
-              saveAuditLogs();
-            }
           } else {
             setDoc(docRef, {
               appointments: state.appointments,
               auditLogs: state.auditLogs,
               lastUpdated: new Date().toISOString()
-            }).catch(e => console.warn('Seed sync error:', e));
+            }).catch(e => console.warn(e));
           }
           state.isFirebaseConnected = true;
           if (syncStatusText) syncStatusText.textContent = "多方即時連線中";
         }, (error) => {
-          console.warn('Firestore snapshot error, running in local-reliable mode:', error);
           state.isFirebaseConnected = false;
-          if (syncStatusText) syncStatusText.textContent = "本機獨立模式 (離線安全)";
+          if (syncStatusText) syncStatusText.textContent = "本機獨立模式";
         });
-
       } catch (err) {
-        console.warn('Firebase init fallback:', err);
         state.isFirebaseConnected = false;
         if (syncStatusText) syncStatusText.textContent = "本機安全模式";
       }
@@ -1079,7 +1007,7 @@
             lastUpdated: new Date().toISOString()
           }, { merge: true });
         } catch (e) {
-          console.warn('Remote sync push error:', e);
+          console.warn('Sync push error:', e);
         }
       }
     }
@@ -1111,12 +1039,17 @@
       return `${year}-${month}-${day}`;
     }
 
+    // 專屬底色：PT:黃色, OT:綠色, ST:紫色
     function getDisciplineClass(d) {
       switch (d) {
-        case 'PT': return 'bg-sky-50 text-sky-700 border-sky-200';
-        case 'OT': return 'bg-amber-50 text-amber-700 border-amber-200';
-        case 'ST': return 'bg-emerald-50 text-emerald-700 border-emerald-200';
-        default: return 'bg-slate-50 text-slate-700 border-slate-200';
+        case 'PT': 
+          return 'bg-amber-100 text-amber-900 border-amber-300'; // 黃色
+        case 'OT': 
+          return 'bg-emerald-100 text-emerald-900 border-emerald-300'; // 綠色
+        case 'ST': 
+          return 'bg-purple-100 text-purple-900 border-purple-300'; // 紫色
+        default: 
+          return 'bg-slate-100 text-slate-800 border-slate-300';
       }
     }
 
@@ -1149,14 +1082,13 @@
           const matchClient = (app.client || '').toLowerCase().includes(q);
           const matchStaff = (app.staff || '').toLowerCase().includes(q);
           const matchSection = (app.section || '').toLowerCase().includes(q);
-          const matchNotes = (app.notes || '').toLowerCase().includes(q);
-          if (!matchClient && !matchStaff && !matchSection && !matchNotes) return false;
+          if (!matchClient && !matchStaff && !matchSection) return false;
         }
         return true;
       });
     }
 
-    // 月曆檢視渲染 (加入小卡片點擊事件)
+    // 月曆檢視渲染 (同時顯示時間、姓名、職員與節數進度)
     function renderMonthView() {
       const monthGrid = document.getElementById('monthGrid');
       monthGrid.innerHTML = '';
@@ -1171,7 +1103,7 @@
       const todayStr = formatDate(new Date());
       const selectedStr = formatDate(state.selectedDayDate);
 
-      // 上個月填補
+      // 上月補位
       for (let i = firstDay - 1; i >= 0; i--) {
         const dNum = prevMonthLastDate - i;
         const cell = document.createElement('div');
@@ -1180,7 +1112,7 @@
         monthGrid.appendChild(cell);
       }
 
-      // 當月日期格
+      // 當月格子
       for (let day = 1; day <= totalDays; day++) {
         const curD = new Date(y, m, day);
         const dateStr = formatDate(curD);
@@ -1192,11 +1124,10 @@
         dayEvents.sort((a, b) => a.startTime.localeCompare(b.startTime));
 
         const cell = document.createElement('div');
-        cell.className = `min-h-[105px] sm:min-h-[125px] p-1 sm:p-1.5 bg-white transition hover:bg-slate-50/80 cursor-pointer flex flex-col justify-between ${
+        cell.className = `min-h-[110px] sm:min-h-[130px] p-1 sm:p-1.5 bg-white transition hover:bg-slate-50/80 cursor-pointer flex flex-col justify-between ${
           isSelected ? 'ring-2 ring-slate-800 z-10' : ''
         }`;
 
-        // 日期頭部
         const headDiv = document.createElement('div');
         headDiv.className = 'flex items-center justify-between';
         headDiv.innerHTML = `
@@ -1207,7 +1138,7 @@
         `;
         cell.appendChild(headDiv);
 
-        // 排班徽章清單 (直接可點擊編輯/取消)
+        // 排班徽章清單 (包含節數顯示)
         const eventsContainer = document.createElement('div');
         eventsContainer.className = 'space-y-1 mt-1 flex-1 overflow-hidden';
 
@@ -1215,13 +1146,17 @@
           const isCancel = ev.status === 'cancelled';
           const disClass = getDisciplineClass(ev.discipline);
           const evDiv = document.createElement('div');
+          
+          // 簡化節數文字：Section 1 -> Sec 1
+          const secShort = (ev.section || '').replace(/Section/i, 'Sec').replace(/\s*Cancel/i, '').trim();
+
           evDiv.className = `p-1 rounded border text-[10px] leading-tight truncate transition select-none ${disClass} ${
             isCancel ? 'opacity-50 line-through bg-slate-100 border-slate-300' : 'hover:ring-1 hover:ring-slate-400'
           }`;
-          evDiv.title = `點擊查看 / 取消 / 編輯排班：${ev.client} (${ev.startTime}-${ev.endTime})`;
-          evDiv.innerHTML = `<span class="font-bold">${ev.startTime}</span> ${ev.client} (${ev.staff.split(' ')[0]})${isCancel ? ' <span class="no-underline text-rose-600 font-bold">[已取消]</span>' : ''}`;
+          
+          evDiv.title = `${ev.client} (${ev.staff}) - ${ev.section} [${ev.startTime}-${ev.endTime}]`;
+          evDiv.innerHTML = `<span class="font-bold">${ev.startTime}</span> ${ev.client} (${ev.staff.split(' ')[0]})${secShort ? ` · <span class="font-semibold">${secShort}</span>` : ''}${isCancel ? ' <span class="no-underline text-rose-600 font-bold">[取消]</span>' : ''}`;
 
-          // 【關鍵修復】：點擊小卡片直接開啟排班彈窗！
           evDiv.onclick = (e) => {
             e.stopPropagation();
             openAppointmentModal(ev);
@@ -1239,7 +1174,6 @@
 
         cell.appendChild(eventsContainer);
 
-        // 點擊空白處選取該天
         cell.onclick = () => {
           state.selectedDayDate = curD;
           renderMonthView();
@@ -1249,7 +1183,6 @@
         monthGrid.appendChild(cell);
       }
 
-      // 手機版清單
       const selectedDayEvents = filtered.filter(a => a.date === selectedStr);
       renderMobileDayAgenda(selectedDayEvents, selectedStr);
     }
@@ -1281,7 +1214,6 @@
       });
     }
 
-    // 週時段檢視渲染
     function renderWeekView() {
       const headerRow = document.getElementById('weekHeaderRow');
       const tbody = document.getElementById('weekTimeTableBody');
@@ -1321,16 +1253,14 @@
 
           const slotEvents = filtered.filter(ev => {
             if (ev.date !== dStr) return false;
-            const startH = parseInt(ev.startTime.split(':')[0], 10);
-            const curH = parseInt(hr.split(':')[0], 10);
-            return startH === curH;
+            return parseInt(ev.startTime.split(':')[0], 10) === parseInt(hr.split(':')[0], 10);
           });
 
           slotEvents.forEach(ev => {
             const isCancel = ev.status === 'cancelled';
             const card = document.createElement('div');
             card.className = `p-1 mb-1 rounded border text-[10px] cursor-pointer ${getDisciplineClass(ev.discipline)} ${isCancel ? 'opacity-50 line-through' : ''}`;
-            card.innerHTML = `<div class="font-bold">${ev.client}</div><div>${ev.startTime} ${ev.staff.split(' ')[0]}</div>`;
+            card.innerHTML = `<div class="font-bold">${ev.client} (${ev.section})</div><div>${ev.startTime} ${ev.staff.split(' ')[0]}</div>`;
             card.onclick = () => openAppointmentModal(ev);
             td.appendChild(card);
           });
@@ -1342,7 +1272,6 @@
       });
     }
 
-    // 清單表格渲染 (支援一鍵取消/恢復)
     function renderTableView() {
       const tbody = document.getElementById('scheduleTableBody');
       tbody.innerHTML = '';
@@ -1378,6 +1307,7 @@
         const btnCancel = tr.querySelector('.btn-cancel-table');
         if (btnCancel) {
           btnCancel.onclick = async () => {
+            if (!checkPermission()) return;
             const reason = prompt(`請輸入【${ev.client}】取消 / 請假原因：`, '身體不適 / 請假');
             if (reason === null) return;
             ev.status = 'cancelled';
@@ -1398,6 +1328,7 @@
         const btnRestore = tr.querySelector('.btn-restore-table');
         if (btnRestore) {
           btnRestore.onclick = async () => {
+            if (!checkPermission()) return;
             ev.status = 'active';
             ev.cancelReason = '';
             ev.section = ev.section.replace(/\s*Cancel/gi, '').trim();
@@ -1417,12 +1348,11 @@
       });
     }
 
-    // 全年度視圖渲染
     function renderYearView() {
       const grid = document.getElementById('yearMatrixGrid');
       grid.innerHTML = '';
       const y = state.currentDate.getFullYear();
-      document.getElementById('yearMatrixTitle').textContent = `${y} 全年度 12 個月復康治療總覽矩陣`;
+      document.getElementById('yearMatrixTitle').textContent = `${y} 全年度 12 個月治療總覽矩陣`;
 
       for (let m = 0; m < 12; m++) {
         const monthEvents = state.appointments.filter(a => {
@@ -1469,20 +1399,15 @@
       renderCurrentView();
     }
 
-    // 排班編輯彈窗核心控制
-    let originalEditingEvent = null;
-
     function openAppointmentModal(app = null, defaultDate = null) {
       const form = document.getElementById('appointmentForm');
       form.reset();
-      document.getElementById('teamsTimeDiffAlert').classList.add('hidden');
 
       const btnDelete = document.getElementById('btnDeleteEvent');
       const btnQuickCancel = document.getElementById('btnQuickCancelEvent');
       const btnQuickRestore = document.getElementById('btnQuickRestoreEvent');
 
       if (app) {
-        originalEditingEvent = JSON.parse(JSON.stringify(app));
         document.getElementById('formEventId').value = app.id;
         document.getElementById('modalTitle').innerHTML = `<i class="fa-solid fa-pen text-sky-400 mr-1.5"></i>編輯排班 - ${app.client}`;
         document.getElementById('formClientName').value = app.client;
@@ -1501,20 +1426,15 @@
           document.querySelector('input[name="formStatusRadio"][value="cancelled"]').checked = true;
           document.getElementById('cancelReasonContainer').classList.remove('hidden');
           document.getElementById('formCancelReason').value = app.cancelReason || '';
-
-          // 顯示「恢復排班」按鈕，隱藏「取消排班」按鈕
           btnQuickCancel.classList.add('hidden');
           btnQuickRestore.classList.remove('hidden');
         } else {
           document.querySelector('input[name="formStatusRadio"][value="active"]').checked = true;
           document.getElementById('cancelReasonContainer').classList.add('hidden');
-
-          // 顯示「取消排班」按鈕，隱藏「恢復排班」按鈕
           btnQuickCancel.classList.remove('hidden');
           btnQuickRestore.classList.add('hidden');
         }
       } else {
-        originalEditingEvent = null;
         document.getElementById('formEventId').value = '';
         document.getElementById('modalTitle').innerHTML = `<i class="fa-solid fa-calendar-plus text-sky-400 mr-1.5"></i>新增治療預約`;
         document.getElementById('formDate').value = defaultDate || formatDate(state.currentDate);
@@ -1527,7 +1447,6 @@
         document.querySelector('input[name="formStatusRadio"][value="active"]').checked = true;
         document.getElementById('cancelReasonContainer').classList.add('hidden');
 
-        // 新增時不顯示取消/恢復/刪除按鈕
         btnDelete.classList.add('hidden');
         btnQuickCancel.classList.add('hidden');
         btnQuickRestore.classList.add('hidden');
@@ -1548,32 +1467,9 @@
       }
     }
 
-    function checkTimeDiff() {
-      if (!originalEditingEvent) return;
-      const newD = document.getElementById('formDate').value;
-      const newS = document.getElementById('formStartTime').value;
-      const newE = document.getElementById('formEndTime').value;
-
-      const diffAlert = document.getElementById('teamsTimeDiffAlert');
-      const diffDetails = document.getElementById('teamsTimeDiffDetails');
-
-      if (newD !== originalEditingEvent.date || newS !== originalEditingEvent.startTime || newE !== originalEditingEvent.endTime) {
-        diffAlert.classList.remove('hidden');
-        diffDetails.innerHTML = `
-          <div>原時間：<span class="line-through text-slate-500">${originalEditingEvent.date} ${originalEditingEvent.startTime}-${originalEditingEvent.endTime}</span></div>
-          <div class="text-rose-700 font-bold">新時間：${newD} ${newS}-${newE}</div>
-        `;
-      } else {
-        diffAlert.classList.add('hidden');
-      }
-    }
-
     document.getElementById('formDate').onchange = () => {
       checkHolidayNotice(document.getElementById('formDate').value);
-      checkTimeDiff();
     };
-    document.getElementById('formStartTime').onchange = checkTimeDiff;
-    document.getElementById('formEndTime').onchange = checkTimeDiff;
 
     document.querySelectorAll('input[name="formStatusRadio"]').forEach(r => {
       r.onchange = () => {
@@ -1582,21 +1478,20 @@
       };
     });
 
-    // 專屬【取消排班 (請假)】按鈕點擊處理
+    // 專屬【取消排班】按鈕
     document.getElementById('btnQuickCancelEvent').onclick = async () => {
+      if (!checkPermission()) return;
       const id = document.getElementById('formEventId').value;
       if (!id) return;
       const client = document.getElementById('formClientName').value;
-      const reason = prompt(`請輸入【${client}】取消 / 請假原因（例如：身體不適、外出覆診）：`, '身體不適 / 請假');
+      const reason = prompt(`請輸入【${client}】取消 / 請假原因：`, '身體不適 / 請假');
       if (reason === null) return;
 
       const app = state.appointments.find(a => a.id === id);
       if (app) {
         app.status = 'cancelled';
         app.cancelReason = reason || '手動標記取消';
-        if (!app.section.includes('Cancel')) {
-          app.section = app.section + ' Cancel';
-        }
+        if (!app.section.includes('Cancel')) app.section = app.section + ' Cancel';
         app.updatedBy = state.currentRole;
         app.updatedAt = new Date().toISOString();
 
@@ -1612,8 +1507,9 @@
       }
     };
 
-    // 專屬【恢復排班】按鈕點擊處理
+    // 專屬【恢復排班】按鈕
     document.getElementById('btnQuickRestoreEvent').onclick = async () => {
+      if (!checkPermission()) return;
       const id = document.getElementById('formEventId').value;
       if (!id) return;
 
@@ -1637,9 +1533,11 @@
       }
     };
 
-    // 儲存排班表單
+    // 儲存表單 (Jo Jo 權限保護)
     document.getElementById('appointmentForm').onsubmit = async (e) => {
       e.preventDefault();
+      if (!checkPermission()) return;
+
       const id = document.getElementById('formEventId').value;
       const client = document.getElementById('formClientName').value.trim();
       const date = document.getElementById('formDate').value;
@@ -1662,17 +1560,16 @@
         client, date, discipline, service, staff, section, startTime, endTime,
         status, cancelReason, notes,
         updatedBy: state.currentRole,
-        updatedAt: new Date().toISOString()
+        updatedAt = new Date().toISOString()
       };
 
       if (id) {
         const idx = state.appointments.findIndex(a => a.id === id);
         if (idx !== -1) {
-          const old = state.appointments[idx];
           state.appointments[idx] = newEvent;
           addAuditRecord({
             action: '更新排班', client, staff,
-            diff: `${old.date} ${old.startTime} ➔ ${date} ${startTime} (${status})`
+            diff: `${date} ${startTime}-${endTime} (${section})`
           });
         }
       } else {
@@ -1691,9 +1588,10 @@
 
     // 刪除排班
     document.getElementById('btnDeleteEvent').onclick = async () => {
+      if (!checkPermission()) return;
       const id = document.getElementById('formEventId').value;
       if (!id) return;
-      if (!confirm('確定要永久刪除此排班紀錄嗎？（建議一般請假使用「取消排班」留底）')) return;
+      if (!confirm('確定要永久刪除此排班紀錄嗎？')) return;
 
       const ev = state.appointments.find(a => a.id === id);
       state.appointments = state.appointments.filter(a => a.id !== id);
@@ -1709,49 +1607,11 @@
       showToast('排班已刪除', 'warning');
     };
 
-    function buildTeamsMessage() {
-      const client = document.getElementById('formClientName').value || '院友';
-      const date = document.getElementById('formDate').value;
-      const start = document.getElementById('formStartTime').value;
-      const end = document.getElementById('formEndTime').value;
-      const staff = document.getElementById('formStaff').value;
-      const section = document.getElementById('formSection').value;
-      const status = document.querySelector('input[name="formStatusRadio"]:checked').value;
-
-      return `【MWC 復康排班異動公告】\n院友：${client}\n日期：${date}\n時間：${start}-${end}\n節數：${section}\n負責：${staff}\n狀態：${status === 'cancelled' ? '已取消' : '正常排班'}\n修改人：${state.currentRole}\n時間戳：${new Date().toLocaleString('zh-HK')}`;
-    }
-
-    document.getElementById('btnCopyTeamsText').onclick = () => {
-      const msg = buildTeamsMessage();
-      const ta = document.createElement('textarea');
-      ta.value = msg;
-      document.body.appendChild(ta);
-      ta.select();
-      document.execCommand('copy');
-      document.body.removeChild(ta);
-      showToast('已複製 Teams 異動公告文字！', 'success');
-    };
-
-    document.getElementById('btnDirectTeamsChat').onclick = () => {
-      const staff = document.getElementById('formStaff').value;
-      const emailMap = {
-        'PTA 珊': 'shan.pta@mwc-rehab.hk',
-        'PTA B哥': 'bbrother.pta@mwc-rehab.hk',
-        'PT Sing': 'sing.pt@mwc-rehab.hk',
-        'ST Tammy': 'tammy.st@mwc-rehab.hk',
-        'ST Kelvin': 'kelvin.st@mwc-rehab.hk',
-        'OTA Rebecca': 'rebecca.ota@mwc-rehab.hk',
-        'OT Ken': 'ken.ot@mwc-rehab.hk'
-      };
-      const email = emailMap[staff] || 'staff@mwc-rehab.hk';
-      const msg = encodeURIComponent(buildTeamsMessage());
-      window.open(`https://teams.microsoft.com/l/chat/0/0?users=${encodeURIComponent(email)}&message=${msg}`, '_blank');
-      showToast(`正在開啟與 ${staff} 的 Teams 私聊對話...`, 'info');
-    };
-
-    // 跨年週期批次排班
+    // 連續服務排班送出
     document.getElementById('recurForm').onsubmit = async (e) => {
       e.preventDefault();
+      if (!checkPermission()) return;
+
       const client = document.getElementById('recurClientName').value.trim();
       const discipline = document.getElementById('recurDiscipline').value;
       const service = document.getElementById('recurService').value.trim();
@@ -1777,9 +1637,7 @@
         const dStr = formatDate(curD);
 
         if (checkedDays.includes(dayOfWeek)) {
-          if (skipHolidays && HK_HOLIDAYS[dStr]) {
-            // 跳過公眾假期
-          } else {
+          if (!(skipHolidays && HK_HOLIDAYS[dStr])) {
             state.appointments.push({
               id: 'mwc-rec-' + Date.now() + '-' + generated,
               client, discipline, service, staff,
@@ -1787,7 +1645,7 @@
               section: `Section ${sessionIndex}`,
               status: 'active',
               cancelReason: '',
-              notes: '批次週期排班產生',
+              notes: '連續服務排班產生',
               updatedBy: state.currentRole,
               updatedAt: new Date().toISOString()
             });
@@ -1799,8 +1657,8 @@
       }
 
       addAuditRecord({
-        action: '批次週期排班', client, staff,
-        diff: `已順利產生 ${generated} 節跨年治療排班`
+        action: '批次連續服務', client, staff,
+        diff: `已順利產生 ${generated} 節治療排班`
       });
 
       await syncToFirebaseRemote();
@@ -1809,6 +1667,7 @@
       showToast(`成功批次產生 ${generated} 節排班！`, 'success');
     };
 
+    // 個案節數核對表
     function renderClientAuditReport() {
       const tbody = document.getElementById('clientAuditTableBody');
       tbody.innerHTML = '';
@@ -1837,100 +1696,239 @@
           <td class="p-2 text-center text-emerald-700 font-bold font-mono">${item.active}</td>
           <td class="p-2 text-center text-rose-600 font-bold font-mono">${item.cancelled}</td>
           <td class="p-2 font-mono text-[11px] text-slate-500">${minD} ~ ${maxD}</td>
-          <td class="p-2"><span class="px-2 py-0.5 rounded text-[10px] font-semibold bg-emerald-50 text-emerald-800 border border-emerald-200">✓ 已核對一致</span></td>
+          <td class="p-2"><span class="px-2 py-0.5 rounded text-[10px] font-semibold bg-emerald-50 text-emerald-800 border border-emerald-200">✓ 核對正常</span></td>
         `;
         tbody.appendChild(tr);
       });
     }
 
-    function renderAuditLogsList() {
-      const container = document.getElementById('auditLogListContainer');
-      container.innerHTML = '';
-
-      if (state.auditLogs.length === 0) {
-        container.innerHTML = `<div class="text-center py-6 text-slate-400">暫無修改紀錄</div>`;
-        return;
-      }
-
-      state.auditLogs.forEach(log => {
-        const item = document.createElement('div');
-        item.className = 'p-2.5 rounded-lg border border-slate-200 bg-slate-50 text-slate-800 space-y-1';
-        item.innerHTML = `
-          <div class="flex items-center justify-between font-bold">
-            <span class="text-slate-900">${log.action} · ${log.client || ''}</span>
-            <span class="text-[10px] text-slate-500 font-mono">${log.timestamp}</span>
-          </div>
-          <div class="text-[11px] text-slate-600">${log.diff}</div>
-          <div class="text-[10px] text-slate-500 flex justify-between">
-            <span>操作修改人: <strong>${log.operator || '-'}</strong></span>
-            <span>負責職員: <strong>${log.staff || '-'}</strong></span>
-          </div>
-        `;
-        container.appendChild(item);
+    // 統計過濾輔助器
+    function getStatsAppointmentsByRange(range) {
+      const y = state.currentDate.getFullYear();
+      const m = state.currentDate.getMonth();
+      return state.appointments.filter(a => {
+        const d = new Date(a.date);
+        if (range === 'month') return d.getFullYear() === y && d.getMonth() === m;
+        if (range === 'year') return d.getFullYear() === y;
+        return true;
       });
     }
 
-    // 匯出 CSV 排班表
+    // 📊 功能鍵 1：職員總個案人次統計 (重複只計一次)
+    function renderStatsClients() {
+      const range = document.getElementById('statsClientsRange').value;
+      const list = getStatsAppointmentsByRange(range);
+      const staffMap = {};
+
+      list.forEach(a => {
+        if (!staffMap[a.staff]) staffMap[a.staff] = new Set();
+        staffMap[a.staff].add(a.client);
+      });
+
+      const tbody = document.getElementById('statsClientsTableBody');
+      tbody.innerHTML = '';
+
+      Object.keys(staffMap).sort().forEach(staff => {
+        const clients = Array.from(staffMap[staff]);
+        const tr = document.createElement('tr');
+        tr.className = 'hover:bg-slate-50';
+        tr.innerHTML = `
+          <td class="p-2 font-bold text-slate-900">${staff}</td>
+          <td class="p-2 text-center font-mono font-bold text-teal-800 text-sm">${clients.length} 人</td>
+          <td class="p-2 text-slate-600">${clients.join('、 ')}</td>
+        `;
+        tbody.appendChild(tr);
+      });
+    }
+
+    document.getElementById('btnExportStatsClientsExcel').onclick = () => {
+      const range = document.getElementById('statsClientsRange').value;
+      const list = getStatsAppointmentsByRange(range);
+      const staffMap = {};
+      list.forEach(a => {
+        if (!staffMap[a.staff]) staffMap[a.staff] = new Set();
+        staffMap[a.staff].add(a.client);
+      });
+
+      let csv = "\uFEFF負責職員,總個案人次(去重),個案名單\n";
+      Object.keys(staffMap).sort().forEach(staff => {
+        const clients = Array.from(staffMap[staff]);
+        csv += `"${staff}","${clients.length}","${clients.join('; ')}"\n`;
+      });
+      downloadCSV(csv, `MWC_職員總個案人次統計_${range}.csv`);
+    };
+
+    // 📈 功能鍵 2：職員總服務節數統計
+    function renderStatsSessions() {
+      const range = document.getElementById('statsSessionsRange').value;
+      const list = getStatsAppointmentsByRange(range);
+      const staffMap = {};
+
+      list.forEach(a => {
+        if (!staffMap[a.staff]) staffMap[a.staff] = { total: 0, active: 0, cancelled: 0 };
+        staffMap[a.staff].total++;
+        if (a.status === 'cancelled') staffMap[a.staff].cancelled++;
+        else staffMap[a.staff].active++;
+      });
+
+      const tbody = document.getElementById('statsSessionsTableBody');
+      tbody.innerHTML = '';
+
+      Object.keys(staffMap).sort().forEach(staff => {
+        const item = staffMap[staff];
+        const tr = document.createElement('tr');
+        tr.className = 'hover:bg-slate-50';
+        tr.innerHTML = `
+          <td class="p-2 font-bold text-slate-900">${staff}</td>
+          <td class="p-2 text-center font-mono font-bold text-emerald-700">${item.active}</td>
+          <td class="p-2 text-center font-mono font-bold text-rose-600">${item.cancelled}</td>
+          <td class="p-2 text-center font-mono font-bold text-slate-900 text-sm">${item.total}</td>
+        `;
+        tbody.appendChild(tr);
+      });
+    }
+
+    document.getElementById('btnExportStatsSessionsExcel').onclick = () => {
+      const range = document.getElementById('statsSessionsRange').value;
+      const list = getStatsAppointmentsByRange(range);
+      const staffMap = {};
+      list.forEach(a => {
+        if (!staffMap[a.staff]) staffMap[a.staff] = { total: 0, active: 0, cancelled: 0 };
+        staffMap[a.staff].total++;
+        if (a.status === 'cancelled') staffMap[a.staff].cancelled++;
+        else staffMap[a.staff].active++;
+      });
+
+      let csv = "\uFEFF負責職員,有效完成節數,取消請假節數,總排定節數\n";
+      Object.keys(staffMap).sort().forEach(staff => {
+        const item = staffMap[staff];
+        csv += `"${staff}","${item.active}","${item.cancelled}","${item.total}"\n`;
+      });
+      downloadCSV(csv, `MWC_職員總節數統計_${range}.csv`);
+    };
+
+    // 💰 功能鍵 3：職員總收入統計
+    function renderStatsRevenue() {
+      const range = document.getElementById('statsRevenueRange').value;
+      const rate = parseFloat(document.getElementById('baseRateInput').value) || 0;
+      const list = getStatsAppointmentsByRange(range);
+      const staffMap = {};
+
+      list.forEach(a => {
+        if (a.status !== 'cancelled') {
+          staffMap[a.staff] = (staffMap[a.staff] || 0) + 1;
+        }
+      });
+
+      const tbody = document.getElementById('statsRevenueTableBody');
+      tbody.innerHTML = '';
+
+      Object.keys(staffMap).sort().forEach(staff => {
+        const count = staffMap[staff];
+        const rev = count * rate;
+        const tr = document.createElement('tr');
+        tr.className = 'hover:bg-slate-50';
+        tr.innerHTML = `
+          <td class="p-2 font-bold text-slate-900">${staff}</td>
+          <td class="p-2 text-center font-bold text-emerald-700">${count} 節</td>
+          <td class="p-2 text-right font-bold text-emerald-900">$${rev.toLocaleString('en-US')}</td>
+        `;
+        tbody.appendChild(tr);
+      });
+    }
+
+    document.getElementById('btnExportStatsRevenueExcel').onclick = () => {
+      const range = document.getElementById('statsRevenueRange').value;
+      const rate = parseFloat(document.getElementById('baseRateInput').value) || 0;
+      const list = getStatsAppointmentsByRange(range);
+      const staffMap = {};
+      list.forEach(a => {
+        if (a.status !== 'cancelled') {
+          staffMap[a.staff] = (staffMap[a.staff] || 0) + 1;
+        }
+      });
+
+      let csv = "\uFEFF負責職員,完成節數,每節基準單價,總收入(HKD)\n";
+      Object.keys(staffMap).sort().forEach(staff => {
+        const count = staffMap[staff];
+        const rev = count * rate;
+        csv += `"${staff}","${count}","${rate}","${rev}"\n`;
+      });
+      downloadCSV(csv, `MWC_職員總收入統計_${range}.csv`);
+    };
+
+    function downloadCSV(csv, filename) {
+      const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = filename;
+      a.click();
+    }
+
+    // 匯出主排班 CSV
     document.getElementById('btnExportCSV').onclick = () => {
-      let csv = "\uFEFF日期,開始時間,結束時間,院友姓名,專職部別,服務類別,節數進度,負責職員,狀態,取消原因,備註\n";
+      let csv = "\uFEFF日期,開始時間,結束時間,個案姓名,專職部別,服務類別,節數進度,負責職員,狀態,取消原因,備註\n";
       state.appointments.forEach(a => {
         csv += `"${a.date}","${a.startTime}","${a.endTime}","${a.client}","${a.discipline}","${a.service}","${a.section}","${a.staff}","${a.status}","${a.cancelReason||''}","${a.notes||''}"\n`;
       });
-      const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = `MWC_復康治療排班表_${formatDate(new Date())}.csv`;
-      a.click();
+      downloadCSV(csv, `MWC_治療服務排班表_${formatDate(new Date())}.csv`);
     };
 
-    // 匯出 CSV 修改報告
-    document.getElementById('btnExportAuditCSV').onclick = () => {
-      let csv = "\uFEFF時間戳記,操作修改人,動作類別,個案姓名,負責職員,變更內容對比\n";
-      state.auditLogs.forEach(l => {
-        csv += `"${l.timestamp}","${l.operator}","${l.action}","${l.client||''}","${l.staff||''}","${l.diff||''}"\n`;
-      });
-      const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = `MWC_排班修改歷史報告_${formatDate(new Date())}.csv`;
-      a.click();
-    };
+    // 監聽統計範圍變更
+    document.getElementById('statsClientsRange').onchange = renderStatsClients;
+    document.getElementById('statsSessionsRange').onchange = renderStatsSessions;
+    document.getElementById('statsRevenueRange').onchange = renderStatsRevenue;
+    document.getElementById('baseRateInput').oninput = renderStatsRevenue;
 
-    document.getElementById('btnClearAuditLogs').onclick = () => {
-      state.auditLogs = [];
-      saveAuditLogs();
-      renderAuditLogsList();
-      showToast('已清空修改歷史報告', 'info');
+    // 模態框事件綁定
+    document.getElementById('btnOpenStatsClients').onclick = () => {
+      renderStatsClients();
+      document.getElementById('statsClientsModal').classList.remove('hidden');
     };
+    document.getElementById('btnMobileStatsClients').onclick = () => {
+      document.getElementById('mobileMoreDropdown').classList.add('hidden');
+      renderStatsClients();
+      document.getElementById('statsClientsModal').classList.remove('hidden');
+    };
+    document.getElementById('btnCloseStatsClients').onclick = () => document.getElementById('statsClientsModal').classList.add('hidden');
+    document.getElementById('btnCloseStatsClientsFooter').onclick = () => document.getElementById('statsClientsModal').classList.add('hidden');
 
+    document.getElementById('btnOpenStatsSessions').onclick = () => {
+      renderStatsSessions();
+      document.getElementById('statsSessionsModal').classList.remove('hidden');
+    };
+    document.getElementById('btnMobileStatsSessions').onclick = () => {
+      document.getElementById('mobileMoreDropdown').classList.add('hidden');
+      renderStatsSessions();
+      document.getElementById('statsSessionsModal').classList.remove('hidden');
+    };
+    document.getElementById('btnCloseStatsSessions').onclick = () => document.getElementById('statsSessionsModal').classList.add('hidden');
+    document.getElementById('btnCloseStatsSessionsFooter').onclick = () => document.getElementById('statsSessionsModal').classList.add('hidden');
+
+    document.getElementById('btnOpenStatsRevenue').onclick = () => {
+      renderStatsRevenue();
+      document.getElementById('statsRevenueModal').classList.remove('hidden');
+    };
+    document.getElementById('btnMobileStatsRevenue').onclick = () => {
+      document.getElementById('mobileMoreDropdown').classList.add('hidden');
+      renderStatsRevenue();
+      document.getElementById('statsRevenueModal').classList.remove('hidden');
+    };
+    document.getElementById('btnCloseStatsRevenue').onclick = () => document.getElementById('statsRevenueModal').classList.add('hidden');
+    document.getElementById('btnCloseStatsRevenueFooter').onclick = () => document.getElementById('statsRevenueModal').classList.add('hidden');
+
+    // 常用視圖切換事件
     document.getElementById('viewBtnMonth').onclick = () => switchView('month');
     document.getElementById('viewBtnWeek').onclick = () => switchView('week');
     document.getElementById('viewBtnTable').onclick = () => switchView('table');
     document.getElementById('viewBtnYear').onclick = () => switchView('year');
 
-    document.getElementById('btnPrevMonth').onclick = () => {
-      state.currentDate.setMonth(state.currentDate.getMonth() - 1);
-      renderCurrentView();
-    };
-    document.getElementById('btnNextMonth').onclick = () => {
-      state.currentDate.setMonth(state.currentDate.getMonth() + 1);
-      renderCurrentView();
-    };
-    document.getElementById('btnPrevYear').onclick = () => {
-      state.currentDate.setFullYear(state.currentDate.getFullYear() - 1);
-      renderCurrentView();
-    };
-    document.getElementById('btnNextYear').onclick = () => {
-      state.currentDate.setFullYear(state.currentDate.getFullYear() + 1);
-      renderCurrentView();
-    };
-    document.getElementById('btnToday').onclick = () => {
-      state.currentDate = new Date();
-      state.selectedDayDate = new Date();
-      renderCurrentView();
-    };
+    document.getElementById('btnPrevMonth').onclick = () => { state.currentDate.setMonth(state.currentDate.getMonth() - 1); renderCurrentView(); };
+    document.getElementById('btnNextMonth').onclick = () => { state.currentDate.setMonth(state.currentDate.getMonth() + 1); renderCurrentView(); };
+    document.getElementById('btnPrevYear').onclick = () => { state.currentDate.setFullYear(state.currentDate.getFullYear() - 1); renderCurrentView(); };
+    document.getElementById('btnNextYear').onclick = () => { state.currentDate.setFullYear(state.currentDate.getFullYear() + 1); renderCurrentView(); };
+    document.getElementById('btnToday').onclick = () => { state.currentDate = new Date(); state.selectedDayDate = new Date(); renderCurrentView(); };
 
     const yearSelect = document.getElementById('jumpYearSelect');
     for (let yr = 2024; yr <= 2032; yr++) {
@@ -1939,38 +1937,24 @@
       opt.textContent = `${yr}年`;
       yearSelect.appendChild(opt);
     }
-    yearSelect.onchange = (e) => {
-      state.currentDate.setFullYear(parseInt(e.target.value, 10));
-      renderCurrentView();
-    };
-    document.getElementById('jumpMonthSelect').onchange = (e) => {
-      state.currentDate.setMonth(parseInt(e.target.value, 10));
-      renderCurrentView();
-    };
+    yearSelect.onchange = (e) => { state.currentDate.setFullYear(parseInt(e.target.value, 10)); renderCurrentView(); };
+    document.getElementById('jumpMonthSelect').onchange = (e) => { state.currentDate.setMonth(parseInt(e.target.value, 10)); renderCurrentView(); };
 
+    // 專屬部別篩選 (PT:黃, OT:綠, ST:紫)
     document.querySelectorAll('.filter-discipline').forEach(btn => {
       btn.onclick = () => {
         document.querySelectorAll('.filter-discipline').forEach(b => {
-          b.className = 'filter-discipline px-2 py-0.5 rounded text-slate-600 hover:text-slate-900';
+          b.className = 'filter-discipline px-2.5 py-1 rounded text-slate-700 hover:bg-slate-100 transition font-medium';
         });
-        btn.className = 'filter-discipline px-2 py-0.5 rounded text-slate-900 bg-white font-bold shadow-2xs';
+        btn.className = 'filter-discipline px-2.5 py-1 rounded text-slate-900 bg-white font-bold shadow-2xs';
         state.filterDiscipline = btn.dataset.discipline;
         renderCurrentView();
       };
     });
 
-    document.getElementById('filterStaffSelect').onchange = (e) => {
-      state.filterStaff = e.target.value;
-      renderCurrentView();
-    };
-    document.getElementById('filterStatusSelect').onchange = (e) => {
-      state.filterStatus = e.target.value;
-      renderCurrentView();
-    };
-    document.getElementById('searchInput').oninput = (e) => {
-      state.searchQuery = e.target.value.trim();
-      renderCurrentView();
-    };
+    document.getElementById('filterStaffSelect').onchange = (e) => { state.filterStaff = e.target.value; renderCurrentView(); };
+    document.getElementById('filterStatusSelect').onchange = (e) => { state.filterStatus = e.target.value; renderCurrentView(); };
+    document.getElementById('searchInput').oninput = (e) => { state.searchQuery = e.target.value.trim(); renderCurrentView(); };
 
     document.getElementById('btnOpenNewModal').onclick = () => openAppointmentModal(null);
     document.getElementById('btnMobileAgendaAdd').onclick = () => openAppointmentModal(null, formatDate(state.selectedDayDate));
@@ -2001,18 +1985,6 @@
     document.getElementById('btnCloseClientAuditModal').onclick = () => document.getElementById('clientAuditModal').classList.add('hidden');
     document.getElementById('btnCloseClientAuditFooter').onclick = () => document.getElementById('clientAuditModal').classList.add('hidden');
 
-    document.getElementById('btnOpenAuditModal').onclick = () => {
-      renderAuditLogsList();
-      document.getElementById('auditLogModal').classList.remove('hidden');
-    };
-    document.getElementById('btnMobileAudit').onclick = () => {
-      document.getElementById('mobileMoreDropdown').classList.add('hidden');
-      renderAuditLogsList();
-      document.getElementById('auditLogModal').classList.remove('hidden');
-    };
-    document.getElementById('btnCloseAuditModal').onclick = () => document.getElementById('auditLogModal').classList.add('hidden');
-    document.getElementById('btnCloseAuditFooter').onclick = () => document.getElementById('auditLogModal').classList.add('hidden');
-
     document.getElementById('btnOpenTeamsConfig').onclick = () => document.getElementById('teamsConfigModal').classList.remove('hidden');
     document.getElementById('btnMobileTeams').onclick = () => {
       document.getElementById('mobileMoreDropdown').classList.add('hidden');
@@ -2023,15 +1995,17 @@
 
     document.getElementById('btnSwitchOperator').onclick = () => document.getElementById('operatorModal').classList.remove('hidden');
     document.getElementById('btnCloseOperatorModal').onclick = () => document.getElementById('operatorModal').classList.add('hidden');
+
     document.querySelectorAll('.btn-select-staff').forEach(btn => {
       btn.onclick = () => {
-        state.currentRole = btn.textContent;
+        state.currentRole = btn.textContent.replace(' (管理員)', '').trim();
         localStorage.setItem('mwc_operator_name', state.currentRole);
         document.getElementById('currentOperatorLabel').textContent = state.currentRole;
         document.getElementById('operatorModal').classList.add('hidden');
         showToast(`已切換操作人為：${state.currentRole}`, 'info');
       };
     });
+
     document.getElementById('btnSaveCustomOperator').onclick = () => {
       const name = document.getElementById('customOperatorInput').value.trim();
       if (name) {
@@ -2044,10 +2018,8 @@
     };
 
     document.getElementById('btnMobileMoreActions').onclick = () => {
-      const dd = document.getElementById('mobileMoreDropdown');
-      dd.classList.toggle('hidden');
+      document.getElementById('mobileMoreDropdown').classList.toggle('hidden');
     };
-
     document.getElementById('btnPrintTable').onclick = () => window.print();
 
     // 系統初始化
