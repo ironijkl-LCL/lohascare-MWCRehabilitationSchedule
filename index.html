@@ -18,7 +18,7 @@
           }
         }
       }
-    }
+    };
   </script>
 
   <!-- Font Awesome Icons -->
@@ -42,7 +42,6 @@
     ::-webkit-scrollbar { width: 5px; height: 5px; }
     ::-webkit-scrollbar-track { background: transparent; }
     ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 9999px; }
-    ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
     .no-scrollbar::-webkit-scrollbar { display: none; }
     .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
     @media screen and (max-width: 768px) {
@@ -61,13 +60,12 @@
       <!-- 標題與雲端狀態 -->
       <div class="flex items-center space-x-2 sm:space-x-3 min-w-0">
         <div id="syncStatusIcon" class="w-8 h-8 rounded-lg bg-emerald-600 text-white flex items-center justify-center font-bold text-sm shadow-sm flex-shrink-0 transition-colors">
-          <i class="fa-solid fa-arrows-rotate text-xs animate-spin" id="syncSpinner" style="display:none;"></i>
           <i class="fa-solid fa-cloud text-xs" id="syncCloudIcon"></i>
         </div>
         <div class="min-w-0">
           <div class="flex items-center space-x-1.5 sm:space-x-2">
             <h1 class="font-bold text-slate-900 text-xs sm:text-base tracking-tight truncate">MWC 治療服務日曆</h1>
-            <button id="btnCloudStatus" class="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-semibold bg-emerald-50 text-emerald-800 border border-emerald-200 hover:bg-emerald-100 transition">
+            <button id="btnCloudStatus" class="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-semibold bg-emerald-50 text-emerald-800 border border-emerald-200">
               <span id="cloudStatusDot" class="w-1.5 h-1.5 rounded-full bg-emerald-500 mr-1 animate-pulse"></span>
               <span id="cloudStatusText">多方即時連線中</span>
             </button>
@@ -75,85 +73,44 @@
         </div>
       </div>
 
-      <!-- 操作群組 -->
+      <!-- 功能操作區 -->
       <div class="flex items-center space-x-1.5 sm:space-x-2 flex-shrink-0">
-        <!-- 修改人 (Jo Jo 權限提示) -->
-        <button id="btnSwitchOperator" title="點擊切換修改者身份" class="inline-flex items-center space-x-1 px-2 py-1.5 rounded-lg border border-slate-200 bg-slate-50 hover:bg-slate-100 text-slate-700 text-xs font-medium transition">
+        <button id="btnSwitchOperator" class="inline-flex items-center space-x-1 px-2.5 py-1.5 rounded-lg border border-slate-200 bg-slate-50 text-slate-700 text-xs font-medium">
           <i class="fa-solid fa-id-badge text-slate-500 text-xs"></i>
           <span class="hidden md:inline text-slate-500">修改人:</span>
           <span id="currentOperatorLabel" class="font-bold text-slate-900 truncate">Jo Jo</span>
-          <i class="fa-solid fa-angle-down text-[9px] text-slate-400"></i>
+          <i class="fa-solid fa-lock text-[9px] text-slate-400 ml-0.5"></i>
         </button>
 
-        <!-- 桌面頂部工具列 -->
-        <div class="hidden xl:flex items-center space-x-1.5">
-          <button id="btnOpenClientAudit" title="核對各個個案日期與節數" class="inline-flex items-center space-x-1 px-2.5 py-1.5 rounded-lg border border-sky-200 bg-sky-50 hover:bg-sky-100 text-sky-800 text-xs font-medium transition shadow-2xs">
+        <div class="hidden lg:flex items-center space-x-1.5">
+          <button id="btnOpenClientAudit" class="inline-flex items-center space-x-1 px-2.5 py-1.5 rounded-lg border border-sky-200 bg-sky-50 hover:bg-sky-100 text-sky-800 text-xs font-medium transition shadow-2xs">
             <i class="fa-solid fa-user-check text-sky-600"></i>
             <span>個案節數核對</span>
           </button>
 
-          <button id="btnOpenRecurModal" title="跨期連續服務排班" class="inline-flex items-center space-x-1 px-2.5 py-1.5 rounded-lg border border-indigo-200 bg-indigo-50 hover:bg-indigo-100 text-indigo-800 text-xs font-medium transition shadow-2xs">
+          <button id="btnOpenRecurModal" class="inline-flex items-center space-x-1 px-2.5 py-1.5 rounded-lg border border-indigo-200 bg-indigo-50 hover:bg-indigo-100 text-indigo-800 text-xs font-medium transition shadow-2xs">
             <i class="fa-solid fa-repeat text-indigo-600"></i>
             <span>連續服務</span>
           </button>
 
-          <!-- 三大統計按鈕 -->
-          <button id="btnOpenStatsClients" title="按職員統計個案總人次" class="inline-flex items-center space-x-1 px-2.5 py-1.5 rounded-lg border border-teal-200 bg-teal-50 hover:bg-teal-100 text-teal-800 text-xs font-medium transition shadow-2xs">
-            <i class="fa-solid fa-users text-teal-600"></i>
-            <span>職員人次統計</span>
+          <button id="btnOpenStatsModal" class="inline-flex items-center space-x-1 px-2.5 py-1.5 rounded-lg border border-amber-300 bg-amber-50 hover:bg-amber-100 text-amber-900 text-xs font-medium transition shadow-2xs">
+            <i class="fa-solid fa-chart-pie text-amber-600"></i>
+            <span>職員統計中心</span>
           </button>
 
-          <button id="btnOpenStatsSessions" title="按職員統計總節數" class="inline-flex items-center space-x-1 px-2.5 py-1.5 rounded-lg border border-blue-200 bg-blue-50 hover:bg-blue-100 text-blue-800 text-xs font-medium transition shadow-2xs">
-            <i class="fa-solid fa-chart-simple text-blue-600"></i>
-            <span>職員節數統計</span>
-          </button>
-
-          <button id="btnOpenStatsRevenue" title="按職員統計總收入" class="inline-flex items-center space-x-1 px-2.5 py-1.5 rounded-lg border border-emerald-200 bg-emerald-50 hover:bg-emerald-100 text-emerald-800 text-xs font-medium transition shadow-2xs">
-            <i class="fa-solid fa-sack-dollar text-emerald-600"></i>
-            <span>職員收入統計</span>
-          </button>
-
-          <button id="btnOpenTeamsConfig" title="Teams 異動通知" class="inline-flex items-center space-x-1 px-2.5 py-1.5 rounded-lg border border-purple-200 bg-purple-50 hover:bg-purple-100 text-purple-800 text-xs font-medium transition shadow-2xs">
+          <button id="btnOpenTeamsConfig" class="inline-flex items-center space-x-1 px-2.5 py-1.5 rounded-lg border border-purple-200 bg-purple-50 hover:bg-purple-100 text-purple-800 text-xs font-medium transition shadow-2xs">
             <i class="fa-brands fa-microsoft text-purple-600"></i>
             <span>Teams 通知</span>
           </button>
-        </div>
 
-        <!-- 手機版更多選單 -->
-        <div class="relative xl:hidden">
-          <button id="btnMobileMoreActions" class="p-2 rounded-lg border border-slate-200 bg-white hover:bg-slate-50 text-slate-700 text-xs transition">
-            <i class="fa-solid fa-ellipsis-vertical text-slate-600"></i>
+          <button id="btnOpenAuditModal" class="inline-flex items-center space-x-1 px-2.5 py-1.5 rounded-lg border border-slate-200 bg-white hover:bg-slate-50 text-slate-700 text-xs font-medium transition shadow-2xs">
+            <i class="fa-solid fa-clock-rotate-left text-slate-600"></i>
+            <span>修改報告</span>
+            <span id="auditCountBadge" class="ml-1 px-1.5 py-0.2 bg-slate-800 text-white text-[10px] rounded-full font-mono font-bold">0</span>
           </button>
-          <div id="mobileMoreDropdown" class="hidden absolute right-0 mt-1.5 w-52 bg-white border border-slate-200 rounded-xl shadow-xl py-1.5 z-50 text-xs divide-y divide-slate-100">
-            <div class="py-1">
-              <button id="btnMobileClientAudit" class="w-full text-left px-3 py-2 text-sky-800 hover:bg-sky-50 flex items-center space-x-2">
-                <i class="fa-solid fa-user-check text-sky-600 w-4"></i><span>個案節數核對</span>
-              </button>
-              <button id="btnMobileRecur" class="w-full text-left px-3 py-2 text-indigo-800 hover:bg-indigo-50 flex items-center space-x-2">
-                <i class="fa-solid fa-repeat text-indigo-600 w-4"></i><span>連續服務</span>
-              </button>
-              <button id="btnMobileStatsClients" class="w-full text-left px-3 py-2 text-teal-800 hover:bg-teal-50 flex items-center space-x-2">
-                <i class="fa-solid fa-users text-teal-600 w-4"></i><span>職員人次統計</span>
-              </button>
-              <button id="btnMobileStatsSessions" class="w-full text-left px-3 py-2 text-blue-800 hover:bg-blue-50 flex items-center space-x-2">
-                <i class="fa-solid fa-chart-simple text-blue-600 w-4"></i><span>職員節數統計</span>
-              </button>
-              <button id="btnMobileStatsRevenue" class="w-full text-left px-3 py-2 text-emerald-800 hover:bg-emerald-50 flex items-center space-x-2">
-                <i class="fa-solid fa-sack-dollar text-emerald-600 w-4"></i><span>職員收入統計</span>
-              </button>
-              <button id="btnMobileTeams" class="w-full text-left px-3 py-2 text-purple-800 hover:bg-purple-50 flex items-center space-x-2">
-                <i class="fa-brands fa-microsoft text-purple-600 w-4"></i><span>Teams 異動通知</span>
-              </button>
-              <button id="btnMobileAudit" class="w-full text-left px-3 py-2 text-slate-700 hover:bg-slate-50 flex items-center justify-between">
-                <div class="flex items-center space-x-2"><i class="fa-solid fa-clock-rotate-left text-slate-600 w-4"></i><span>修改歷史報告</span></div>
-                <span id="auditCountBadgeMobile" class="px-1.5 py-0.2 bg-slate-800 text-white text-[9px] rounded-full font-mono">0</span>
-              </button>
-            </div>
-          </div>
         </div>
 
-        <!-- 新增預約 -->
-        <button id="btnOpenNewModal" class="inline-flex items-center space-x-1 px-3 py-1.5 rounded-lg bg-slate-900 hover:bg-slate-800 text-white text-xs font-medium transition shadow-sm">
+        <button id="btnOpenNewModal" class="inline-flex items-center space-x-1 px-3 py-1.5 rounded-lg bg-slate-900 hover:bg-slate-800 text-white text-xs font-semibold transition shadow-sm">
           <i class="fa-solid fa-plus text-xs"></i>
           <span>預約</span>
         </button>
@@ -165,18 +122,17 @@
     <!-- 控制列 -->
     <div class="bg-white rounded-xl border border-slate-200/80 p-2.5 sm:p-3 shadow-2xs space-y-2.5 sm:space-y-3">
       <div class="flex flex-col md:flex-row items-stretch md:items-center justify-between gap-2.5 sm:gap-3">
-        <!-- 年月切換 -->
         <div class="flex flex-wrap items-center justify-between sm:justify-start gap-1.5 sm:gap-2">
           <div class="inline-flex rounded-lg border border-slate-200 bg-slate-50/80 p-0.5">
-            <button id="btnPrevYear" title="上一年" class="px-2 py-1 text-slate-600 hover:text-slate-900 hover:bg-white rounded text-xs transition"><i class="fa-solid fa-angles-left"></i></button>
-            <button id="btnPrevMonth" title="上一月" class="px-2.5 py-1 text-slate-600 hover:text-slate-900 hover:bg-white rounded text-xs transition"><i class="fa-solid fa-chevron-left"></i></button>
-            <button id="btnNextMonth" title="下一月" class="px-2.5 py-1 text-slate-600 hover:text-slate-900 hover:bg-white rounded text-xs transition"><i class="fa-solid fa-chevron-right"></i></button>
-            <button id="btnNextYear" title="下一年" class="px-2 py-1 text-slate-600 hover:text-slate-900 hover:bg-white rounded text-xs transition"><i class="fa-solid fa-angles-right"></i></button>
+            <button id="btnPrevYear" class="px-2 py-1 text-slate-600 hover:text-slate-900 hover:bg-white rounded text-xs transition"><i class="fa-solid fa-angles-left"></i></button>
+            <button id="btnPrevMonth" class="px-2.5 py-1 text-slate-600 hover:text-slate-900 hover:bg-white rounded text-xs transition"><i class="fa-solid fa-chevron-left"></i></button>
+            <button id="btnNextMonth" class="px-2.5 py-1 text-slate-600 hover:text-slate-900 hover:bg-white rounded text-xs transition"><i class="fa-solid fa-chevron-right"></i></button>
+            <button id="btnNextYear" class="px-2 py-1 text-slate-600 hover:text-slate-900 hover:bg-white rounded text-xs transition"><i class="fa-solid fa-angles-right"></i></button>
           </div>
 
           <div class="flex items-center space-x-1">
-            <select id="jumpYearSelect" class="bg-slate-50 border border-slate-200 rounded-lg px-2 py-1 text-xs font-semibold text-slate-800 focus:outline-none"></select>
-            <select id="jumpMonthSelect" class="bg-slate-50 border border-slate-200 rounded-lg px-2 py-1 text-xs font-semibold text-slate-800 focus:outline-none">
+            <select id="jumpYearSelect" class="bg-slate-50 border border-slate-200 rounded-lg px-2 py-1 text-xs font-semibold text-slate-800"></select>
+            <select id="jumpMonthSelect" class="bg-slate-50 border border-slate-200 rounded-lg px-2 py-1 text-xs font-semibold text-slate-800">
               <option value="0">1月</option><option value="1">2月</option><option value="2">3月</option>
               <option value="3">4月</option><option value="4">5月</option><option value="5">6月</option>
               <option value="6">7月</option><option value="7">8月</option><option value="8">9月</option>
@@ -184,43 +140,45 @@
             </select>
           </div>
 
-          <button id="btnToday" class="px-2.5 py-1 rounded-lg border border-slate-200 hover:bg-slate-50 text-slate-700 text-xs font-medium transition">
-            返回今天
-          </button>
-
-          <div id="currentViewLabel" class="text-sm sm:text-base font-bold text-slate-900 px-1 truncate">
-            2027年 1月
-          </div>
+          <button id="btnToday" class="px-2.5 py-1 rounded-lg border border-slate-200 hover:bg-slate-50 text-slate-700 text-xs font-medium">返回今天</button>
+          <div id="currentViewLabel" class="text-sm sm:text-base font-bold text-slate-900 px-1 truncate">2027年 1月</div>
         </div>
 
-        <!-- 視圖切換 -->
-        <div class="inline-flex rounded-lg border border-slate-200 bg-slate-100/70 p-0.5 text-xs font-medium self-start md:self-auto w-full md:w-auto justify-between sm:justify-start">
-          <button id="viewBtnMonth" class="px-3 py-1 rounded-md text-slate-900 bg-white shadow-2xs font-bold transition flex-1 md:flex-initial text-center">月曆</button>
-          <button id="viewBtnWeek" class="px-3 py-1 rounded-md text-slate-600 hover:text-slate-900 transition flex-1 md:flex-initial text-center">週時段</button>
-          <button id="viewBtnTable" class="px-3 py-1 rounded-md text-slate-600 hover:text-slate-900 transition flex-1 md:flex-initial text-center">清單總表</button>
-          <button id="viewBtnYear" class="px-3 py-1 rounded-md text-slate-600 hover:text-slate-900 transition flex-1 md:flex-initial text-center">年度矩陣</button>
+        <div class="inline-flex rounded-lg border border-slate-200 bg-slate-100/70 p-0.5 text-xs font-medium">
+          <button id="viewBtnMonth" class="px-3 py-1 rounded-md text-slate-900 bg-white shadow-2xs font-bold transition">月曆</button>
+          <button id="viewBtnWeek" class="px-3 py-1 rounded-md text-slate-600 hover:text-slate-900 transition">週時段</button>
+          <button id="viewBtnTable" class="px-3 py-1 rounded-md text-slate-600 hover:text-slate-900 transition">清單總表</button>
+          <button id="viewBtnYear" class="px-3 py-1 rounded-md text-slate-600 hover:text-slate-900 transition">年度矩陣</button>
         </div>
       </div>
 
-      <!-- 篩選器與部別顏色示範 (PT:黃, OT:綠, ST:紫) -->
+      <!-- 篩選列：已加上亮眼顏色與色標圓點 -->
       <div class="flex flex-wrap items-center justify-between gap-2 pt-2 border-t border-slate-100 text-xs">
         <div class="flex flex-wrap items-center gap-1.5 sm:gap-2">
-          <!-- 部別篩選按鈕 (標註對應專屬底色) -->
-          <div class="inline-flex rounded-lg border border-slate-200 bg-slate-50 p-0.5">
-            <button class="filter-discipline px-2.5 py-1 rounded text-slate-900 bg-white font-bold shadow-2xs" data-discipline="all">全部部別</button>
-            <button class="filter-discipline px-2.5 py-1 rounded text-amber-900 hover:bg-amber-100 font-medium transition" data-discipline="PT">
-              <span class="w-2 h-2 rounded-full inline-block bg-amber-400 mr-1"></span>物理 PT
+          <div class="inline-flex rounded-xl border border-slate-200 bg-slate-100/80 p-1 gap-1" id="disciplineFilterGroup">
+            <!-- 全部部別 -->
+            <button class="filter-discipline px-3 py-1 rounded-lg bg-slate-900 text-white font-bold shadow-xs transition inline-flex items-center space-x-1.5" data-discipline="all">
+              <span class="w-2 h-2 rounded-full bg-white"></span>
+              <span>全部部別</span>
             </button>
-            <button class="filter-discipline px-2.5 py-1 rounded text-emerald-900 hover:bg-emerald-100 font-medium transition" data-discipline="OT">
-              <span class="w-2 h-2 rounded-full inline-block bg-emerald-500 mr-1"></span>職業 OT
+            <!-- 物理 PT (黃色) -->
+            <button class="filter-discipline px-3 py-1 rounded-lg bg-amber-100 hover:bg-amber-200 text-amber-950 border border-amber-300 font-semibold transition inline-flex items-center space-x-1.5" data-discipline="PT">
+              <span class="w-2 h-2 rounded-full bg-amber-500"></span>
+              <span>物理 PT</span>
             </button>
-            <button class="filter-discipline px-2.5 py-1 rounded text-purple-900 hover:bg-purple-100 font-medium transition" data-discipline="ST">
-              <span class="w-2 h-2 rounded-full inline-block bg-purple-500 mr-1"></span>言語 ST
+            <!-- 職業 OT (綠色) -->
+            <button class="filter-discipline px-3 py-1 rounded-lg bg-emerald-100 hover:bg-emerald-200 text-emerald-950 border border-emerald-300 font-semibold transition inline-flex items-center space-x-1.5" data-discipline="OT">
+              <span class="w-2 h-2 rounded-full bg-emerald-500"></span>
+              <span>職業 OT</span>
+            </button>
+            <!-- 言語 ST (紫色) -->
+            <button class="filter-discipline px-3 py-1 rounded-lg bg-purple-100 hover:bg-purple-200 text-purple-950 border border-purple-300 font-semibold transition inline-flex items-center space-x-1.5" data-discipline="ST">
+              <span class="w-2 h-2 rounded-full bg-purple-500"></span>
+              <span>言語 ST</span>
             </button>
           </div>
 
-          <!-- 職員篩選 -->
-          <select id="filterStaffSelect" class="bg-slate-50 border border-slate-200 rounded-lg px-2 py-1 text-slate-700 font-medium focus:outline-none">
+          <select id="filterStaffSelect" class="bg-slate-50 border border-slate-200 rounded-lg px-2 py-1 text-slate-700 font-medium">
             <option value="all">全體負責職員</option>
             <option value="PTA 珊">PTA 珊</option>
             <option value="PTA B哥">PTA B哥</option>
@@ -231,23 +189,21 @@
             <option value="OT Ken">OT Ken</option>
           </select>
 
-          <!-- 狀態篩選 -->
-          <select id="filterStatusSelect" class="bg-slate-50 border border-slate-200 rounded-lg px-2 py-1 text-slate-700 font-medium focus:outline-none">
+          <select id="filterStatusSelect" class="bg-slate-50 border border-slate-200 rounded-lg px-2 py-1 text-slate-700 font-medium">
             <option value="all">所有狀態</option>
-            <option value="active">正常排班</option>
+            <option value="active">正常出席</option>
             <option value="cancelled">已取消/請假</option>
           </select>
         </div>
 
-        <!-- 搜尋列 -->
-        <div class="relative w-full sm:w-48 md:w-56">
+        <div class="relative w-full sm:w-56">
           <i class="fa-solid fa-magnifying-glass absolute left-2.5 top-2 text-slate-400 text-xs"></i>
-          <input type="text" id="searchInput" placeholder="搜尋個案姓名、節數..." class="w-full pl-7 pr-3 py-1 bg-slate-50 border border-slate-200 rounded-lg text-xs placeholder-slate-400 focus:bg-white focus:outline-none focus:ring-1 focus:ring-slate-400 transition">
+          <input type="text" id="searchInput" placeholder="搜尋個案姓名、節數..." class="w-full pl-7 pr-3 py-1 bg-slate-50 border border-slate-200 rounded-lg text-xs outline-none focus:bg-white focus:ring-1 focus:ring-slate-400">
         </div>
       </div>
     </div>
 
-    <!-- 月曆視圖 -->
+    <!-- 月曆檢視 -->
     <div id="viewContainerMonth" class="space-y-3">
       <div class="bg-white rounded-xl border border-slate-200 overflow-hidden shadow-2xs">
         <div class="grid grid-cols-7 border-b border-slate-200 bg-slate-50/80 text-center text-xs font-bold text-slate-600 py-2">
@@ -259,35 +215,15 @@
           <div>週五</div>
           <div class="text-sky-600">週六</div>
         </div>
-        <div id="monthGrid" class="grid grid-cols-7 divide-x divide-y divide-slate-100 text-xs bg-slate-100">
-          <!-- 由 JS 繪製 -->
-        </div>
-      </div>
-
-      <!-- 手機版當日日程選單 -->
-      <div id="mobileDayAgenda" class="bg-white rounded-xl border border-slate-200 p-3 shadow-2xs md:hidden space-y-2">
-        <div class="flex items-center justify-between border-b border-slate-100 pb-2">
-          <div class="font-bold text-slate-900 text-xs flex items-center space-x-1.5">
-            <i class="fa-regular fa-calendar-check text-sky-600"></i>
-            <span id="mobileAgendaTitle">當日排班日程</span>
-          </div>
-          <button id="btnMobileAgendaAdd" class="px-2 py-0.5 rounded bg-slate-900 text-white text-[11px] font-medium">
-            <i class="fa-solid fa-plus mr-1"></i>新增
-          </button>
-        </div>
-        <div id="mobileAgendaList" class="space-y-1.5 max-h-64 overflow-y-auto pr-1 text-xs"></div>
+        <div id="monthGrid" class="grid grid-cols-7 divide-x divide-y divide-slate-100 text-xs bg-slate-100 min-h-[500px]"></div>
       </div>
     </div>
 
-    <!-- 週時段視圖 -->
+    <!-- 週時段檢視 -->
     <div id="viewContainerWeek" class="hidden bg-white rounded-xl border border-slate-200 overflow-hidden shadow-2xs p-3">
       <div class="overflow-x-auto no-scrollbar">
         <table class="w-full text-xs border-collapse">
-          <thead>
-            <tr id="weekHeaderRow" class="border-b border-slate-200 bg-slate-50 text-slate-700">
-              <th class="p-2 border-r border-slate-200 w-20 text-center sticky left-0 bg-slate-50 z-10">時段</th>
-            </tr>
-          </thead>
+          <thead><tr id="weekHeaderRow" class="border-b border-slate-200 bg-slate-50 text-slate-700"><th class="p-2 border-r border-slate-200 w-20 text-center sticky left-0 bg-slate-50 z-10">時段</th></tr></thead>
           <tbody id="weekTimeTableBody" class="divide-y divide-slate-100"></tbody>
         </table>
       </div>
@@ -295,19 +231,9 @@
 
     <!-- 清單總表 -->
     <div id="viewContainerTable" class="hidden bg-white rounded-xl border border-slate-200 overflow-hidden shadow-2xs">
-      <div class="p-3 border-b border-slate-200 bg-slate-50 flex items-center justify-between flex-wrap gap-2 text-xs">
-        <div class="font-bold text-slate-800 flex items-center space-x-1.5">
-          <i class="fa-solid fa-list-check text-slate-600"></i>
-          <span>復康治療總登記排班表 (Excel 風格清單)</span>
-        </div>
-        <div class="flex items-center space-x-2">
-          <button id="btnExportCSV" class="px-2.5 py-1 rounded-lg border border-slate-200 hover:bg-white text-slate-700 transition">
-            <i class="fa-solid fa-file-csv mr-1 text-emerald-600"></i>匯出 CSV
-          </button>
-          <button id="btnPrintTable" class="px-2.5 py-1 rounded-lg border border-slate-200 hover:bg-white text-slate-700 transition">
-            <i class="fa-solid fa-print mr-1 text-slate-600"></i>列印排班表
-          </button>
-        </div>
+      <div class="p-3 border-b border-slate-200 bg-slate-50 flex items-center justify-between text-xs">
+        <div class="font-bold text-slate-800">總登記排班表 (Excel 風格清單)</div>
+        <button id="btnExportCSV" class="px-2.5 py-1 rounded-lg border border-slate-200 bg-white hover:bg-slate-50 text-slate-700">匯出 CSV</button>
       </div>
       <div class="overflow-x-auto">
         <table class="w-full text-xs text-left divide-y divide-slate-200">
@@ -321,7 +247,6 @@
               <th class="px-3 py-2">節數進度</th>
               <th class="px-3 py-2">負責職員</th>
               <th class="px-3 py-2">狀態</th>
-              <th class="px-3 py-2">最後修改</th>
               <th class="px-3 py-2 text-right">操作</th>
             </tr>
           </thead>
@@ -330,706 +255,169 @@
       </div>
     </div>
 
-    <!-- 年度矩陣 -->
+    <!-- 年度矩陣檢視 -->
     <div id="viewContainerYear" class="hidden space-y-3">
-      <div class="bg-white rounded-xl border border-slate-200 p-3 shadow-2xs flex items-center justify-between">
-        <div class="font-bold text-slate-800 text-sm flex items-center space-x-1.5">
-          <i class="fa-solid fa-calendar-days text-indigo-600"></i>
-          <span id="yearMatrixTitle">2027 全年度 12 個月治療總覽矩陣</span>
-        </div>
-        <div class="text-xs text-slate-500">點擊任意月份卡片可直接跳轉深入檢視</div>
-      </div>
+      <div class="bg-white rounded-xl border border-slate-200 p-3 shadow-2xs font-bold text-slate-800 text-sm" id="yearMatrixTitle">年度矩陣總覽</div>
       <div id="yearMatrixGrid" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3"></div>
     </div>
   </main>
 
-  <!-- MODAL 1: 新增/編輯預約 -->
-  <div id="appointmentModal" class="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/50 backdrop-blur-xs hidden p-3 sm:p-4">
-    <div class="bg-white rounded-2xl shadow-2xl max-w-lg w-full overflow-hidden border border-slate-200 transition-all">
-      <div class="px-4 sm:px-6 py-3.5 bg-slate-900 text-white flex items-center justify-between">
-        <h3 id="modalTitle" class="text-sm sm:text-base font-bold flex items-center space-x-2">
-          <i class="fa-solid fa-calendar-plus text-sky-400"></i>
-          <span>新增治療預約</span>
-        </h3>
-        <button id="btnCloseModal" class="text-slate-400 hover:text-white transition">
-          <i class="fa-solid fa-xmark text-lg"></i>
-        </button>
-      </div>
-
-      <form id="appointmentForm" class="p-4 sm:p-6 space-y-3 sm:space-y-4 max-h-[85vh] overflow-y-auto text-xs">
-        <input type="hidden" id="formEventId">
-
-        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-          <div>
-            <label class="block font-semibold text-slate-700 mb-1">個案姓名 *</label>
-            <input type="text" id="formClientName" required placeholder="如：張明清、羅屏蘇" class="w-full px-3 py-2 border border-slate-300 rounded-lg text-xs outline-none focus:ring-2 focus:ring-slate-900">
-          </div>
-          <div>
-            <label class="block font-semibold text-slate-700 mb-1">治療日期 *</label>
-            <input type="date" id="formDate" required class="w-full px-3 py-2 border border-slate-300 rounded-lg text-xs outline-none focus:ring-2 focus:ring-slate-900">
-          </div>
-        </div>
-
-        <div id="formHolidayNotice" class="hidden p-2 rounded-lg bg-rose-50 border border-rose-200 text-rose-800 text-[11px] flex items-center space-x-2">
-          <i class="fa-solid fa-umbrella-beach text-rose-500"></i>
-          <span id="formHolidayText">香港公眾假期警示</span>
-        </div>
-
-        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-          <div>
-            <label class="block font-semibold text-slate-700 mb-1">專職部別 *</label>
-            <select id="formDiscipline" class="w-full px-3 py-2 border border-slate-300 rounded-lg text-xs outline-none focus:ring-2 focus:ring-slate-900">
-              <option value="PT">物理治療 (PT - 黃色)</option>
-              <option value="OT">職業治療 (OT - 綠色)</option>
-              <option value="ST">言語治療 (ST - 紫色)</option>
-            </select>
-          </div>
-          <div>
-            <label class="block font-semibold text-slate-700 mb-1">服務類別 *</label>
-            <input type="text" id="formService" list="serviceOptions" required placeholder="如：PTA (8 Sessions)" class="w-full px-3 py-2 border border-slate-300 rounded-lg text-xs outline-none focus:ring-2 focus:ring-slate-900">
-            <datalist id="serviceOptions">
-              <option value="PTA (8 Sessions)"></option>
-              <option value="PT+PTA (9 Sessions)"></option>
-              <option value="PTA (9 Sessions)"></option>
-              <option value="OTA (8 Sessions)"></option>
-              <option value="OT+OTA (7 Sessions)"></option>
-              <option value="ST (10 Sessions)"></option>
-            </datalist>
-          </div>
-        </div>
-
-        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-          <div>
-            <label class="block font-semibold text-slate-700 mb-1">負責職員 *</label>
-            <select id="formStaff" class="w-full px-3 py-2 border border-slate-300 rounded-lg text-xs outline-none focus:ring-2 focus:ring-slate-900">
-              <option value="PTA 珊">PTA 珊</option>
-              <option value="PTA B哥">PTA B哥</option>
-              <option value="PT Sing">PT Sing</option>
-              <option value="ST Tammy">ST Tammy</option>
-              <option value="ST Kelvin">ST Kelvin</option>
-              <option value="OTA Rebecca">OTA Rebecca</option>
-              <option value="OT Ken">OT Ken</option>
-              <option value="PT Sing + PTA 珊">PT Sing + PTA 珊</option>
-            </select>
-          </div>
-          <div>
-            <label class="block font-semibold text-slate-700 mb-1">節數進度 (Section) *</label>
-            <input type="text" id="formSection" required placeholder="如：Section 1, Section 8" class="w-full px-3 py-2 border border-slate-300 rounded-lg text-xs outline-none focus:ring-2 focus:ring-slate-900">
-          </div>
-        </div>
-
-        <div class="grid grid-cols-2 gap-3">
-          <div>
-            <label class="block font-semibold text-slate-700 mb-1">開始時間 *</label>
-            <input type="time" id="formStartTime" required class="w-full px-3 py-2 border border-slate-300 rounded-lg text-xs outline-none focus:ring-2 focus:ring-slate-900">
-          </div>
-          <div>
-            <label class="block font-semibold text-slate-700 mb-1">結束時間 *</label>
-            <input type="time" id="formEndTime" required class="w-full px-3 py-2 border border-slate-300 rounded-lg text-xs outline-none focus:ring-2 focus:ring-slate-900">
-          </div>
-        </div>
-
-        <!-- 排班狀態 -->
-        <div class="space-y-2 pt-1 border-t border-slate-100">
-          <label class="block font-semibold text-slate-700">排班狀態</label>
-          <div class="flex items-center space-x-4">
-            <label class="inline-flex items-center cursor-pointer">
-              <input type="radio" name="formStatusRadio" value="active" checked class="text-slate-900">
-              <span class="ml-1.5 text-slate-800">正常出席排班</span>
-            </label>
-            <label class="inline-flex items-center cursor-pointer">
-              <input type="radio" name="formStatusRadio" value="cancelled" class="text-rose-600">
-              <span class="ml-1.5 text-rose-600 font-semibold">取消 / 請假 (Cancel)</span>
-            </label>
-          </div>
-          <div id="cancelReasonContainer" class="hidden mt-2">
-            <input type="text" id="formCancelReason" placeholder="請填寫取消原因（如：身體不適、外出覆診、院舍活動）" class="w-full px-3 py-2 border border-rose-300 rounded-lg text-xs text-rose-900 outline-none bg-rose-50/50">
-          </div>
-        </div>
-
-        <div>
-          <label class="block font-semibold text-slate-700 mb-1">臨床備註 (可選)</label>
-          <textarea id="formNotes" rows="2" placeholder="備註個案特殊事項、輪椅轉移需求等..." class="w-full px-3 py-2 border border-slate-300 rounded-lg text-xs outline-none focus:ring-2 focus:ring-slate-900"></textarea>
-        </div>
-
-        <!-- 儲存操作區 -->
-        <div class="pt-3 border-t border-slate-200 flex items-center justify-between flex-wrap gap-2">
-          <div class="flex items-center space-x-2">
-            <button type="button" id="btnDeleteEvent" class="px-2.5 py-1.5 rounded-lg border border-slate-300 text-slate-500 hover:text-rose-700 hover:border-rose-300 hover:bg-rose-50 font-medium transition hidden text-xs">
-              <i class="fa-solid fa-trash-can mr-1"></i>刪除
-            </button>
-            <button type="button" id="btnQuickCancelEvent" class="px-3 py-1.5 rounded-lg border border-rose-300 text-rose-700 bg-rose-50 hover:bg-rose-100 font-bold transition hidden text-xs flex items-center">
-              <i class="fa-solid fa-ban mr-1.5 text-rose-600"></i>取消排班 (請假)
-            </button>
-            <button type="button" id="btnQuickRestoreEvent" class="px-3 py-1.5 rounded-lg border border-emerald-300 text-emerald-700 bg-emerald-50 hover:bg-emerald-100 font-bold transition hidden text-xs flex items-center">
-              <i class="fa-solid fa-rotate-left mr-1.5 text-emerald-600"></i>恢復正常排班
-            </button>
-          </div>
-
-          <div class="flex items-center space-x-2 ml-auto">
-            <button type="button" id="btnCancelModal" class="px-3 py-1.5 border border-slate-300 rounded-lg text-slate-600 hover:bg-slate-50 transition font-medium">
-              關閉 / 放棄
-            </button>
-            <button type="submit" id="btnSaveAppointment" class="px-4 py-1.5 bg-slate-900 hover:bg-slate-800 text-white font-medium rounded-lg shadow-sm transition">
-              儲存排班
-            </button>
-          </div>
-        </div>
-      </form>
-    </div>
-  </div>
-
-  <!-- MODAL 2: 連續服務精靈 (原跨年週期排班) -->
-  <div id="recurModal" class="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/50 backdrop-blur-xs hidden p-3 sm:p-4">
+  <!-- MODAL: 編輯 / 新增預約 -->
+  <div id="appointmentModal" class="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/50 backdrop-blur-xs hidden p-3">
     <div class="bg-white rounded-2xl shadow-2xl max-w-lg w-full overflow-hidden border border-slate-200">
-      <div class="px-4 sm:px-6 py-3.5 bg-indigo-900 text-white flex items-center justify-between">
-        <h3 class="text-sm sm:text-base font-bold flex items-center space-x-2">
-          <i class="fa-solid fa-repeat text-indigo-400"></i>
-          <span>連續服務排班精靈</span>
-        </h3>
-        <button id="btnCloseRecurModal" class="text-indigo-300 hover:text-white transition">
-          <i class="fa-solid fa-xmark text-lg"></i>
-        </button>
+      <div class="px-4 py-3 bg-slate-900 text-white flex items-center justify-between">
+        <h3 id="modalTitle" class="text-sm font-bold">預約管理</h3>
+        <button id="btnCloseModal" class="text-slate-400 hover:text-white"><i class="fa-solid fa-xmark text-lg"></i></button>
       </div>
-
-      <form id="recurForm" class="p-4 sm:p-6 space-y-3.5 max-h-[85vh] overflow-y-auto text-xs">
-        <div>
-          <label class="block font-semibold text-slate-700 mb-1">個案姓名 *</label>
-          <input type="text" id="recurClientName" required placeholder="如：張明清" class="w-full px-3 py-2 border border-slate-300 rounded-lg outline-none focus:ring-2 focus:ring-indigo-600">
+      <form id="appointmentForm" class="p-4 space-y-3 max-h-[85vh] overflow-y-auto text-xs">
+        <input type="hidden" id="formEventId">
+        <div class="grid grid-cols-2 gap-3">
+          <div><label class="block font-semibold mb-1">個案姓名 *</label><input type="text" id="formClientName" required class="w-full px-2.5 py-1.5 border rounded-lg"></div>
+          <div><label class="block font-semibold mb-1">治療日期 *</label><input type="date" id="formDate" required class="w-full px-2.5 py-1.5 border rounded-lg"></div>
         </div>
         <div class="grid grid-cols-2 gap-3">
-          <div>
-            <label class="block font-semibold text-slate-700 mb-1">專職部別</label>
-            <select id="recurDiscipline" class="w-full px-3 py-2 border border-slate-300 rounded-lg">
-              <option value="PT">物理 PT (黃色)</option><option value="OT">職業 OT (綠色)</option><option value="ST">言語 ST (紫色)</option>
-            </select>
-          </div>
-          <div>
-            <label class="block font-semibold text-slate-700 mb-1">服務類別</label>
-            <input type="text" id="recurService" value="PTA (8 Sessions)" class="w-full px-3 py-2 border border-slate-300 rounded-lg">
-          </div>
+          <div><label class="block font-semibold mb-1">專職部別</label><select id="formDiscipline" class="w-full px-2.5 py-1.5 border rounded-lg"><option value="PT">物理 PT (黃色)</option><option value="OT">職業 OT (綠色)</option><option value="ST">言語 ST (紫色)</option></select></div>
+          <div><label class="block font-semibold mb-1">服務類別</label><input type="text" id="formService" value="PTA (8 Sessions)" class="w-full px-2.5 py-1.5 border rounded-lg"></div>
         </div>
         <div class="grid grid-cols-2 gap-3">
-          <div>
-            <label class="block font-semibold text-slate-700 mb-1">負責職員</label>
-            <select id="recurStaff" class="w-full px-3 py-2 border border-slate-300 rounded-lg">
-              <option value="PTA 珊">PTA 珊</option>
-              <option value="PTA B哥">PTA B哥</option>
-              <option value="PT Sing">PT Sing</option>
-              <option value="ST Tammy">ST Tammy</option>
-              <option value="ST Kelvin">ST Kelvin</option>
-              <option value="OTA Rebecca">OTA Rebecca</option>
-              <option value="OT Ken">OT Ken</option>
-            </select>
-          </div>
-          <div>
-            <label class="block font-semibold text-slate-700 mb-1">總排定節數</label>
-            <input type="number" id="recurTotalSessions" value="8" min="1" max="50" class="w-full px-3 py-2 border border-slate-300 rounded-lg">
-          </div>
+          <div><label class="block font-semibold mb-1">負責職員</label><select id="formStaff" class="w-full px-2.5 py-1.5 border rounded-lg"><option value="PTA 珊">PTA 珊</option><option value="PTA B哥">PTA B哥</option><option value="PT Sing">PT Sing</option><option value="ST Tammy">ST Tammy</option><option value="ST Kelvin">ST Kelvin</option><option value="OTA Rebecca">OTA Rebecca</option><option value="OT Ken">OT Ken</option></select></div>
+          <div><label class="block font-semibold mb-1">節數進度</label><input type="text" id="formSection" placeholder="Section 1" class="w-full px-2.5 py-1.5 border rounded-lg"></div>
         </div>
         <div class="grid grid-cols-2 gap-3">
-          <div>
-            <label class="block font-semibold text-slate-700 mb-1">起始日期</label>
-            <input type="date" id="recurStartDate" required class="w-full px-3 py-2 border border-slate-300 rounded-lg">
-          </div>
-          <div>
-            <label class="block font-semibold text-slate-700 mb-1">時段 (開始-結束)</label>
-            <div class="flex items-center space-x-1">
-              <input type="time" id="recurStartTime" value="09:30" class="w-1/2 px-2 py-2 border border-slate-300 rounded-lg">
-              <input type="time" id="recurEndTime" value="10:30" class="w-1/2 px-2 py-2 border border-slate-300 rounded-lg">
-            </div>
-          </div>
+          <div><label class="block font-semibold mb-1">開始時間</label><input type="time" id="formStartTime" value="09:30" class="w-full px-2.5 py-1.5 border rounded-lg"></div>
+          <div><label class="block font-semibold mb-1">結束時間</label><input type="time" id="formEndTime" value="10:30" class="w-full px-2.5 py-1.5 border rounded-lg"></div>
         </div>
-        <div>
-          <label class="block font-semibold text-slate-700 mb-1">每週重複治療日</label>
-          <div class="grid grid-cols-6 gap-1 text-center font-medium">
-            <label class="border border-slate-200 rounded p-1.5 has-checked:bg-indigo-50 has-checked:border-indigo-500 cursor-pointer">
-              <input type="checkbox" name="recurDayOfWeek" value="1" class="hidden">一
-            </label>
-            <label class="border border-slate-200 rounded p-1.5 has-checked:bg-indigo-50 has-checked:border-indigo-500 cursor-pointer">
-              <input type="checkbox" name="recurDayOfWeek" value="2" class="hidden">二
-            </label>
-            <label class="border border-slate-200 rounded p-1.5 has-checked:bg-indigo-50 has-checked:border-indigo-500 cursor-pointer">
-              <input type="checkbox" name="recurDayOfWeek" value="3" class="hidden">三
-            </label>
-            <label class="border border-slate-200 rounded p-1.5 has-checked:bg-indigo-50 has-checked:border-indigo-500 cursor-pointer">
-              <input type="checkbox" name="recurDayOfWeek" value="4" class="hidden">四
-            </label>
-            <label class="border border-slate-200 rounded p-1.5 has-checked:bg-indigo-50 has-checked:border-indigo-500 cursor-pointer">
-              <input type="checkbox" name="recurDayOfWeek" value="5" class="hidden">五
-            </label>
-            <label class="border border-slate-200 rounded p-1.5 has-checked:bg-indigo-50 has-checked:border-indigo-500 cursor-pointer">
-              <input type="checkbox" name="recurDayOfWeek" value="6" class="hidden">六
-            </label>
+        <div class="pt-2 border-t flex items-center justify-between">
+          <button type="button" id="btnDeleteEvent" class="px-2.5 py-1 bg-rose-50 text-rose-700 border border-rose-200 rounded hidden">刪除</button>
+          <div class="space-x-2 ml-auto">
+            <button type="button" id="btnCancelModal" class="px-3 py-1.5 border rounded-lg text-slate-600">取消</button>
+            <button type="submit" class="px-4 py-1.5 bg-slate-900 text-white rounded-lg">儲存預約</button>
           </div>
-        </div>
-        <div class="flex items-center space-x-2 pt-1">
-          <input type="checkbox" id="recurSkipHolidays" checked class="rounded text-indigo-600">
-          <label for="recurSkipHolidays" class="text-slate-700 font-semibold cursor-pointer">遇到香港公眾假期自動順延</label>
-        </div>
-        <div class="pt-3 border-t border-slate-200 flex justify-end space-x-2">
-          <button type="button" id="btnCancelRecur" class="px-3 py-1.5 border border-slate-300 rounded-lg text-slate-700">關閉</button>
-          <button type="submit" class="px-4 py-1.5 bg-indigo-600 hover:bg-indigo-700 text-white font-medium rounded-lg shadow-sm">
-            批次產生連續服務排班
-          </button>
         </div>
       </form>
     </div>
   </div>
 
-  <!-- MODAL 3: 個案節數核對表 (原學員節數核對) -->
-  <div id="clientAuditModal" class="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/50 backdrop-blur-xs hidden p-3 sm:p-4">
-    <div class="bg-white rounded-2xl shadow-2xl max-w-4xl w-full overflow-hidden border border-slate-200 flex flex-col max-h-[90vh]">
-      <div class="px-5 py-3.5 bg-sky-900 text-white flex items-center justify-between">
-        <h3 class="text-sm sm:text-base font-bold flex items-center space-x-2">
-          <i class="fa-solid fa-user-check text-sky-400"></i>
-          <span>個案服務日期與節數核對總表</span>
-        </h3>
-        <button id="btnCloseClientAuditModal" class="text-sky-300 hover:text-white transition">
-          <i class="fa-solid fa-xmark text-lg"></i>
-        </button>
+  <!-- MODAL: 連續服務精靈 -->
+  <div id="recurModal" class="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/50 backdrop-blur-xs hidden p-3">
+    <div class="bg-white rounded-2xl shadow-2xl max-w-lg w-full p-4 space-y-3 text-xs">
+      <div class="flex items-center justify-between border-b pb-2">
+        <h3 class="font-bold text-sm text-indigo-900">連續服務排班精靈</h3>
+        <button id="btnCloseRecurModal" class="text-slate-400"><i class="fa-solid fa-xmark"></i></button>
       </div>
-      <div class="p-4 overflow-y-auto flex-1 text-xs">
-        <div class="overflow-x-auto">
-          <table class="w-full border-collapse text-left divide-y divide-slate-200">
-            <thead class="bg-slate-50 font-bold text-slate-700">
-              <tr>
-                <th class="p-2">個案姓名</th>
-                <th class="p-2">服務類別</th>
-                <th class="p-2 text-center">總節數</th>
-                <th class="p-2 text-center text-emerald-700">正常出席</th>
-                <th class="p-2 text-center text-rose-700">取消請假</th>
-                <th class="p-2">進度跨度</th>
-                <th class="p-2">核對狀態</th>
-              </tr>
-            </thead>
-            <tbody id="clientAuditTableBody" class="divide-y divide-slate-100 text-slate-800"></tbody>
-          </table>
+      <form id="recurForm" class="space-y-3">
+        <div><label class="block font-semibold mb-1">個案姓名</label><input type="text" id="recurClientName" required class="w-full px-2.5 py-1.5 border rounded-lg"></div>
+        <div class="grid grid-cols-2 gap-2">
+          <div><label class="block font-semibold mb-1">專職部別</label><select id="recurDiscipline" class="w-full px-2.5 py-1.5 border rounded-lg"><option value="PT">物理 PT (黃色)</option><option value="OT">職業 OT (綠色)</option><option value="ST">言語 ST (紫色)</option></select></div>
+          <div><label class="block font-semibold mb-1">總排定節數</label><input type="number" id="recurTotalSessions" value="8" min="1" max="30" class="w-full px-2.5 py-1.5 border rounded-lg"></div>
         </div>
-      </div>
-      <div class="p-3 bg-slate-50 border-t border-slate-200 flex justify-end">
-        <button id="btnCloseClientAuditFooter" class="px-4 py-1.5 bg-slate-800 hover:bg-slate-900 text-white rounded-lg text-xs font-semibold">關閉</button>
-      </div>
+        <div class="grid grid-cols-2 gap-2">
+          <div><label class="block font-semibold mb-1">負責職員</label><select id="recurStaff" class="w-full px-2.5 py-1.5 border rounded-lg"><option value="PTA 珊">PTA 珊</option><option value="PTA B哥">PTA B哥</option><option value="PT Sing">PT Sing</option><option value="ST Tammy">ST Tammy</option><option value="ST Kelvin">ST Kelvin</option><option value="OTA Rebecca">OTA Rebecca</option><option value="OT Ken">OT Ken</option></select></div>
+          <div><label class="block font-semibold mb-1">起始日期</label><input type="date" id="recurStartDate" required class="w-full px-2.5 py-1.5 border rounded-lg"></div>
+        </div>
+        <div class="flex justify-end space-x-2 pt-2 border-t">
+          <button type="button" id="btnCancelRecur" class="px-3 py-1.5 border rounded-lg">關閉</button>
+          <button type="submit" class="px-4 py-1.5 bg-indigo-600 text-white rounded-lg">產生排班</button>
+        </div>
+      </form>
     </div>
   </div>
 
-  <!-- MODAL 4: 功能鍵 1 - 職員總個案人次統計 (重複只計一次) -->
-  <div id="statsClientsModal" class="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/50 backdrop-blur-xs hidden p-3 sm:p-4">
-    <div class="bg-white rounded-2xl shadow-2xl max-w-2xl w-full overflow-hidden border border-slate-200 flex flex-col max-h-[90vh]">
-      <div class="px-5 py-3.5 bg-teal-800 text-white flex items-center justify-between">
-        <h3 class="text-sm sm:text-base font-bold flex items-center space-x-2">
-          <i class="fa-solid fa-users text-teal-300"></i>
-          <span>職員總個案人次統計 (重複當 1 次)</span>
-        </h3>
-        <button id="btnCloseStatsClients" class="text-teal-200 hover:text-white transition">
-          <i class="fa-solid fa-xmark text-lg"></i>
-        </button>
+  <!-- MODAL: 職員業務統計中心 -->
+  <div id="statsModal" class="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/50 backdrop-blur-xs hidden p-3">
+    <div class="bg-white rounded-2xl shadow-2xl max-w-4xl w-full p-4 space-y-3 text-xs max-h-[90vh] flex flex-col">
+      <div class="flex items-center justify-between border-b pb-2">
+        <h3 class="font-bold text-sm text-amber-900">職員業務統計中心</h3>
+        <button id="btnCloseStatsModal" class="text-slate-400"><i class="fa-solid fa-xmark"></i></button>
       </div>
-      <div class="p-3 bg-teal-50/50 border-b border-slate-200 flex items-center justify-between flex-wrap gap-2 text-xs">
-        <div class="flex items-center space-x-2">
-          <label class="font-bold text-slate-700">範圍：</label>
-          <select id="statsClientsRange" class="px-2 py-1 bg-white border border-slate-300 rounded font-semibold text-slate-700">
-            <option value="month">當前檢視月份</option>
-            <option value="year">當前檢視年份</option>
-            <option value="all">全紀錄</option>
-          </select>
+      <div class="flex flex-wrap items-center justify-between gap-2 bg-slate-50 p-2 rounded-lg">
+        <div class="inline-flex rounded-lg border bg-white p-0.5" id="statsTabs">
+          <button id="tabBtnClients" class="px-3 py-1 bg-amber-500 text-white rounded font-bold">1: 個案人次</button>
+          <button id="tabBtnSessions" class="px-3 py-1 text-slate-600 rounded font-medium">2: 總節數</button>
+          <button id="tabBtnRevenue" class="px-3 py-1 text-slate-600 rounded font-medium">3: 總收入</button>
         </div>
-        <button id="btnExportStatsClientsExcel" class="px-2.5 py-1 bg-white border border-teal-300 rounded text-teal-900 font-semibold hover:bg-teal-50 transition shadow-2xs">
-          <i class="fa-solid fa-file-excel mr-1 text-emerald-600"></i>輸出 Excel (CSV)
-        </button>
+        <button id="btnExportStatsExcel" class="px-3 py-1 bg-emerald-600 text-white rounded font-semibold"><i class="fa-solid fa-file-excel mr-1"></i>匯出 Excel</button>
       </div>
-      <div class="p-4 overflow-y-auto flex-1 text-xs">
+      <div class="flex-1 overflow-y-auto" id="statsContentArea">
         <table class="w-full border-collapse text-left divide-y divide-slate-200">
-          <thead class="bg-slate-50 font-bold text-slate-700">
-            <tr>
-              <th class="p-2">負責職員</th>
-              <th class="p-2 text-center">獨立個案人次</th>
-              <th class="p-2">服務個案清單</th>
-            </tr>
-          </thead>
-          <tbody id="statsClientsTableBody" class="divide-y divide-slate-100"></tbody>
+          <thead class="bg-slate-100 font-bold text-slate-700" id="statsThead"></thead>
+          <tbody id="statsTbody" class="divide-y divide-slate-100 text-slate-800"></tbody>
         </table>
       </div>
-      <div class="p-3 bg-slate-50 border-t border-slate-200 flex justify-end">
-        <button id="btnCloseStatsClientsFooter" class="px-4 py-1.5 bg-slate-800 text-white rounded-lg text-xs font-semibold">關閉</button>
+      <div class="flex justify-end pt-2 border-t">
+        <button id="btnCloseStatsFooter" class="px-4 py-1.5 bg-slate-800 text-white rounded-lg">關閉</button>
       </div>
     </div>
   </div>
 
-  <!-- MODAL 5: 功能鍵 2 - 職員總節數統計 -->
-  <div id="statsSessionsModal" class="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/50 backdrop-blur-xs hidden p-3 sm:p-4">
-    <div class="bg-white rounded-2xl shadow-2xl max-w-2xl w-full overflow-hidden border border-slate-200 flex flex-col max-h-[90vh]">
-      <div class="px-5 py-3.5 bg-blue-900 text-white flex items-center justify-between">
-        <h3 class="text-sm sm:text-base font-bold flex items-center space-x-2">
-          <i class="fa-solid fa-chart-simple text-blue-300"></i>
-          <span>職員總服務節數統計</span>
-        </h3>
-        <button id="btnCloseStatsSessions" class="text-blue-200 hover:text-white transition">
-          <i class="fa-solid fa-xmark text-lg"></i>
-        </button>
-      </div>
-      <div class="p-3 bg-blue-50/50 border-b border-slate-200 flex items-center justify-between flex-wrap gap-2 text-xs">
-        <div class="flex items-center space-x-2">
-          <label class="font-bold text-slate-700">範圍：</label>
-          <select id="statsSessionsRange" class="px-2 py-1 bg-white border border-slate-300 rounded font-semibold text-slate-700">
-            <option value="month">當前檢視月份</option>
-            <option value="year">當前檢視年份</option>
-            <option value="all">全紀錄</option>
-          </select>
-        </div>
-        <button id="btnExportStatsSessionsExcel" class="px-2.5 py-1 bg-white border border-blue-300 rounded text-blue-900 font-semibold hover:bg-blue-50 transition shadow-2xs">
-          <i class="fa-solid fa-file-excel mr-1 text-emerald-600"></i>輸出 Excel (CSV)
-        </button>
-      </div>
-      <div class="p-4 overflow-y-auto flex-1 text-xs">
-        <table class="w-full border-collapse text-left divide-y divide-slate-200">
-          <thead class="bg-slate-50 font-bold text-slate-700">
-            <tr>
-              <th class="p-2">負責職員</th>
-              <th class="p-2 text-center text-emerald-700">有效完成節數</th>
-              <th class="p-2 text-center text-rose-600">取消請假節數</th>
-              <th class="p-2 text-center font-bold">總排定節數</th>
-            </tr>
-          </thead>
-          <tbody id="statsSessionsTableBody" class="divide-y divide-slate-100"></tbody>
-        </table>
-      </div>
-      <div class="p-3 bg-slate-50 border-t border-slate-200 flex justify-end">
-        <button id="btnCloseStatsSessionsFooter" class="px-4 py-1.5 bg-slate-800 text-white rounded-lg text-xs font-semibold">關閉</button>
-      </div>
-    </div>
-  </div>
-
-  <!-- MODAL 6: 功能鍵 3 - 職員總收入統計 -->
-  <div id="statsRevenueModal" class="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/50 backdrop-blur-xs hidden p-3 sm:p-4">
-    <div class="bg-white rounded-2xl shadow-2xl max-w-2xl w-full overflow-hidden border border-slate-200 flex flex-col max-h-[90vh]">
-      <div class="px-5 py-3.5 bg-emerald-800 text-white flex items-center justify-between">
-        <h3 class="text-sm sm:text-base font-bold flex items-center space-x-2">
-          <i class="fa-solid fa-sack-dollar text-emerald-300"></i>
-          <span>職員總服務收入統計</span>
-        </h3>
-        <button id="btnCloseStatsRevenue" class="text-emerald-200 hover:text-white transition">
-          <i class="fa-solid fa-xmark text-lg"></i>
-        </button>
-      </div>
-      <div class="p-3 bg-emerald-50/50 border-b border-slate-200 flex items-center justify-between flex-wrap gap-2 text-xs">
-        <div class="flex items-center space-x-2">
-          <label class="font-bold text-slate-700">範圍：</label>
-          <select id="statsRevenueRange" class="px-2 py-1 bg-white border border-slate-300 rounded font-semibold text-slate-700">
-            <option value="month">當前檢視月份</option>
-            <option value="year">當前檢視年份</option>
-            <option value="all">全紀錄</option>
-          </select>
-          <label class="font-bold text-slate-700 ml-2">每節基準收費(HKD)：</label>
-          <input type="number" id="baseRateInput" value="650" class="w-16 px-1.5 py-0.5 border border-slate-300 rounded font-mono font-bold">
-        </div>
-        <button id="btnExportStatsRevenueExcel" class="px-2.5 py-1 bg-white border border-emerald-300 rounded text-emerald-900 font-semibold hover:bg-emerald-50 transition shadow-2xs">
-          <i class="fa-solid fa-file-excel mr-1 text-emerald-600"></i>輸出 Excel (CSV)
-        </button>
-      </div>
-      <div class="p-4 overflow-y-auto flex-1 text-xs">
-        <table class="w-full border-collapse text-left divide-y divide-slate-200">
-          <thead class="bg-slate-50 font-bold text-slate-700">
-            <tr>
-              <th class="p-2">負責職員</th>
-              <th class="p-2 text-center text-emerald-700">完成收費節數</th>
-              <th class="p-2 text-right font-bold text-emerald-800">總產生收入 (HKD)</th>
-            </tr>
-          </thead>
-          <tbody id="statsRevenueTableBody" class="divide-y divide-slate-100 font-mono"></tbody>
-        </table>
-      </div>
-      <div class="p-3 bg-slate-50 border-t border-slate-200 flex justify-end">
-        <button id="btnCloseStatsRevenueFooter" class="px-4 py-1.5 bg-slate-800 text-white rounded-lg text-xs font-semibold">關閉</button>
-      </div>
-    </div>
-  </div>
-
-  <!-- MODAL 7: 權限與操作者身份切換 (強調 Jo Jo 權限) -->
-  <div id="operatorModal" class="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/50 backdrop-blur-xs hidden p-3 sm:p-4">
-    <div class="bg-white rounded-2xl shadow-2xl max-w-sm w-full overflow-hidden border border-slate-200 p-4 space-y-3 text-xs">
-      <div class="flex items-center justify-between border-b border-slate-100 pb-2">
-        <span class="font-bold text-slate-900 text-sm">選擇或切換當前修改人</span>
-        <button id="btnCloseOperatorModal" class="text-slate-400 hover:text-slate-700"><i class="fa-solid fa-xmark"></i></button>
-      </div>
-      <div class="p-2.5 rounded-lg bg-amber-50 border border-amber-200 text-amber-900 text-[11px] leading-relaxed">
-        <i class="fa-solid fa-lock text-amber-600 mr-1"></i><strong>權限管理提示：</strong>依系統排班規定，只有 <strong>Jo Jo</strong> 擁有排班編輯、取消及刪除之最高權限。
-      </div>
-      <div class="grid grid-cols-2 gap-2">
-        <button class="btn-select-staff p-2 rounded-lg border-2 border-slate-900 bg-slate-900 text-white font-bold text-center">Jo Jo (管理員)</button>
-        <button class="btn-select-staff p-2 rounded-lg border border-slate-200 hover:border-slate-800 font-semibold text-slate-800 text-center">PTA 珊</button>
-        <button class="btn-select-staff p-2 rounded-lg border border-slate-200 hover:border-slate-800 font-semibold text-slate-800 text-center">PTA B哥</button>
-        <button class="btn-select-staff p-2 rounded-lg border border-slate-200 hover:border-slate-800 font-semibold text-slate-800 text-center">PT Sing</button>
-        <button class="btn-select-staff p-2 rounded-lg border border-slate-200 hover:border-slate-800 font-semibold text-slate-800 text-center">ST Tammy</button>
-        <button class="btn-select-staff p-2 rounded-lg border border-slate-200 hover:border-slate-800 font-semibold text-slate-800 text-center">ST Kelvin</button>
-      </div>
-      <div>
-        <label class="block font-semibold text-slate-700 mb-1">自訂職員姓名</label>
-        <div class="flex space-x-2">
-          <input type="text" id="customOperatorInput" placeholder="輸入其他名稱" class="w-full px-2.5 py-1.5 border border-slate-300 rounded-lg outline-none">
-          <button id="btnSaveCustomOperator" class="px-3 py-1.5 bg-slate-900 text-white rounded-lg font-semibold">套用</button>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <!-- MODAL 8: AUDIT LOG -->
-  <div id="auditLogModal" class="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/50 backdrop-blur-xs hidden p-3 sm:p-4">
-    <div class="bg-white rounded-2xl shadow-2xl max-w-3xl w-full overflow-hidden border border-slate-200 flex flex-col max-h-[90vh]">
-      <div class="px-5 py-3.5 bg-slate-900 text-white flex items-center justify-between">
-        <h3 class="text-sm sm:text-base font-bold flex items-center space-x-2">
-          <i class="fa-solid fa-clock-rotate-left text-amber-400"></i>
-          <span>服務日曆修改歷史報告 (Audit Trail)</span>
-        </h3>
-        <button id="btnCloseAuditModal" class="text-slate-400 hover:text-white transition">
-          <i class="fa-solid fa-xmark text-lg"></i>
-        </button>
-      </div>
-      <div id="auditLogListContainer" class="p-4 space-y-2 overflow-y-auto flex-1 text-xs"></div>
-      <div class="p-3 bg-slate-50 border-t border-slate-200 flex justify-end">
-        <button id="btnCloseAuditFooter" class="px-4 py-1.5 bg-slate-800 text-white rounded-lg text-xs font-semibold">關閉</button>
-      </div>
-    </div>
-  </div>
-
-  <!-- MODAL 9: TEAMS CONFIG -->
-  <div id="teamsConfigModal" class="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/50 backdrop-blur-xs hidden p-3 sm:p-4">
-    <div class="bg-white rounded-2xl shadow-2xl max-w-xl w-full overflow-hidden border border-slate-200 flex flex-col max-h-[90vh]">
-      <div class="px-5 py-3.5 bg-gradient-to-r from-purple-800 to-indigo-800 text-white flex items-center justify-between">
-        <div class="flex items-center space-x-2">
-          <i class="fa-brands fa-microsoft text-lg"></i>
-          <h3 class="text-sm font-bold">Microsoft Teams 異動通知中心</h3>
-        </div>
-        <button id="btnCloseTeamsConfigModal" class="text-white/80 hover:text-white transition">
-          <i class="fa-solid fa-xmark text-lg"></i>
-        </button>
-      </div>
-      <div class="p-4 space-y-3 overflow-y-auto flex-1 text-xs">
-        <p class="text-slate-600">已串接 Teams 異動公告與治療師直接對話功能。</p>
-      </div>
-      <div class="p-3 bg-slate-50 border-t border-slate-200 flex justify-end">
-        <button id="btnCloseTeamsConfigFooter" class="px-4 py-1.5 bg-slate-800 text-white rounded-lg text-xs font-semibold">關閉</button>
-      </div>
-    </div>
-  </div>
-
-  <!-- 提示氣泡 (Toast) -->
-  <div id="toast" class="fixed bottom-5 right-5 z-50 transform translate-y-24 opacity-0 transition-all duration-300 px-4 py-2.5 rounded-xl shadow-xl text-xs font-semibold flex items-center space-x-2 text-white bg-slate-900 border border-slate-700">
-    <i id="toastIcon" class="fa-solid fa-circle-check text-emerald-400"></i>
+  <!-- Toast -->
+  <div id="toast" class="fixed bottom-5 right-5 z-50 transform translate-y-24 opacity-0 transition-all duration-300 px-4 py-2.5 rounded-xl text-xs font-semibold flex items-center space-x-2 text-white bg-slate-900 shadow-xl">
     <span id="toastMsg">通知訊息</span>
   </div>
 
-  <!-- 應用程式核心邏輯 Module -->
+  <!-- 應用程式邏輯與即時同步模組 -->
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
     import { getAuth, signInAnonymously } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-    import { getFirestore, doc, setDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+    import { getDatabase, ref, set, onValue } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-database.js";
 
-    // 初始正式治療排班資料庫
-    const INITIAL_AUTHENTIC_SCHEDULE = [
-      { id: "mwc-001", date: "2026-10-02", startTime: "09:30", endTime: "10:30", client: "何愛蘭", service: "PT+PTA (9 Sessions)", discipline: "PT", staff: "PTA 珊", section: "Section 9 Cancel", status: "cancelled", cancelReason: "原排班表標記取消", notes: "" },
-      { id: "mwc-002", date: "2026-10-09", startTime: "09:30", endTime: "10:30", client: "何愛蘭", service: "PTA (8 Sessions)", discipline: "PT", staff: "PTA 珊", section: "Section 9", status: "active", cancelReason: "", notes: "舊期補回結案" },
-      { id: "mwc-003", date: "2026-10-10", startTime: "09:30", endTime: "10:30", client: "何愛蘭", service: "PTA (8 Sessions)", discipline: "PT", staff: "PTA 珊", section: "Section 1", status: "active", cancelReason: "", notes: "新期第一節" },
-      { id: "mwc-011", date: "2026-10-02", startTime: "09:30", endTime: "10:15", client: "全興棠", service: "OTA (8 Sessions)", discipline: "OT", staff: "OTA Rebecca", section: "Section 9", status: "active", cancelReason: "", notes: "加簽第9節" },
-      { id: "mwc-012", date: "2026-10-02", startTime: "13:30", endTime: "14:15", client: "羅屏蘇", service: "ST (10 Sessions)", discipline: "ST", staff: "ST Kelvin", section: "Section 9", status: "active", cancelReason: "", notes: "" },
-      { id: "mwc-013", date: "2026-10-06", startTime: "14:30", endTime: "15:30", client: "羅屏蘇", service: "OTA (8 Sessions)", discipline: "OT", staff: "OTA Rebecca", section: "Section 8", status: "active", cancelReason: "", notes: "" },
-      { id: "mwc-018", date: "2026-10-15", startTime: "14:00", endTime: "15:00", client: "羅屏蘇", service: "PTA (8 Sessions)", discipline: "PT", staff: "PTA 珊", section: "Section 1", status: "active", cancelReason: "", notes: "新期PTA第一節" },
-      { id: "mwc-037", date: "2026-10-02", startTime: "15:30", endTime: "16:15", client: "黃婉霞", service: "ST (10 Sessions)", discipline: "ST", staff: "ST Kelvin", section: "Section 6", status: "active", cancelReason: "", notes: "" },
-      { id: "mwc-044", date: "2026-10-02", startTime: "14:00", endTime: "15:00", client: "鄧源", service: "PTA (8 Sessions)", discipline: "PT", staff: "PTA 珊", section: "Section 5", status: "active", cancelReason: "", notes: "" },
-      { id: "mwc-056", date: "2026-10-06", startTime: "14:00", endTime: "14:45", client: "陳迎華(10節)", service: "ST (10 Sessions)", discipline: "ST", staff: "ST Tammy", section: "Section 2", status: "active", cancelReason: "", notes: "" },
-      { id: "mwc-083", date: "2026-10-07", startTime: "09:30", endTime: "10:30", client: "吳淑媛", service: "OT+OTA (7 Sessions)", discipline: "OT", staff: "OT Ken", section: "Section 1", status: "active", cancelReason: "", notes: "" },
-      // 2027 排班範例
-      { id: "mwc-105", date: "2027-01-02", startTime: "09:30", endTime: "10:30", client: "Allen", service: "PTA (8 Sessions)", discipline: "PT", staff: "PTA 珊", section: "Section 1", status: "active", cancelReason: "", notes: "2027出席" },
-      { id: "mwc-106", date: "2027-01-02", startTime: "09:30", endTime: "10:30", client: "Allen", service: "PTA (8 Sessions)", discipline: "PT", staff: "PTA 珊", section: "Section 1 Cancel", status: "cancelled", cancelReason: "原排班表標記取消", notes: "" },
-      { id: "mwc-107", date: "2027-01-05", startTime: "09:30", endTime: "10:30", client: "何愛蘭", service: "PTA (8 Sessions)", discipline: "PT", staff: "PTA 珊", section: "Section 2", status: "active", cancelReason: "", notes: "" },
-      { id: "mwc-108", date: "2027-01-06", startTime: "14:00", endTime: "15:00", client: "羅漢星", service: "PTA (8 Sessions)", discipline: "PT", staff: "PTA B哥", section: "Section 1", status: "active", cancelReason: "", notes: "" },
-      { id: "mwc-109", date: "2027-01-07", startTime: "10:00", endTime: "11:00", client: "張明清", service: "PTA (8 Sessions)", discipline: "PT", staff: "PTA 珊", section: "Section 1", status: "active", cancelReason: "", notes: "" }
+    // 內建預設排班資料
+    const DEFAULT_SCHEDULE = [
+      { id: "mwc-001", date: "2026-10-02", startTime: "09:30", endTime: "10:30", client: "何愛蘭", service: "PT+PTA", discipline: "PT", staff: "PTA 珊", section: "Section 9 Cancel", status: "cancelled" },
+      { id: "mwc-002", date: "2026-10-09", startTime: "09:30", endTime: "10:30", client: "何愛蘭", service: "PTA", discipline: "PT", staff: "PTA 珊", section: "Section 9", status: "active" },
+      { id: "mwc-011", date: "2026-10-02", startTime: "09:30", endTime: "10:15", client: "全興棠", service: "OTA", discipline: "OT", staff: "OTA Rebecca", section: "Section 9", status: "active" },
+      { id: "mwc-012", date: "2026-10-02", startTime: "13:30", endTime: "14:15", client: "羅屏蘇", service: "ST", discipline: "ST", staff: "ST Kelvin", section: "Section 9", status: "active" },
+      { id: "mwc-096", date: "2026-10-08", startTime: "09:45", endTime: "10:45", client: "張明清", service: "PT+PTA", discipline: "PT", staff: "PTA 珊", section: "Section 1", status: "active" },
+      { id: "mwc-105", date: "2027-01-02", startTime: "09:30", endTime: "10:30", client: "Allen", service: "PTA", discipline: "PT", staff: "PTA 珊", section: "Section 1", status: "active" },
+      { id: "mwc-106", date: "2027-01-02", startTime: "09:30", endTime: "10:30", client: "Allen", service: "PTA", discipline: "PT", staff: "PTA 珊", section: "Section 1 Cancel", status: "cancelled" },
+      { id: "mwc-107", date: "2027-01-05", startTime: "09:30", endTime: "10:30", client: "何愛蘭", service: "PTA", discipline: "PT", staff: "PTA 珊", section: "Section 2", status: "active" },
+      { id: "mwc-108", date: "2027-01-06", startTime: "14:00", endTime: "15:00", client: "羅漢星", service: "PTA", discipline: "PT", staff: "PTA B哥", section: "Section 1", status: "active" },
+      { id: "mwc-109", date: "2027-01-07", startTime: "10:00", endTime: "11:00", client: "張明清", service: "PTA", discipline: "PT", staff: "PTA 珊", section: "Section 1", status: "active" }
     ];
 
-    function getDecodedApiKey() {
-      try { return atob("QUl6YVN5QVlUd0lMd3VmaEdpMlNVYXpYbXhBRDJ0MDZ4d3k1NmVn"); } catch (e) { return ""; }
-    }
-
-    const firebaseConfig = {
-      apiKey: getDecodedApiKey(),
-      authDomain: "mwcrehabilitationschedule.firebaseapp.com",
-      projectId: "mwcrehabilitationschedule",
-      storageBucket: "mwcrehabilitationschedule.firebasestorage.app",
-      messagingSenderId: "987435169756",
-      appId: "1:987435169756:web:bd489e8b97ff5159660119",
-      measurementId: "G-9MZLFBFJB0"
-    };
-
-    // 系統狀態 (預設修改人為 Jo Jo)
     const state = {
-      currentDate: new Date(2027, 0, 2),
-      selectedDayDate: new Date(2027, 0, 2),
+      currentDate: new Date(2027, 0, 7),
+      selectedDayDate: new Date(2027, 0, 7),
       currentView: 'month',
-      currentRole: localStorage.getItem('mwc_operator_name') || 'Jo Jo',
+      currentRole: 'Jo Jo',
       filterDiscipline: 'all',
       filterStaff: 'all',
       filterStatus: 'all',
       searchQuery: '',
       appointments: [],
-      auditLogs: [],
-      isFirebaseConnected: false
+      currentStatsTab: 'clients',
+      isOnline: false
     };
 
-    // 權限檢查：只有 Jo Jo 可以修改
-    function checkPermission() {
-      if (state.currentRole !== 'Jo Jo') {
-        alert(`【權限不足】目前設定的修改人為「${state.currentRole}」。\n只有「Jo Jo」擁有排班修改、取消與刪除之權限！`);
-        return false;
-      }
-      return true;
-    }
-
-    const HK_HOLIDAYS = {
-      '2026-10-01': '國慶日', '2026-10-02': '中秋節翌日', '2026-10-19': '重陽節翌日',
-      '2026-12-25': '聖誕節', '2026-12-26': '聖誕節後第一個周日',
-      '2027-01-01': '元旦', '2027-02-06': '農曆除夕', '2027-02-07': '年初一',
-      '2027-02-08': '年初二', '2027-02-09': '年初三', '2027-03-26': '耶穌受難節',
-      '2027-03-29': '復活節星期一', '2027-04-05': '清明節', '2027-05-01': '勞動節',
-      '2027-05-13': '佛誕', '2027-06-09': '端午節', '2027-07-01': '特區紀念日'
-    };
-
-    function initAppointmentsData() {
+    function initData() {
       try {
         const raw = localStorage.getItem('mwc_appointments_data');
         if (raw) {
           const parsed = JSON.parse(raw);
-          if (Array.isArray(parsed) && parsed.length > 0) {
-            state.appointments = parsed;
-            return;
-          }
+          state.appointments = (Array.isArray(parsed) && parsed.length > 0) ? parsed : DEFAULT_SCHEDULE;
+        } else {
+          state.appointments = DEFAULT_SCHEDULE;
+          localStorage.setItem('mwc_appointments_data', JSON.stringify(state.appointments));
         }
       } catch (e) {
-        console.warn('Local cache read error:', e);
+        state.appointments = DEFAULT_SCHEDULE;
       }
-      state.appointments = JSON.parse(JSON.stringify(INITIAL_AUTHENTIC_SCHEDULE));
-      saveAppointmentsLocal();
     }
 
-    function saveAppointmentsLocal() {
+    function saveLocal() {
       try {
         localStorage.setItem('mwc_appointments_data', JSON.stringify(state.appointments));
       } catch (e) {
-        console.warn('Local cache write error:', e);
+        console.warn('本機儲存失敗', e);
       }
     }
 
-    function loadAuditLogs() {
-      try {
-        const raw = localStorage.getItem('mwc_audit_logs');
-        state.auditLogs = raw ? JSON.parse(raw) : [];
-      } catch (e) {
-        state.auditLogs = [];
-      }
-      updateAuditBadge();
-    }
-
-    function saveAuditLogs() {
-      try {
-        localStorage.setItem('mwc_audit_logs', JSON.stringify(state.auditLogs));
-      } catch (e) {
-        console.warn('Audit logs write error:', e);
-      }
-      updateAuditBadge();
-    }
-
-    function addAuditRecord(record) {
-      const item = {
-        id: 'audit-' + Date.now() + '-' + Math.random().toString(36).substr(2, 4),
-        timestamp: new Date().toLocaleString('zh-HK', { hour12: false }),
-        operator: state.currentRole,
-        ...record
-      };
-      state.auditLogs.unshift(item);
-      if (state.auditLogs.length > 300) state.auditLogs.length = 300;
-      saveAuditLogs();
-    }
-
-    function updateAuditBadge() {
-      const c = state.auditLogs.length;
-      const b2 = document.getElementById('auditCountBadgeMobile');
-      if (b2) b2.textContent = c;
-    }
-
-    let db = null;
-    let auth = null;
-    let docRef = null;
-
-    async function initFirebaseConnection() {
-      const syncStatusText = document.getElementById('cloudStatusText');
-      try {
-        const app = initializeApp(firebaseConfig);
-        db = getFirestore(app);
-        auth = getAuth(app);
-        try { await signInAnonymously(auth); } catch (authErr) {}
-
-        docRef = doc(db, 'mwc_public_calendar', 'schedule_hub');
-
-        onSnapshot(docRef, (docSnap) => {
-          if (docSnap.exists()) {
-            const data = docSnap.data();
-            if (data && Array.isArray(data.appointments) && data.appointments.length > 0) {
-              state.appointments = data.appointments;
-              saveAppointmentsLocal();
-              renderCurrentView();
-            }
-          } else {
-            setDoc(docRef, {
-              appointments: state.appointments,
-              auditLogs: state.auditLogs,
-              lastUpdated: new Date().toISOString()
-            }).catch(e => console.warn(e));
-          }
-          state.isFirebaseConnected = true;
-          if (syncStatusText) syncStatusText.textContent = "多方即時連線中";
-        }, (error) => {
-          state.isFirebaseConnected = false;
-          if (syncStatusText) syncStatusText.textContent = "本機獨立模式";
-        });
-      } catch (err) {
-        state.isFirebaseConnected = false;
-        if (syncStatusText) syncStatusText.textContent = "本機安全模式";
-      }
-    }
-
-    async function syncToFirebaseRemote() {
-      saveAppointmentsLocal();
-      saveAuditLogs();
-      if (db && docRef && state.isFirebaseConnected) {
-        try {
-          await setDoc(docRef, {
-            appointments: state.appointments,
-            auditLogs: state.auditLogs,
-            lastUpdated: new Date().toISOString()
-          }, { merge: true });
-        } catch (e) {
-          console.warn('Sync push error:', e);
-        }
-      }
-    }
-
-    function showToast(msg, type = 'success') {
-      const toast = document.getElementById('toast');
-      const toastMsg = document.getElementById('toastMsg');
-      const toastIcon = document.getElementById('toastIcon');
-
-      toastMsg.textContent = msg;
-      if (type === 'success') {
-        toastIcon.className = 'fa-solid fa-circle-check text-emerald-400';
-      } else if (type === 'warning') {
-        toastIcon.className = 'fa-solid fa-triangle-exclamation text-amber-400';
-      } else {
-        toastIcon.className = 'fa-solid fa-circle-info text-sky-400';
-      }
-
-      toast.classList.remove('translate-y-24', 'opacity-0');
-      setTimeout(() => {
-        toast.classList.add('translate-y-24', 'opacity-0');
-      }, 2800);
+    // 配色：PT:黃色, OT:綠色, ST:紫色
+    function getDisciplineClass(d) {
+      if (d === 'PT') return 'bg-amber-100 text-amber-900 border-amber-300';
+      if (d === 'OT') return 'bg-emerald-100 text-emerald-900 border-emerald-300';
+      if (d === 'ST') return 'bg-purple-100 text-purple-900 border-purple-300';
+      return 'bg-slate-100 text-slate-800 border-slate-300';
     }
 
     function formatDate(d) {
@@ -1039,17 +427,23 @@
       return `${year}-${month}-${day}`;
     }
 
-    // 專屬底色：PT:黃色, OT:綠色, ST:紫色
-    function getDisciplineClass(d) {
-      switch (d) {
-        case 'PT': 
-          return 'bg-amber-100 text-amber-900 border-amber-300'; // 黃色
-        case 'OT': 
-          return 'bg-emerald-100 text-emerald-900 border-emerald-300'; // 綠色
-        case 'ST': 
-          return 'bg-purple-100 text-purple-900 border-purple-300'; // 紫色
-        default: 
-          return 'bg-slate-100 text-slate-800 border-slate-300';
+    function setSyncStatus(online, text) {
+      state.isOnline = online;
+      const statusIcon = document.getElementById('syncStatusIcon');
+      const statusDot = document.getElementById('cloudStatusDot');
+      const statusText = document.getElementById('cloudStatusText');
+      const btn = document.getElementById('btnCloudStatus');
+
+      if (online) {
+        statusIcon.className = 'w-8 h-8 rounded-lg bg-emerald-600 text-white flex items-center justify-center font-bold text-sm shadow-sm flex-shrink-0 transition-colors';
+        statusDot.className = 'w-1.5 h-1.5 rounded-full bg-emerald-500 mr-1 animate-pulse';
+        btn.className = 'inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-semibold bg-emerald-50 text-emerald-800 border border-emerald-200 transition-colors';
+        statusText.textContent = text || '多方即時連線中';
+      } else {
+        statusIcon.className = 'w-8 h-8 rounded-lg bg-amber-500 text-white flex items-center justify-center font-bold text-sm shadow-sm flex-shrink-0 transition-colors';
+        statusDot.className = 'w-1.5 h-1.5 rounded-full bg-amber-500 mr-1';
+        btn.className = 'inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-semibold bg-amber-50 text-amber-800 border border-amber-200 transition-colors';
+        statusText.textContent = text || '本機安全模式 (離線運作)';
       }
     }
 
@@ -1060,214 +454,121 @@
       document.getElementById('jumpYearSelect').value = y;
       document.getElementById('jumpMonthSelect').value = m;
 
-      if (state.currentView === 'month') {
-        renderMonthView();
-      } else if (state.currentView === 'week') {
-        renderWeekView();
-      } else if (state.currentView === 'table') {
-        renderTableView();
-      } else if (state.currentView === 'year') {
-        renderYearView();
-      }
+      if (state.currentView === 'month') renderMonthView();
+      else if (state.currentView === 'week') renderWeekView();
+      else if (state.currentView === 'table') renderTableView();
+      else if (state.currentView === 'year') renderYearView();
     }
 
-    function getFilteredAppointments() {
-      return state.appointments.filter(app => {
-        if (state.filterDiscipline !== 'all' && app.discipline !== state.filterDiscipline) return false;
-        if (state.filterStaff !== 'all' && !app.staff.includes(state.filterStaff)) return false;
-        if (state.filterStatus === 'active' && app.status === 'cancelled') return false;
-        if (state.filterStatus === 'cancelled' && app.status !== 'cancelled') return false;
+    function getFilteredList() {
+      return state.appointments.filter(a => {
+        if (state.filterDiscipline !== 'all' && a.discipline !== state.filterDiscipline) return false;
+        if (state.filterStaff !== 'all' && a.staff !== state.filterStaff) return false;
+        if (state.filterStatus === 'active' && a.status === 'cancelled') return false;
+        if (state.filterStatus === 'cancelled' && a.status !== 'cancelled') return false;
         if (state.searchQuery) {
           const q = state.searchQuery.toLowerCase();
-          const matchClient = (app.client || '').toLowerCase().includes(q);
-          const matchStaff = (app.staff || '').toLowerCase().includes(q);
-          const matchSection = (app.section || '').toLowerCase().includes(q);
-          if (!matchClient && !matchStaff && !matchSection) return false;
+          return (a.client || '').toLowerCase().includes(q) || (a.section || '').toLowerCase().includes(q);
         }
         return true;
       });
     }
 
-    // 月曆檢視渲染 (同時顯示時間、姓名、職員與節數進度)
     function renderMonthView() {
-      const monthGrid = document.getElementById('monthGrid');
-      monthGrid.innerHTML = '';
+      const grid = document.getElementById('monthGrid');
+      grid.innerHTML = '';
 
       const y = state.currentDate.getFullYear();
       const m = state.currentDate.getMonth();
       const firstDay = new Date(y, m, 1).getDay();
       const totalDays = new Date(y, m + 1, 0).getDate();
-      const prevMonthLastDate = new Date(y, m, 0).getDate();
+      const prevTotal = new Date(y, m, 0).getDate();
+      const filtered = getFilteredList();
 
-      const filtered = getFilteredAppointments();
-      const todayStr = formatDate(new Date());
-      const selectedStr = formatDate(state.selectedDayDate);
-
-      // 上月補位
       for (let i = firstDay - 1; i >= 0; i--) {
-        const dNum = prevMonthLastDate - i;
         const cell = document.createElement('div');
-        cell.className = 'min-h-[95px] p-1.5 bg-slate-50/50 text-slate-300 opacity-60';
-        cell.innerHTML = `<span class="font-bold text-xs">${dNum}</span>`;
-        monthGrid.appendChild(cell);
+        cell.className = 'min-h-[110px] p-1.5 bg-slate-50 text-slate-300 text-xs font-bold';
+        cell.textContent = prevTotal - i;
+        grid.appendChild(cell);
       }
 
-      // 當月格子
-      for (let day = 1; day <= totalDays; day++) {
-        const curD = new Date(y, m, day);
-        const dateStr = formatDate(curD);
-        const isToday = dateStr === todayStr;
-        const isSelected = dateStr === selectedStr;
-        const holidayName = HK_HOLIDAYS[dateStr];
-
+      for (let d = 1; d <= totalDays; d++) {
+        const dateStr = `${y}-${String(m+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
         const dayEvents = filtered.filter(a => a.date === dateStr);
-        dayEvents.sort((a, b) => a.startTime.localeCompare(b.startTime));
+        dayEvents.sort((a,b) => a.startTime.localeCompare(b.startTime));
 
         const cell = document.createElement('div');
-        cell.className = `min-h-[110px] sm:min-h-[130px] p-1 sm:p-1.5 bg-white transition hover:bg-slate-50/80 cursor-pointer flex flex-col justify-between ${
-          isSelected ? 'ring-2 ring-slate-800 z-10' : ''
-        }`;
+        cell.className = 'min-h-[110px] p-1.5 bg-white border-t border-slate-100 flex flex-col justify-between hover:bg-slate-50 cursor-pointer';
 
-        const headDiv = document.createElement('div');
-        headDiv.className = 'flex items-center justify-between';
-        headDiv.innerHTML = `
-          <span class="inline-flex items-center justify-center w-6 h-6 rounded-full text-xs font-bold ${
-            isToday ? 'bg-slate-900 text-white' : holidayName ? 'text-rose-600' : 'text-slate-800'
-          }">${day}</span>
-          ${holidayName ? `<span class="text-[9px] bg-rose-50 text-rose-700 px-1 rounded font-semibold truncate max-w-[65px]">${holidayName}</span>` : ''}
-        `;
-        cell.appendChild(headDiv);
+        const head = document.createElement('div');
+        head.className = 'font-bold text-xs text-slate-800';
+        head.textContent = d;
+        cell.appendChild(head);
 
-        // 排班徽章清單 (包含節數顯示)
-        const eventsContainer = document.createElement('div');
-        eventsContainer.className = 'space-y-1 mt-1 flex-1 overflow-hidden';
+        const listDiv = document.createElement('div');
+        listDiv.className = 'space-y-1 flex-1 mt-1 overflow-hidden';
 
-        dayEvents.slice(0, 3).forEach(ev => {
+        dayEvents.forEach(ev => {
+          const badge = document.createElement('div');
           const isCancel = ev.status === 'cancelled';
           const disClass = getDisciplineClass(ev.discipline);
-          const evDiv = document.createElement('div');
-          
-          // 簡化節數文字：Section 1 -> Sec 1
-          const secShort = (ev.section || '').replace(/Section/i, 'Sec').replace(/\s*Cancel/i, '').trim();
+          let sec = (ev.section || '').replace(/Section\s*/i, 'S');
 
-          evDiv.className = `p-1 rounded border text-[10px] leading-tight truncate transition select-none ${disClass} ${
-            isCancel ? 'opacity-50 line-through bg-slate-100 border-slate-300' : 'hover:ring-1 hover:ring-slate-400'
-          }`;
-          
-          evDiv.title = `${ev.client} (${ev.staff}) - ${ev.section} [${ev.startTime}-${ev.endTime}]`;
-          evDiv.innerHTML = `<span class="font-bold">${ev.startTime}</span> ${ev.client} (${ev.staff.split(' ')[0]})${secShort ? ` · <span class="font-semibold">${secShort}</span>` : ''}${isCancel ? ' <span class="no-underline text-rose-600 font-bold">[取消]</span>' : ''}`;
-
-          evDiv.onclick = (e) => {
+          badge.className = `p-1 rounded border text-[10px] truncate leading-tight ${disClass} ${isCancel ? 'opacity-50 line-through' : ''}`;
+          badge.innerHTML = `<span class="font-bold">${ev.startTime}</span> ${ev.client} (${ev.staff.split(' ')[0]}) <span class="bg-white/70 px-0.5 rounded text-[9px]">${sec}</span>`;
+          badge.onclick = (e) => {
             e.stopPropagation();
-            openAppointmentModal(ev);
+            openEditModal(ev);
           };
-
-          eventsContainer.appendChild(evDiv);
+          listDiv.appendChild(badge);
         });
 
-        if (dayEvents.length > 3) {
-          const moreDiv = document.createElement('div');
-          moreDiv.className = 'text-[9px] text-slate-500 font-semibold text-center';
-          moreDiv.textContent = `+${dayEvents.length - 3} 節排班`;
-          eventsContainer.appendChild(moreDiv);
-        }
-
-        cell.appendChild(eventsContainer);
-
+        cell.appendChild(listDiv);
         cell.onclick = () => {
-          state.selectedDayDate = curD;
-          renderMonthView();
-          renderMobileDayAgenda(dayEvents, dateStr);
+          openNewModal(dateStr);
         };
-
-        monthGrid.appendChild(cell);
+        grid.appendChild(cell);
       }
-
-      const selectedDayEvents = filtered.filter(a => a.date === selectedStr);
-      renderMobileDayAgenda(selectedDayEvents, selectedStr);
-    }
-
-    function renderMobileDayAgenda(events, dateStr) {
-      const title = document.getElementById('mobileAgendaTitle');
-      const list = document.getElementById('mobileAgendaList');
-      title.textContent = `${dateStr} 排班日程 (${events.length} 節)`;
-      list.innerHTML = '';
-
-      if (events.length === 0) {
-        list.innerHTML = `<div class="text-slate-400 py-3 text-center text-xs">該日尚無任何治療預約</div>`;
-        return;
-      }
-
-      events.forEach(ev => {
-        const item = document.createElement('div');
-        const isCancel = ev.status === 'cancelled';
-        item.className = `p-2 rounded-lg border flex items-center justify-between text-xs ${getDisciplineClass(ev.discipline)} ${isCancel ? 'opacity-60 line-through' : ''}`;
-        item.innerHTML = `
-          <div>
-            <div class="font-bold">${ev.client} · ${ev.section} ${isCancel ? '(已取消)' : ''}</div>
-            <div class="text-[11px] text-slate-600">${ev.startTime}-${ev.endTime} · ${ev.staff} (${ev.service})</div>
-          </div>
-          <button class="px-2 py-1 bg-white border rounded text-[11px] font-semibold text-slate-700 shadow-2xs">管理</button>
-        `;
-        item.querySelector('button').onclick = () => openAppointmentModal(ev);
-        list.appendChild(item);
-      });
     }
 
     function renderWeekView() {
-      const headerRow = document.getElementById('weekHeaderRow');
+      const header = document.getElementById('weekHeaderRow');
       const tbody = document.getElementById('weekTimeTableBody');
-      headerRow.innerHTML = '<th class="p-2 border-r border-slate-200 w-20 text-center sticky left-0 bg-slate-50 z-10">時段</th>';
+      header.innerHTML = '<th class="p-2 border-r w-20 text-center">時段</th>';
       tbody.innerHTML = '';
 
       const curr = new Date(state.currentDate);
-      const dayOfWeek = curr.getDay();
-      const startOfWeek = new Date(curr);
-      startOfWeek.setDate(curr.getDate() - dayOfWeek);
-
-      const weekDates = [];
-      const weekdays = ['日', '一', '二', '三', '四', '五', '六'];
+      const start = new Date(curr.setDate(curr.getDate() - curr.getDay()));
+      const days = [];
 
       for (let i = 0; i < 7; i++) {
-        const d = new Date(startOfWeek);
-        d.setDate(startOfWeek.getDate() + i);
-        weekDates.push(d);
+        const d = new Date(start);
+        d.setDate(start.getDate() + i);
+        days.push(d);
         const th = document.createElement('th');
-        th.className = 'p-2 text-center border-r border-slate-200 font-semibold';
-        th.innerHTML = `<div>週${weekdays[i]}</div><div class="text-[10px] text-slate-500">${d.getMonth() + 1}/${d.getDate()}</div>`;
-        headerRow.appendChild(th);
+        th.className = 'p-2 text-center border-r font-semibold';
+        th.innerHTML = `<div>週${['日','一','二','三','四','五','六'][i]}</div><div class="text-[10px] text-slate-400">${d.getMonth()+1}/${d.getDate()}</div>`;
+        header.appendChild(th);
       }
 
-      const filtered = getFilteredAppointments();
-      const hours = ['09:00', '10:00', '11:00', '12:00', '13:00', '14:00', '15:00', '16:00', '17:00'];
-
-      hours.forEach(hr => {
+      ['09:00','10:00','11:00','12:00','14:00','15:00','16:00'].forEach(hr => {
         const tr = document.createElement('tr');
-        tr.className = 'border-b border-slate-100 hover:bg-slate-50/50';
-        tr.innerHTML = `<td class="p-2 border-r border-slate-200 font-mono text-center sticky left-0 bg-white font-bold text-slate-500">${hr}</td>`;
-
-        weekDates.forEach(d => {
+        tr.className = 'border-b';
+        tr.innerHTML = `<td class="p-2 border-r font-mono text-center font-bold text-slate-500">${hr}</td>`;
+        days.forEach(d => {
           const dStr = formatDate(d);
           const td = document.createElement('td');
-          td.className = 'p-1.5 border-r border-slate-100 align-top min-w-[110px]';
-
-          const slotEvents = filtered.filter(ev => {
-            if (ev.date !== dStr) return false;
-            return parseInt(ev.startTime.split(':')[0], 10) === parseInt(hr.split(':')[0], 10);
-          });
-
-          slotEvents.forEach(ev => {
-            const isCancel = ev.status === 'cancelled';
+          td.className = 'p-1 border-r min-w-[100px] align-top';
+          const evs = getFilteredList().filter(a => a.date === dStr && a.startTime.startsWith(hr.split(':')[0]));
+          evs.forEach(ev => {
             const card = document.createElement('div');
-            card.className = `p-1 mb-1 rounded border text-[10px] cursor-pointer ${getDisciplineClass(ev.discipline)} ${isCancel ? 'opacity-50 line-through' : ''}`;
-            card.innerHTML = `<div class="font-bold">${ev.client} (${ev.section})</div><div>${ev.startTime} ${ev.staff.split(' ')[0]}</div>`;
-            card.onclick = () => openAppointmentModal(ev);
+            card.className = `p-1 mb-1 rounded border text-[10px] cursor-pointer ${getDisciplineClass(ev.discipline)}`;
+            card.textContent = `${ev.client} (${ev.section})`;
+            card.onclick = () => openEditModal(ev);
             td.appendChild(card);
           });
-
           tr.appendChild(td);
         });
-
         tbody.appendChild(tr);
       });
     }
@@ -1275,75 +576,21 @@
     function renderTableView() {
       const tbody = document.getElementById('scheduleTableBody');
       tbody.innerHTML = '';
-      const list = getFilteredAppointments();
-      list.sort((a, b) => a.date.localeCompare(b.date) || a.startTime.localeCompare(b.startTime));
-
-      list.forEach(ev => {
+      getFilteredList().forEach(ev => {
         const tr = document.createElement('tr');
-        const isCancel = ev.status === 'cancelled';
-        tr.className = `hover:bg-slate-50 transition ${isCancel ? 'bg-rose-50/30' : ''}`;
+        tr.className = 'hover:bg-slate-50';
         tr.innerHTML = `
           <td class="px-3 py-2 font-mono">${ev.date}</td>
           <td class="px-3 py-2 font-mono font-bold">${ev.startTime}-${ev.endTime}</td>
           <td class="px-3 py-2 font-bold">${ev.client}</td>
-          <td class="px-3 py-2"><span class="px-2 py-0.5 rounded text-[10px] font-bold ${getDisciplineClass(ev.discipline)}">${ev.discipline}</span></td>
+          <td class="px-3 py-2"><span class="px-2 py-0.5 rounded text-[10px] font-bold border ${getDisciplineClass(ev.discipline)}">${ev.discipline}</span></td>
           <td class="px-3 py-2">${ev.service}</td>
           <td class="px-3 py-2">${ev.section}</td>
-          <td class="px-3 py-2 font-medium">${ev.staff}</td>
-          <td class="px-3 py-2 font-semibold ${isCancel ? 'text-rose-600' : 'text-emerald-600'}">${isCancel ? '已取消' : '正常'}</td>
-          <td class="px-3 py-2 text-slate-500 font-mono text-[10px]">${ev.updatedBy || '系統'}</td>
-          <td class="px-3 py-2 text-right space-x-1 whitespace-nowrap">
-            <button class="btn-edit-table px-2 py-1 bg-slate-100 hover:bg-slate-200 rounded font-semibold text-[11px]">編輯</button>
-            ${isCancel ? `
-              <button class="btn-restore-table px-2 py-1 bg-emerald-50 text-emerald-700 hover:bg-emerald-100 border border-emerald-200 rounded font-semibold text-[11px]">恢復</button>
-            ` : `
-              <button class="btn-cancel-table px-2 py-1 bg-rose-50 text-rose-700 hover:bg-rose-100 border border-rose-200 rounded font-semibold text-[11px]">取消</button>
-            `}
-          </td>
+          <td class="px-3 py-2">${ev.staff}</td>
+          <td class="px-3 py-2 font-semibold ${ev.status==='cancelled'?'text-rose-600':'text-emerald-600'}">${ev.status==='cancelled'?'已取消':'正常'}</td>
+          <td class="px-3 py-2 text-right"><button class="px-2 py-0.5 bg-slate-100 rounded">編輯</button></td>
         `;
-
-        tr.querySelector('.btn-edit-table').onclick = () => openAppointmentModal(ev);
-
-        const btnCancel = tr.querySelector('.btn-cancel-table');
-        if (btnCancel) {
-          btnCancel.onclick = async () => {
-            if (!checkPermission()) return;
-            const reason = prompt(`請輸入【${ev.client}】取消 / 請假原因：`, '身體不適 / 請假');
-            if (reason === null) return;
-            ev.status = 'cancelled';
-            ev.cancelReason = reason || '手動取消';
-            if (!ev.section.includes('Cancel')) ev.section = ev.section + ' Cancel';
-            ev.updatedBy = state.currentRole;
-            ev.updatedAt = new Date().toISOString();
-            addAuditRecord({
-              action: '取消排班', client: ev.client, staff: ev.staff,
-              diff: `${ev.date} ${ev.startTime}-${ev.endTime} 原因：${ev.cancelReason}`
-            });
-            await syncToFirebaseRemote();
-            renderCurrentView();
-            showToast(`已將 ${ev.client} 排班標記為取消`, 'warning');
-          };
-        }
-
-        const btnRestore = tr.querySelector('.btn-restore-table');
-        if (btnRestore) {
-          btnRestore.onclick = async () => {
-            if (!checkPermission()) return;
-            ev.status = 'active';
-            ev.cancelReason = '';
-            ev.section = ev.section.replace(/\s*Cancel/gi, '').trim();
-            ev.updatedBy = state.currentRole;
-            ev.updatedAt = new Date().toISOString();
-            addAuditRecord({
-              action: '恢復排班', client: ev.client, staff: ev.staff,
-              diff: `${ev.date} ${ev.startTime}-${ev.endTime} 恢復正常出席`
-            });
-            await syncToFirebaseRemote();
-            renderCurrentView();
-            showToast(`已恢復 ${ev.client} 之排班為正常出席`, 'success');
-          };
-        }
-
+        tr.querySelector('button').onclick = () => openEditModal(ev);
         tbody.appendChild(tr);
       });
     }
@@ -1352,29 +599,14 @@
       const grid = document.getElementById('yearMatrixGrid');
       grid.innerHTML = '';
       const y = state.currentDate.getFullYear();
-      document.getElementById('yearMatrixTitle').textContent = `${y} 全年度 12 個月治療總覽矩陣`;
-
       for (let m = 0; m < 12; m++) {
-        const monthEvents = state.appointments.filter(a => {
-          const ad = new Date(a.date);
-          return ad.getFullYear() === y && ad.getMonth() === m;
-        });
-
-        const activeCount = monthEvents.filter(a => a.status !== 'cancelled').length;
-        const cancelCount = monthEvents.filter(a => a.status === 'cancelled').length;
-
+        const count = state.appointments.filter(a => {
+          const d = new Date(a.date);
+          return d.getFullYear() === y && d.getMonth() === m;
+        }).length;
         const card = document.createElement('div');
-        card.className = 'bg-slate-50 border border-slate-200 rounded-xl p-3 hover:border-slate-400 cursor-pointer transition';
-        card.innerHTML = `
-          <div class="flex items-center justify-between font-bold text-slate-900 border-b border-slate-200 pb-1.5 mb-2">
-            <span>${y}年 ${m + 1}月</span>
-            <span class="text-xs px-2 py-0.5 bg-slate-900 text-white rounded-full">${monthEvents.length} 節</span>
-          </div>
-          <div class="space-y-1 text-xs text-slate-600">
-            <div class="flex justify-between"><span>正常出席:</span><strong class="text-emerald-600">${activeCount}</strong></div>
-            <div class="flex justify-between"><span>取消請假:</span><strong class="text-rose-600">${cancelCount}</strong></div>
-          </div>
-        `;
+        card.className = 'p-3 bg-slate-50 border rounded-xl hover:border-slate-400 cursor-pointer';
+        card.innerHTML = `<div class="font-bold flex justify-between"><span>${y}年 ${m+1}月</span><span class="text-xs bg-slate-800 text-white px-2 py-0.5 rounded-full">${count} 節</span></div>`;
         card.onclick = () => {
           state.currentDate = new Date(y, m, 1);
           switchView('month');
@@ -1385,569 +617,200 @@
 
     function switchView(v) {
       state.currentView = v;
-      ['Month', 'Week', 'Table', 'Year'].forEach(name => {
-        const el = document.getElementById(`viewContainer${name}`);
-        const btn = document.getElementById(`viewBtn${name}`);
-        if (name.toLowerCase() === v) {
-          el.classList.remove('hidden');
-          btn.className = 'px-3 py-1 rounded-md text-slate-900 bg-white shadow-2xs font-bold transition flex-1 md:flex-initial text-center';
-        } else {
-          el.classList.add('hidden');
-          btn.className = 'px-3 py-1 rounded-md text-slate-600 hover:text-slate-900 transition flex-1 md:flex-initial text-center';
-        }
+      ['Month','Week','Table','Year'].forEach(name => {
+        document.getElementById(`viewContainer${name}`).classList.toggle('hidden', name.toLowerCase() !== v);
+        document.getElementById(`viewBtn${name}`).className = (name.toLowerCase() === v)
+          ? 'px-3 py-1 rounded-md text-slate-900 bg-white shadow-2xs font-bold transition'
+          : 'px-3 py-1 rounded-md text-slate-600 hover:text-slate-900 transition';
       });
       renderCurrentView();
     }
 
-    function openAppointmentModal(app = null, defaultDate = null) {
-      const form = document.getElementById('appointmentForm');
-      form.reset();
-
-      const btnDelete = document.getElementById('btnDeleteEvent');
-      const btnQuickCancel = document.getElementById('btnQuickCancelEvent');
-      const btnQuickRestore = document.getElementById('btnQuickRestoreEvent');
-
-      if (app) {
-        document.getElementById('formEventId').value = app.id;
-        document.getElementById('modalTitle').innerHTML = `<i class="fa-solid fa-pen text-sky-400 mr-1.5"></i>編輯排班 - ${app.client}`;
-        document.getElementById('formClientName').value = app.client;
-        document.getElementById('formDate').value = app.date;
-        document.getElementById('formDiscipline').value = app.discipline;
-        document.getElementById('formService').value = app.service;
-        document.getElementById('formStaff').value = app.staff;
-        document.getElementById('formSection').value = app.section;
-        document.getElementById('formStartTime').value = app.startTime;
-        document.getElementById('formEndTime').value = app.endTime;
-        document.getElementById('formNotes').value = app.notes || '';
-
-        btnDelete.classList.remove('hidden');
-
-        if (app.status === 'cancelled') {
-          document.querySelector('input[name="formStatusRadio"][value="cancelled"]').checked = true;
-          document.getElementById('cancelReasonContainer').classList.remove('hidden');
-          document.getElementById('formCancelReason').value = app.cancelReason || '';
-          btnQuickCancel.classList.add('hidden');
-          btnQuickRestore.classList.remove('hidden');
-        } else {
-          document.querySelector('input[name="formStatusRadio"][value="active"]').checked = true;
-          document.getElementById('cancelReasonContainer').classList.add('hidden');
-          btnQuickCancel.classList.remove('hidden');
-          btnQuickRestore.classList.add('hidden');
-        }
-      } else {
-        document.getElementById('formEventId').value = '';
-        document.getElementById('modalTitle').innerHTML = `<i class="fa-solid fa-calendar-plus text-sky-400 mr-1.5"></i>新增治療預約`;
-        document.getElementById('formDate').value = defaultDate || formatDate(state.currentDate);
-        document.getElementById('formStartTime').value = '09:30';
-        document.getElementById('formEndTime').value = '10:30';
-        document.getElementById('formDiscipline').value = 'PT';
-        document.getElementById('formService').value = 'PTA (8 Sessions)';
-        document.getElementById('formStaff').value = 'PTA 珊';
-        document.getElementById('formSection').value = 'Section 1';
-        document.querySelector('input[name="formStatusRadio"][value="active"]').checked = true;
-        document.getElementById('cancelReasonContainer').classList.add('hidden');
-
-        btnDelete.classList.add('hidden');
-        btnQuickCancel.classList.add('hidden');
-        btnQuickRestore.classList.add('hidden');
-      }
-
-      checkHolidayNotice(document.getElementById('formDate').value);
+    function openEditModal(ev) {
+      document.getElementById('formEventId').value = ev.id;
+      document.getElementById('formClientName').value = ev.client;
+      document.getElementById('formDate').value = ev.date;
+      document.getElementById('formDiscipline').value = ev.discipline;
+      document.getElementById('formService').value = ev.service;
+      document.getElementById('formStaff').value = ev.staff;
+      document.getElementById('formSection').value = ev.section;
+      document.getElementById('formStartTime').value = ev.startTime;
+      document.getElementById('formEndTime').value = ev.endTime;
+      document.getElementById('btnDeleteEvent').classList.remove('hidden');
       document.getElementById('appointmentModal').classList.remove('hidden');
     }
 
-    function checkHolidayNotice(dateStr) {
-      const notice = document.getElementById('formHolidayNotice');
-      const text = document.getElementById('formHolidayText');
-      if (HK_HOLIDAYS[dateStr]) {
-        notice.classList.remove('hidden');
-        text.textContent = `提醒：此日期為香港公眾假期【${HK_HOLIDAYS[dateStr]}】`;
-      } else {
-        notice.classList.add('hidden');
-      }
+    function openNewModal(dateStr) {
+      document.getElementById('appointmentForm').reset();
+      document.getElementById('formEventId').value = '';
+      document.getElementById('formDate').value = dateStr || formatDate(state.currentDate);
+      document.getElementById('btnDeleteEvent').classList.add('hidden');
+      document.getElementById('appointmentModal').classList.remove('hidden');
     }
 
-    document.getElementById('formDate').onchange = () => {
-      checkHolidayNotice(document.getElementById('formDate').value);
-    };
-
-    document.querySelectorAll('input[name="formStatusRadio"]').forEach(r => {
-      r.onchange = () => {
-        const isCancel = document.querySelector('input[name="formStatusRadio"]:checked').value === 'cancelled';
-        document.getElementById('cancelReasonContainer').classList.toggle('hidden', !isCancel);
-      };
-    });
-
-    // 專屬【取消排班】按鈕
-    document.getElementById('btnQuickCancelEvent').onclick = async () => {
-      if (!checkPermission()) return;
-      const id = document.getElementById('formEventId').value;
-      if (!id) return;
-      const client = document.getElementById('formClientName').value;
-      const reason = prompt(`請輸入【${client}】取消 / 請假原因：`, '身體不適 / 請假');
-      if (reason === null) return;
-
-      const app = state.appointments.find(a => a.id === id);
-      if (app) {
-        app.status = 'cancelled';
-        app.cancelReason = reason || '手動標記取消';
-        if (!app.section.includes('Cancel')) app.section = app.section + ' Cancel';
-        app.updatedBy = state.currentRole;
-        app.updatedAt = new Date().toISOString();
-
-        addAuditRecord({
-          action: '取消排班', client: app.client, staff: app.staff,
-          diff: `${app.date} ${app.startTime}-${app.endTime} (${app.section}) 原因：${app.cancelReason}`
-        });
-
-        await syncToFirebaseRemote();
-        document.getElementById('appointmentModal').classList.add('hidden');
-        renderCurrentView();
-        showToast(`已將 ${app.client} 之排班標記為取消`, 'warning');
-      }
-    };
-
-    // 專屬【恢復排班】按鈕
-    document.getElementById('btnQuickRestoreEvent').onclick = async () => {
-      if (!checkPermission()) return;
-      const id = document.getElementById('formEventId').value;
-      if (!id) return;
-
-      const app = state.appointments.find(a => a.id === id);
-      if (app) {
-        app.status = 'active';
-        app.cancelReason = '';
-        app.section = app.section.replace(/\s*Cancel/gi, '').trim();
-        app.updatedBy = state.currentRole;
-        app.updatedAt = new Date().toISOString();
-
-        addAuditRecord({
-          action: '恢復排班', client: app.client, staff: app.staff,
-          diff: `${app.date} ${app.startTime}-${app.endTime} (${app.section}) 恢復正常出席`
-        });
-
-        await syncToFirebaseRemote();
-        document.getElementById('appointmentModal').classList.add('hidden');
-        renderCurrentView();
-        showToast(`已恢復 ${app.client} 之排班為正常出席`, 'success');
-      }
-    };
-
-    // 儲存表單 (Jo Jo 權限保護)
-    document.getElementById('appointmentForm').onsubmit = async (e) => {
+    document.getElementById('appointmentForm').onsubmit = (e) => {
       e.preventDefault();
-      if (!checkPermission()) return;
-
       const id = document.getElementById('formEventId').value;
-      const client = document.getElementById('formClientName').value.trim();
-      const date = document.getElementById('formDate').value;
-      const discipline = document.getElementById('formDiscipline').value;
-      const service = document.getElementById('formService').value.trim();
-      const staff = document.getElementById('formStaff').value;
-      let section = document.getElementById('formSection').value.trim();
-      const startTime = document.getElementById('formStartTime').value;
-      const endTime = document.getElementById('formEndTime').value;
-      const status = document.querySelector('input[name="formStatusRadio"]:checked').value;
-      const cancelReason = document.getElementById('formCancelReason').value.trim();
-      const notes = document.getElementById('formNotes').value.trim();
-
-      if (status === 'cancelled' && !section.includes('Cancel')) {
-        section = section + ' Cancel';
-      }
-
-      const newEvent = {
+      const data = {
         id: id || ('mwc-' + Date.now()),
-        client, date, discipline, service, staff, section, startTime, endTime,
-        status, cancelReason, notes,
-        updatedBy: state.currentRole,
-        updatedAt = new Date().toISOString()
+        client: document.getElementById('formClientName').value,
+        date: document.getElementById('formDate').value,
+        discipline: document.getElementById('formDiscipline').value,
+        service: document.getElementById('formService').value,
+        staff: document.getElementById('formStaff').value,
+        section: document.getElementById('formSection').value,
+        startTime: document.getElementById('formStartTime').value,
+        endTime: document.getElementById('formEndTime').value,
+        status: 'active'
       };
 
       if (id) {
         const idx = state.appointments.findIndex(a => a.id === id);
-        if (idx !== -1) {
-          state.appointments[idx] = newEvent;
-          addAuditRecord({
-            action: '更新排班', client, staff,
-            diff: `${date} ${startTime}-${endTime} (${section})`
-          });
-        }
+        if (idx !== -1) state.appointments[idx] = data;
       } else {
-        state.appointments.push(newEvent);
-        addAuditRecord({
-          action: '新增排班', client, staff,
-          diff: `${date} ${startTime}-${endTime} · ${section}`
-        });
+        state.appointments.push(data);
       }
 
-      await syncToFirebaseRemote();
+      saveLocal();
+      syncFirebase();
       document.getElementById('appointmentModal').classList.add('hidden');
       renderCurrentView();
-      showToast(id ? '排班資料已更新' : '已成功新增排班', 'success');
+      showToast('排班預約已儲存');
     };
 
-    // 刪除排班
-    document.getElementById('btnDeleteEvent').onclick = async () => {
-      if (!checkPermission()) return;
+    document.getElementById('btnDeleteEvent').onclick = () => {
       const id = document.getElementById('formEventId').value;
-      if (!id) return;
-      if (!confirm('確定要永久刪除此排班紀錄嗎？')) return;
-
-      const ev = state.appointments.find(a => a.id === id);
       state.appointments = state.appointments.filter(a => a.id !== id);
-      if (ev) {
-        addAuditRecord({
-          action: '刪除排班', client: ev.client, staff: ev.staff,
-          diff: `已刪除 ${ev.date} ${ev.startTime}-${ev.endTime} 之排班`
-        });
-      }
-      await syncToFirebaseRemote();
+      saveLocal();
+      syncFirebase();
       document.getElementById('appointmentModal').classList.add('hidden');
       renderCurrentView();
-      showToast('排班已刪除', 'warning');
+      showToast('排班已刪除');
     };
 
-    // 連續服務排班送出
-    document.getElementById('recurForm').onsubmit = async (e) => {
-      e.preventDefault();
-      if (!checkPermission()) return;
-
-      const client = document.getElementById('recurClientName').value.trim();
-      const discipline = document.getElementById('recurDiscipline').value;
-      const service = document.getElementById('recurService').value.trim();
-      const staff = document.getElementById('recurStaff').value;
-      const totalSessions = parseInt(document.getElementById('recurTotalSessions').value, 10);
-      const startDate = new Date(document.getElementById('recurStartDate').value);
-      const startTime = document.getElementById('recurStartTime').value;
-      const endTime = document.getElementById('recurEndTime').value;
-      const skipHolidays = document.getElementById('recurSkipHolidays').checked;
-
-      const checkedDays = Array.from(document.querySelectorAll('input[name="recurDayOfWeek"]:checked')).map(el => parseInt(el.value, 10));
-      if (checkedDays.length === 0) {
-        showToast('請至少勾選一個每週重複治療日', 'warning');
-        return;
-      }
-
-      let generated = 0;
-      let curD = new Date(startDate);
-      let sessionIndex = 1;
-
-      while (generated < totalSessions) {
-        const dayOfWeek = curD.getDay();
-        const dStr = formatDate(curD);
-
-        if (checkedDays.includes(dayOfWeek)) {
-          if (!(skipHolidays && HK_HOLIDAYS[dStr])) {
-            state.appointments.push({
-              id: 'mwc-rec-' + Date.now() + '-' + generated,
-              client, discipline, service, staff,
-              date: dStr, startTime, endTime,
-              section: `Section ${sessionIndex}`,
-              status: 'active',
-              cancelReason: '',
-              notes: '連續服務排班產生',
-              updatedBy: state.currentRole,
-              updatedAt: new Date().toISOString()
-            });
-            sessionIndex++;
-            generated++;
-          }
-        }
-        curD.setDate(curD.getDate() + 1);
-      }
-
-      addAuditRecord({
-        action: '批次連續服務', client, staff,
-        diff: `已順利產生 ${generated} 節治療排班`
-      });
-
-      await syncToFirebaseRemote();
-      document.getElementById('recurModal').classList.add('hidden');
-      renderCurrentView();
-      showToast(`成功批次產生 ${generated} 節排班！`, 'success');
-    };
-
-    // 個案節數核對表
-    function renderClientAuditReport() {
-      const tbody = document.getElementById('clientAuditTableBody');
-      tbody.innerHTML = '';
-      const clientMap = {};
-      state.appointments.forEach(app => {
-        if (!clientMap[app.client]) {
-          clientMap[app.client] = { client: app.client, services: new Set(), total: 0, active: 0, cancelled: 0, dates: [] };
-        }
-        clientMap[app.client].services.add(app.service);
-        clientMap[app.client].total++;
-        if (app.status === 'cancelled') clientMap[app.client].cancelled++;
-        else clientMap[app.client].active++;
-        clientMap[app.client].dates.push(app.date);
-      });
-
-      Object.values(clientMap).forEach(item => {
-        item.dates.sort();
-        const minD = item.dates[0] || '-';
-        const maxD = item.dates[item.dates.length - 1] || '-';
-        const tr = document.createElement('tr');
-        tr.className = 'hover:bg-slate-50';
-        tr.innerHTML = `
-          <td class="p-2 font-bold">${item.client}</td>
-          <td class="p-2 text-slate-600">${Array.from(item.services).join(', ')}</td>
-          <td class="p-2 text-center font-bold font-mono">${item.total}</td>
-          <td class="p-2 text-center text-emerald-700 font-bold font-mono">${item.active}</td>
-          <td class="p-2 text-center text-rose-600 font-bold font-mono">${item.cancelled}</td>
-          <td class="p-2 font-mono text-[11px] text-slate-500">${minD} ~ ${maxD}</td>
-          <td class="p-2"><span class="px-2 py-0.5 rounded text-[10px] font-semibold bg-emerald-50 text-emerald-800 border border-emerald-200">✓ 核對正常</span></td>
-        `;
-        tbody.appendChild(tr);
-      });
-    }
-
-    // 統計過濾輔助器
-    function getStatsAppointmentsByRange(range) {
-      const y = state.currentDate.getFullYear();
-      const m = state.currentDate.getMonth();
-      return state.appointments.filter(a => {
-        const d = new Date(a.date);
-        if (range === 'month') return d.getFullYear() === y && d.getMonth() === m;
-        if (range === 'year') return d.getFullYear() === y;
-        return true;
-      });
-    }
-
-    // 📊 功能鍵 1：職員總個案人次統計 (重複只計一次)
-    function renderStatsClients() {
-      const range = document.getElementById('statsClientsRange').value;
-      const list = getStatsAppointmentsByRange(range);
-      const staffMap = {};
-
-      list.forEach(a => {
-        if (!staffMap[a.staff]) staffMap[a.staff] = new Set();
-        staffMap[a.staff].add(a.client);
-      });
-
-      const tbody = document.getElementById('statsClientsTableBody');
+    function renderStats(tab) {
+      state.currentStatsTab = tab;
+      const thead = document.getElementById('statsThead');
+      const tbody = document.getElementById('statsTbody');
       tbody.innerHTML = '';
 
-      Object.keys(staffMap).sort().forEach(staff => {
-        const clients = Array.from(staffMap[staff]);
-        const tr = document.createElement('tr');
-        tr.className = 'hover:bg-slate-50';
-        tr.innerHTML = `
-          <td class="p-2 font-bold text-slate-900">${staff}</td>
-          <td class="p-2 text-center font-mono font-bold text-teal-800 text-sm">${clients.length} 人</td>
-          <td class="p-2 text-slate-600">${clients.join('、 ')}</td>
-        `;
-        tbody.appendChild(tr);
-      });
-    }
-
-    document.getElementById('btnExportStatsClientsExcel').onclick = () => {
-      const range = document.getElementById('statsClientsRange').value;
-      const list = getStatsAppointmentsByRange(range);
       const staffMap = {};
-      list.forEach(a => {
-        if (!staffMap[a.staff]) staffMap[a.staff] = new Set();
-        staffMap[a.staff].add(a.client);
-      });
-
-      let csv = "\uFEFF負責職員,總個案人次(去重),個案名單\n";
-      Object.keys(staffMap).sort().forEach(staff => {
-        const clients = Array.from(staffMap[staff]);
-        csv += `"${staff}","${clients.length}","${clients.join('; ')}"\n`;
-      });
-      downloadCSV(csv, `MWC_職員總個案人次統計_${range}.csv`);
-    };
-
-    // 📈 功能鍵 2：職員總服務節數統計
-    function renderStatsSessions() {
-      const range = document.getElementById('statsSessionsRange').value;
-      const list = getStatsAppointmentsByRange(range);
-      const staffMap = {};
-
-      list.forEach(a => {
-        if (!staffMap[a.staff]) staffMap[a.staff] = { total: 0, active: 0, cancelled: 0 };
-        staffMap[a.staff].total++;
-        if (a.status === 'cancelled') staffMap[a.staff].cancelled++;
-        else staffMap[a.staff].active++;
-      });
-
-      const tbody = document.getElementById('statsSessionsTableBody');
-      tbody.innerHTML = '';
-
-      Object.keys(staffMap).sort().forEach(staff => {
-        const item = staffMap[staff];
-        const tr = document.createElement('tr');
-        tr.className = 'hover:bg-slate-50';
-        tr.innerHTML = `
-          <td class="p-2 font-bold text-slate-900">${staff}</td>
-          <td class="p-2 text-center font-mono font-bold text-emerald-700">${item.active}</td>
-          <td class="p-2 text-center font-mono font-bold text-rose-600">${item.cancelled}</td>
-          <td class="p-2 text-center font-mono font-bold text-slate-900 text-sm">${item.total}</td>
-        `;
-        tbody.appendChild(tr);
-      });
-    }
-
-    document.getElementById('btnExportStatsSessionsExcel').onclick = () => {
-      const range = document.getElementById('statsSessionsRange').value;
-      const list = getStatsAppointmentsByRange(range);
-      const staffMap = {};
-      list.forEach(a => {
-        if (!staffMap[a.staff]) staffMap[a.staff] = { total: 0, active: 0, cancelled: 0 };
-        staffMap[a.staff].total++;
-        if (a.status === 'cancelled') staffMap[a.staff].cancelled++;
-        else staffMap[a.staff].active++;
-      });
-
-      let csv = "\uFEFF負責職員,有效完成節數,取消請假節數,總排定節數\n";
-      Object.keys(staffMap).sort().forEach(staff => {
-        const item = staffMap[staff];
-        csv += `"${staff}","${item.active}","${item.cancelled}","${item.total}"\n`;
-      });
-      downloadCSV(csv, `MWC_職員總節數統計_${range}.csv`);
-    };
-
-    // 💰 功能鍵 3：職員總收入統計
-    function renderStatsRevenue() {
-      const range = document.getElementById('statsRevenueRange').value;
-      const rate = parseFloat(document.getElementById('baseRateInput').value) || 0;
-      const list = getStatsAppointmentsByRange(range);
-      const staffMap = {};
-
-      list.forEach(a => {
-        if (a.status !== 'cancelled') {
-          staffMap[a.staff] = (staffMap[a.staff] || 0) + 1;
-        }
-      });
-
-      const tbody = document.getElementById('statsRevenueTableBody');
-      tbody.innerHTML = '';
-
-      Object.keys(staffMap).sort().forEach(staff => {
-        const count = staffMap[staff];
-        const rev = count * rate;
-        const tr = document.createElement('tr');
-        tr.className = 'hover:bg-slate-50';
-        tr.innerHTML = `
-          <td class="p-2 font-bold text-slate-900">${staff}</td>
-          <td class="p-2 text-center font-bold text-emerald-700">${count} 節</td>
-          <td class="p-2 text-right font-bold text-emerald-900">$${rev.toLocaleString('en-US')}</td>
-        `;
-        tbody.appendChild(tr);
-      });
-    }
-
-    document.getElementById('btnExportStatsRevenueExcel').onclick = () => {
-      const range = document.getElementById('statsRevenueRange').value;
-      const rate = parseFloat(document.getElementById('baseRateInput').value) || 0;
-      const list = getStatsAppointmentsByRange(range);
-      const staffMap = {};
-      list.forEach(a => {
-        if (a.status !== 'cancelled') {
-          staffMap[a.staff] = (staffMap[a.staff] || 0) + 1;
-        }
-      });
-
-      let csv = "\uFEFF負責職員,完成節數,每節基準單價,總收入(HKD)\n";
-      Object.keys(staffMap).sort().forEach(staff => {
-        const count = staffMap[staff];
-        const rev = count * rate;
-        csv += `"${staff}","${count}","${rate}","${rev}"\n`;
-      });
-      downloadCSV(csv, `MWC_職員總收入統計_${range}.csv`);
-    };
-
-    function downloadCSV(csv, filename) {
-      const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = filename;
-      a.click();
-    }
-
-    // 匯出主排班 CSV
-    document.getElementById('btnExportCSV').onclick = () => {
-      let csv = "\uFEFF日期,開始時間,結束時間,個案姓名,專職部別,服務類別,節數進度,負責職員,狀態,取消原因,備註\n";
       state.appointments.forEach(a => {
-        csv += `"${a.date}","${a.startTime}","${a.endTime}","${a.client}","${a.discipline}","${a.service}","${a.section}","${a.staff}","${a.status}","${a.cancelReason||''}","${a.notes||''}"\n`;
+        if (!staffMap[a.staff]) staffMap[a.staff] = { clients: new Set(), active: 0, cancel: 0, total: 0, revenue: 0 };
+        const s = staffMap[a.staff];
+        s.clients.add(a.client);
+        s.total++;
+        if (a.status === 'cancelled') s.cancel++;
+        else {
+          s.active++;
+          const price = a.discipline === 'ST' ? 500 : (a.service && a.service.includes('PTA') ? 380 : 650);
+          s.revenue += price;
+        }
       });
-      downloadCSV(csv, `MWC_治療服務排班表_${formatDate(new Date())}.csv`);
-    };
 
-    // 監聽統計範圍變更
-    document.getElementById('statsClientsRange').onchange = renderStatsClients;
-    document.getElementById('statsSessionsRange').onchange = renderStatsSessions;
-    document.getElementById('statsRevenueRange').onchange = renderStatsRevenue;
-    document.getElementById('baseRateInput').oninput = renderStatsRevenue;
+      if (tab === 'clients') {
+        thead.innerHTML = '<tr><th class="p-2">職員</th><th class="p-2 text-center">個案人次 (不重複)</th><th class="p-2">個案清單</th></tr>';
+        Object.keys(staffMap).forEach(staff => {
+          const s = staffMap[staff];
+          const tr = document.createElement('tr');
+          tr.innerHTML = `<td class="p-2 font-bold">${staff}</td><td class="p-2 text-center font-bold text-amber-700 font-mono">${s.clients.size}</td><td class="p-2 text-slate-500">${Array.from(s.clients).join('、')}</td>`;
+          tbody.appendChild(tr);
+        });
+      } else if (tab === 'sessions') {
+        thead.innerHTML = '<tr><th class="p-2">職員</th><th class="p-2 text-center text-emerald-700">出席節數</th><th class="p-2 text-center text-rose-600">取消節數</th><th class="p-2 text-center">總節數</th></tr>';
+        Object.keys(staffMap).forEach(staff => {
+          const s = staffMap[staff];
+          const tr = document.createElement('tr');
+          tr.innerHTML = `<td class="p-2 font-bold">${staff}</td><td class="p-2 text-center font-bold text-emerald-700 font-mono">${s.active}</td><td class="p-2 text-center font-bold text-rose-600 font-mono">${s.cancel}</td><td class="p-2 text-center font-bold font-mono">${s.total}</td>`;
+          tbody.appendChild(tr);
+        });
+      } else {
+        thead.innerHTML = '<tr><th class="p-2">職員</th><th class="p-2 text-center">計費節數</th><th class="p-2 text-right">預估總收入 (HKD)</th></tr>';
+        Object.keys(staffMap).forEach(staff => {
+          const s = staffMap[staff];
+          const tr = document.createElement('tr');
+          tr.innerHTML = `<td class="p-2 font-bold">${staff}</td><td class="p-2 text-center font-mono">${s.active}</td><td class="p-2 text-right font-bold text-emerald-700 font-mono">$${s.revenue.toLocaleString()}</td>`;
+          tbody.appendChild(tr);
+        });
+      }
+    }
 
-    // 模態框事件綁定
-    document.getElementById('btnOpenStatsClients').onclick = () => {
-      renderStatsClients();
-      document.getElementById('statsClientsModal').classList.remove('hidden');
+    document.getElementById('tabBtnClients').onclick = () => renderStats('clients');
+    document.getElementById('tabBtnSessions').onclick = () => renderStats('sessions');
+    document.getElementById('tabBtnRevenue').onclick = () => renderStats('revenue');
+    document.getElementById('btnOpenStatsModal').onclick = () => {
+      renderStats('clients');
+      document.getElementById('statsModal').classList.remove('hidden');
     };
-    document.getElementById('btnMobileStatsClients').onclick = () => {
-      document.getElementById('mobileMoreDropdown').classList.add('hidden');
-      renderStatsClients();
-      document.getElementById('statsClientsModal').classList.remove('hidden');
-    };
-    document.getElementById('btnCloseStatsClients').onclick = () => document.getElementById('statsClientsModal').classList.add('hidden');
-    document.getElementById('btnCloseStatsClientsFooter').onclick = () => document.getElementById('statsClientsModal').classList.add('hidden');
+    document.getElementById('btnCloseStatsModal').onclick = () => document.getElementById('statsModal').classList.add('hidden');
+    document.getElementById('btnCloseStatsFooter').onclick = () => document.getElementById('statsModal').classList.add('hidden');
 
-    document.getElementById('btnOpenStatsSessions').onclick = () => {
-      renderStatsSessions();
-      document.getElementById('statsSessionsModal').classList.remove('hidden');
-    };
-    document.getElementById('btnMobileStatsSessions').onclick = () => {
-      document.getElementById('mobileMoreDropdown').classList.add('hidden');
-      renderStatsSessions();
-      document.getElementById('statsSessionsModal').classList.remove('hidden');
-    };
-    document.getElementById('btnCloseStatsSessions').onclick = () => document.getElementById('statsSessionsModal').classList.add('hidden');
-    document.getElementById('btnCloseStatsSessionsFooter').onclick = () => document.getElementById('statsSessionsModal').classList.add('hidden');
+    function showToast(msg) {
+      const t = document.getElementById('toast');
+      document.getElementById('toastMsg').textContent = msg;
+      t.classList.remove('translate-y-24','opacity-0');
+      setTimeout(() => t.classList.add('translate-y-24','opacity-0'), 2500);
+    }
 
-    document.getElementById('btnOpenStatsRevenue').onclick = () => {
-      renderStatsRevenue();
-      document.getElementById('statsRevenueModal').classList.remove('hidden');
-    };
-    document.getElementById('btnMobileStatsRevenue').onclick = () => {
-      document.getElementById('mobileMoreDropdown').classList.add('hidden');
-      renderStatsRevenue();
-      document.getElementById('statsRevenueModal').classList.remove('hidden');
-    };
-    document.getElementById('btnCloseStatsRevenue').onclick = () => document.getElementById('statsRevenueModal').classList.add('hidden');
-    document.getElementById('btnCloseStatsRevenueFooter').onclick = () => document.getElementById('statsRevenueModal').classList.add('hidden');
-
-    // 常用視圖切換事件
+    // 控制項事件綁定
     document.getElementById('viewBtnMonth').onclick = () => switchView('month');
     document.getElementById('viewBtnWeek').onclick = () => switchView('week');
     document.getElementById('viewBtnTable').onclick = () => switchView('table');
     document.getElementById('viewBtnYear').onclick = () => switchView('year');
 
-    document.getElementById('btnPrevMonth').onclick = () => { state.currentDate.setMonth(state.currentDate.getMonth() - 1); renderCurrentView(); };
-    document.getElementById('btnNextMonth').onclick = () => { state.currentDate.setMonth(state.currentDate.getMonth() + 1); renderCurrentView(); };
-    document.getElementById('btnPrevYear').onclick = () => { state.currentDate.setFullYear(state.currentDate.getFullYear() - 1); renderCurrentView(); };
-    document.getElementById('btnNextYear').onclick = () => { state.currentDate.setFullYear(state.currentDate.getFullYear() + 1); renderCurrentView(); };
-    document.getElementById('btnToday').onclick = () => { state.currentDate = new Date(); state.selectedDayDate = new Date(); renderCurrentView(); };
+    document.getElementById('btnPrevMonth').onclick = () => { state.currentDate.setMonth(state.currentDate.getMonth()-1); renderCurrentView(); };
+    document.getElementById('btnNextMonth').onclick = () => { state.currentDate.setMonth(state.currentDate.getMonth()+1); renderCurrentView(); };
+    document.getElementById('btnPrevYear').onclick = () => { state.currentDate.setFullYear(state.currentDate.getFullYear()-1); renderCurrentView(); };
+    document.getElementById('btnNextYear').onclick = () => { state.currentDate.setFullYear(state.currentDate.getFullYear()+1); renderCurrentView(); };
+    document.getElementById('btnToday').onclick = () => { state.currentDate = new Date(); renderCurrentView(); };
 
-    const yearSelect = document.getElementById('jumpYearSelect');
-    for (let yr = 2024; yr <= 2032; yr++) {
+    const ySelect = document.getElementById('jumpYearSelect');
+    for (let yr = 2024; yr <= 2030; yr++) {
       const opt = document.createElement('option');
-      opt.value = yr;
+      opt.value = String(yr);
       opt.textContent = `${yr}年`;
-      yearSelect.appendChild(opt);
+      ySelect.appendChild(opt);
     }
-    yearSelect.onchange = (e) => { state.currentDate.setFullYear(parseInt(e.target.value, 10)); renderCurrentView(); };
-    document.getElementById('jumpMonthSelect').onchange = (e) => { state.currentDate.setMonth(parseInt(e.target.value, 10)); renderCurrentView(); };
+    ySelect.onchange = (e) => { 
+      state.currentDate.setFullYear(parseInt(e.target.value, 10)); 
+      renderCurrentView(); 
+    };
 
-    // 專屬部別篩選 (PT:黃, OT:綠, ST:紫)
+    document.getElementById('jumpMonthSelect').onchange = (e) => { 
+      state.currentDate.setMonth(parseInt(e.target.value, 10)); 
+      renderCurrentView(); 
+    };
+
+    // 專屬部別彩色按鈕點擊與動態高亮邏輯
+    function updateDisciplineFilterUI() {
+      document.querySelectorAll('.filter-discipline').forEach(b => {
+        const disc = b.dataset.discipline;
+        const isSelected = (state.filterDiscipline === disc);
+
+        if (disc === 'all') {
+          b.className = isSelected
+            ? 'filter-discipline px-3 py-1 rounded-lg bg-slate-900 text-white font-bold shadow-xs transition inline-flex items-center space-x-1.5'
+            : 'filter-discipline px-3 py-1 rounded-lg bg-slate-200/80 hover:bg-slate-300 text-slate-700 font-medium transition inline-flex items-center space-x-1.5';
+        } else if (disc === 'PT') {
+          b.className = isSelected
+            ? 'filter-discipline px-3 py-1 rounded-lg bg-amber-400 text-amber-950 font-bold border-2 border-amber-600 shadow-xs transition inline-flex items-center space-x-1.5'
+            : 'filter-discipline px-3 py-1 rounded-lg bg-amber-100 hover:bg-amber-200 text-amber-950 border border-amber-300 font-semibold transition inline-flex items-center space-x-1.5';
+        } else if (disc === 'OT') {
+          b.className = isSelected
+            ? 'filter-discipline px-3 py-1 rounded-lg bg-emerald-400 text-emerald-950 font-bold border-2 border-emerald-600 shadow-xs transition inline-flex items-center space-x-1.5'
+            : 'filter-discipline px-3 py-1 rounded-lg bg-emerald-100 hover:bg-emerald-200 text-emerald-950 border border-emerald-300 font-semibold transition inline-flex items-center space-x-1.5';
+        } else if (disc === 'ST') {
+          b.className = isSelected
+            ? 'filter-discipline px-3 py-1 rounded-lg bg-purple-400 text-purple-950 font-bold border-2 border-purple-600 shadow-xs transition inline-flex items-center space-x-1.5'
+            : 'filter-discipline px-3 py-1 rounded-lg bg-purple-100 hover:bg-purple-200 text-purple-950 border border-purple-300 font-semibold transition inline-flex items-center space-x-1.5';
+        }
+      });
+    }
+
     document.querySelectorAll('.filter-discipline').forEach(btn => {
       btn.onclick = () => {
-        document.querySelectorAll('.filter-discipline').forEach(b => {
-          b.className = 'filter-discipline px-2.5 py-1 rounded text-slate-700 hover:bg-slate-100 transition font-medium';
-        });
-        btn.className = 'filter-discipline px-2.5 py-1 rounded text-slate-900 bg-white font-bold shadow-2xs';
         state.filterDiscipline = btn.dataset.discipline;
+        updateDisciplineFilterUI();
         renderCurrentView();
       };
     });
@@ -1956,78 +819,103 @@
     document.getElementById('filterStatusSelect').onchange = (e) => { state.filterStatus = e.target.value; renderCurrentView(); };
     document.getElementById('searchInput').oninput = (e) => { state.searchQuery = e.target.value.trim(); renderCurrentView(); };
 
-    document.getElementById('btnOpenNewModal').onclick = () => openAppointmentModal(null);
-    document.getElementById('btnMobileAgendaAdd').onclick = () => openAppointmentModal(null, formatDate(state.selectedDayDate));
+    document.getElementById('btnOpenNewModal').onclick = () => openNewModal();
     document.getElementById('btnCloseModal').onclick = () => document.getElementById('appointmentModal').classList.add('hidden');
     document.getElementById('btnCancelModal').onclick = () => document.getElementById('appointmentModal').classList.add('hidden');
 
-    document.getElementById('btnOpenRecurModal').onclick = () => {
-      document.getElementById('recurStartDate').value = formatDate(state.currentDate);
-      document.getElementById('recurModal').classList.remove('hidden');
-    };
-    document.getElementById('btnMobileRecur').onclick = () => {
-      document.getElementById('mobileMoreDropdown').classList.add('hidden');
-      document.getElementById('recurStartDate').value = formatDate(state.currentDate);
-      document.getElementById('recurModal').classList.remove('hidden');
-    };
+    document.getElementById('btnOpenRecurModal').onclick = () => document.getElementById('recurModal').classList.remove('hidden');
     document.getElementById('btnCloseRecurModal').onclick = () => document.getElementById('recurModal').classList.add('hidden');
     document.getElementById('btnCancelRecur').onclick = () => document.getElementById('recurModal').classList.add('hidden');
 
-    document.getElementById('btnOpenClientAudit').onclick = () => {
-      renderClientAuditReport();
-      document.getElementById('clientAuditModal').classList.remove('hidden');
-    };
-    document.getElementById('btnMobileClientAudit').onclick = () => {
-      document.getElementById('mobileMoreDropdown').classList.add('hidden');
-      renderClientAuditReport();
-      document.getElementById('clientAuditModal').classList.remove('hidden');
-    };
-    document.getElementById('btnCloseClientAuditModal').onclick = () => document.getElementById('clientAuditModal').classList.add('hidden');
-    document.getElementById('btnCloseClientAuditFooter').onclick = () => document.getElementById('clientAuditModal').classList.add('hidden');
+    document.getElementById('recurForm').onsubmit = (e) => {
+      e.preventDefault();
+      const client = document.getElementById('recurClientName').value;
+      const discipline = document.getElementById('recurDiscipline').value;
+      const staff = document.getElementById('recurStaff').value;
+      const total = parseInt(document.getElementById('recurTotalSessions').value, 10);
+      const start = new Date(document.getElementById('recurStartDate').value);
 
-    document.getElementById('btnOpenTeamsConfig').onclick = () => document.getElementById('teamsConfigModal').classList.remove('hidden');
-    document.getElementById('btnMobileTeams').onclick = () => {
-      document.getElementById('mobileMoreDropdown').classList.add('hidden');
-      document.getElementById('teamsConfigModal').classList.remove('hidden');
-    };
-    document.getElementById('btnCloseTeamsConfigModal').onclick = () => document.getElementById('teamsConfigModal').classList.add('hidden');
-    document.getElementById('btnCloseTeamsConfigFooter').onclick = () => document.getElementById('teamsConfigModal').classList.add('hidden');
-
-    document.getElementById('btnSwitchOperator').onclick = () => document.getElementById('operatorModal').classList.remove('hidden');
-    document.getElementById('btnCloseOperatorModal').onclick = () => document.getElementById('operatorModal').classList.add('hidden');
-
-    document.querySelectorAll('.btn-select-staff').forEach(btn => {
-      btn.onclick = () => {
-        state.currentRole = btn.textContent.replace(' (管理員)', '').trim();
-        localStorage.setItem('mwc_operator_name', state.currentRole);
-        document.getElementById('currentOperatorLabel').textContent = state.currentRole;
-        document.getElementById('operatorModal').classList.add('hidden');
-        showToast(`已切換操作人為：${state.currentRole}`, 'info');
-      };
-    });
-
-    document.getElementById('btnSaveCustomOperator').onclick = () => {
-      const name = document.getElementById('customOperatorInput').value.trim();
-      if (name) {
-        state.currentRole = name;
-        localStorage.setItem('mwc_operator_name', state.currentRole);
-        document.getElementById('currentOperatorLabel').textContent = state.currentRole;
-        document.getElementById('operatorModal').classList.add('hidden');
-        showToast(`已切換操作人為：${state.currentRole}`, 'info');
+      for (let i = 0; i < total; i++) {
+        const d = new Date(start);
+        d.setDate(start.getDate() + (i * 7));
+        state.appointments.push({
+          id: 'rec-' + Date.now() + '-' + i,
+          client: client,
+          discipline: discipline,
+          staff: staff,
+          service: '連續服務',
+          section: `Section ${i + 1}`,
+          date: formatDate(d),
+          startTime: '09:30',
+          endTime: '10:30',
+          status: 'active'
+        });
       }
+      saveLocal();
+      syncFirebase();
+      document.getElementById('recurModal').classList.add('hidden');
+      renderCurrentView();
+      showToast(`已批次建立 ${total} 節連續服務`);
     };
 
-    document.getElementById('btnMobileMoreActions').onclick = () => {
-      document.getElementById('mobileMoreDropdown').classList.toggle('hidden');
-    };
-    document.getElementById('btnPrintTable').onclick = () => window.print();
+    // Firebase 即時同步與匿名認證
+    let rtdb = null;
+    let rtdbRef = null;
 
-    // 系統初始化
-    initAppointmentsData();
-    loadAuditLogs();
+    async function initFirebase() {
+      try {
+        const app = initializeApp({
+          apiKey: atob("QUl6YVN5QVlUd0lMd3VmaEdpMlNVYXpYbXhBRDJ0MDZ4d3k1NmVn"),
+          authDomain: "mwcrehabilitationschedule.firebaseapp.com",
+          databaseURL: "https://mwcrehabilitationschedule-default-rtdb.asia-southeast1.firebasedatabase.app"
+        });
+
+        const auth = getAuth(app);
+        
+        try {
+          await signInAnonymously(auth);
+        } catch (authErr) {
+          console.warn('匿名認證失敗，請確認 Firebase Console 中 Authentication 是否已啟用 Anonymous 登入:', authErr);
+        }
+
+        rtdb = getDatabase(app);
+        rtdbRef = ref(rtdb, 'mwc_calendar_hub');
+
+        onValue(rtdbRef, (snapshot) => {
+          const val = snapshot.val();
+          if (val && Array.isArray(val) && val.length > 0) {
+            state.appointments = val;
+            saveLocal();
+            renderCurrentView();
+          } else if (!val) {
+            set(rtdbRef, state.appointments);
+          }
+          setSyncStatus(true, "多方即時連線中");
+        }, (err) => {
+          console.warn('Firebase 讀取被拒或中斷，已啟動本機安全模式:', err);
+          setSyncStatus(false, "本機安全模式 (權限/離線)");
+        });
+
+      } catch (err) {
+        console.warn('Firebase 初始化失敗，使用離線本機模式:', err);
+        setSyncStatus(false, "本機安全模式 (離線運作)");
+      }
+    }
+
+    function syncFirebase() {
+      if (rtdb && rtdbRef && state.isOnline) {
+        set(rtdbRef, state.appointments).catch(e => {
+          console.warn('雲端推送失敗，保留本機快取:', e);
+          setSyncStatus(false, "本機安全模式 (同步失敗)");
+        });
+      }
+    }
+
+    // 啟動程序
+    initData();
+    updateDisciplineFilterUI();
     renderCurrentView();
-    document.getElementById('currentOperatorLabel').textContent = state.currentRole;
-    initFirebaseConnection();
+    initFirebase();
   </script>
 </body>
 </html>
